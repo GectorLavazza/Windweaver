@@ -18,8 +18,8 @@ class Map:
         self.array = self.get_array()
         self.tiles = self.get_tiles(self.array)
 
-        self.default_surface = self.get_surface(self.tiles)
-        self.surface = self.get_surface(self.tiles)
+        self.default_surface = self.get_surface(self.tiles, self.array)
+        self.surface = self.get_surface(self.tiles, self.array)
 
         self.rect = self.surface.get_rect()
         self.rect.center = center
@@ -104,7 +104,7 @@ class Map:
 
         return tiles
 
-    def get_surface(self, array):
+    def get_surface(self, tiles, array):
         w, h = TILE_SIZE * MAP_WIDTH, TILE_SIZE * MAP_HEIGHT
         surface = pygame.surface.Surface((w, h)).convert()
 
@@ -112,7 +112,7 @@ class Map:
             for x in range(w // TILE_SIZE):
 
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    tile = array[y][x]
+                    tile = tiles[y][x]
 
                     if tile == 'water':
                         color = WATER_COLOR
