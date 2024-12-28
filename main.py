@@ -7,7 +7,7 @@ from cursor import Cursor
 from map import Map
 from settings import *
 
-
+# test comment
 def main():
     pygame.init()
     pygame.mouse.set_visible(False)
