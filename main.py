@@ -1,19 +1,19 @@
 import random
 import time
 
-import pygame
 
 from map import Map
 from settings import *
 
 pygame.init()
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF)
+screen = pygame.display.set_mode((screen_width, screen_height), pygame.DOUBLEBUF)
 screen_rect = screen.get_rect()
 
+surface = pygame.Surface((320, 180))
+
 seed = random.randint(0, 100)
-cam_pos = WIDTH // 2, HEIGHT // 2
-map = Map(screen, seed, cam_pos)
+map = Map(surface, seed, CENTER)
 
 running = True
 clock = pygame.time.Clock()
@@ -49,15 +49,11 @@ while running:
             if event.key == pygame.K_d:  # Move right
                 map.dx = 0
 
-        if event.type == pygame.MOUSEWHEEL:
-            map.dz = event.y
-            map.zoom()
-
-    screen.fill((0, 0, 0))
-
     map.update(dt)
 
     pygame.display.flip()
+
+    screen.blit(pygame.transform.scale_by(surface, SCALE), (0, 0))
 
     clock.tick(FPS)
 

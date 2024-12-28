@@ -1,11 +1,10 @@
 import noise
-import pygame
 
 from settings import *
 
 
 class Map:
-    def __init__(self, screen: pygame.surface.Surface, seed, camera_pos):
+    def __init__(self, screen: pygame.surface.Surface, seed, center):
         self.scale = 40.0
         self.octaves = 4
         self.persistence = 0.4
@@ -22,15 +21,12 @@ class Map:
         self.surface = self.get_surface(self.array)
 
         self.rect = self.surface.get_rect()
-        self.rect.center = camera_pos
+        self.rect.center = center
         self.pos = self.rect.topleft
 
-        self.camera_pos = camera_pos
+        self.center = center
 
-        self.speed = 1
-        self.zoom_speed = 0.01
-        self.zoom_factor = 1
-        self.dz = 0
+        self.speed = 2
 
         self.dx = 0
         self.dy = 0
@@ -49,33 +45,20 @@ class Map:
         self.velocity.x = input_direction.x * self.speed * dt
         self.velocity.y = input_direction.y * self.speed * dt
 
-        self.rect.centerx += self.velocity.x * dt
-        self.rect.centery += self.velocity.y * dt
+        self.rect.x += self.velocity.x * dt
+        self.rect.y += self.velocity.y * dt
 
-        self.camera_pos = self.rect.center
+        self.rect.x = max(self.screen_rect.width - self.rect.width,
+                          min(self.rect.x, 0))
+        self.rect.y = max(self.screen_rect.height - self.rect.height,
+                          min(self.rect.y, 0))
+
+        self.center = self.rect.center
         self.pos = self.rect.topleft
-
-    def zoom(self):
-        self.zoom_factor += self.zoom_speed * self.dz
-        if self.zoom_factor < MIN_ZOOM:
-            self.zoom_factor = MIN_ZOOM
-        elif self.zoom_factor > MAX_ZOOM:
-            self.zoom_factor = MAX_ZOOM
-
-        zoomed_surface = pygame.transform.smoothscale_by(self.default_surface, self.zoom_factor).convert()
-        zoomed_rect = zoomed_surface.get_rect()
-        zoomed_rect.center = self.camera_pos
-        sides = self.get_sides(zoomed_rect)
-
-        if not any([self.screen_rect.collidepoint(p) for p in sides]):
-            self.surface = zoomed_surface
-
-            self.rect = self.surface.get_rect()
-            self.rect.center = self.camera_pos
-            self.pos = self.rect.topleft
 
     def get_array(self):
         array = []
+        va = []
         for y in range(MAP_HEIGHT):
             row = []
             for x in range(MAP_WIDTH):
@@ -86,14 +69,20 @@ class Map:
                     persistence=self.persistence,
                     lacunarity=self.lacunarity,
                     repeatx=1024, repeaty=1024
-                )
+                ) + 0.5
+                if noise_value < 0:
+                    noise_value = 0
+                elif noise_value > 1:
+                    noise_value = 1
 
-                if noise_value < -0.1:
-                    row.append("water")
-                elif noise_value < 0.4:
-                    row.append("grass")
+                if noise_value < 0.5:
+                    tile = 'water'
+                elif noise_value < 0.8:
+                    tile = 'grass'
                 else:
-                    row.append("mountain")
+                    tile = 'mountains'
+
+                row.append(tile)
 
             array.append(row)
 
@@ -101,17 +90,17 @@ class Map:
 
     def get_surface(self, array):
         w, h = TILE_SIZE * MAP_WIDTH, TILE_SIZE * MAP_HEIGHT
-        surface = pygame.surface.Surface((w, h))
+        surface = pygame.surface.Surface((w, h)).convert()
 
         for y in range(h // TILE_SIZE):
             for x in range(w // TILE_SIZE):
 
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    terrain_type = array[y][x]
+                    tile = array[y][x]
 
-                    if terrain_type == "water":
+                    if tile == 'water':
                         color = WATER_COLOR
-                    elif terrain_type == "grass":
+                    elif tile == 'grass':
                         color = GRASS_COLOR
                     else:
                         color = MOUNTAIN_COLOR
@@ -128,10 +117,14 @@ class Map:
         return corners
 
     def get_sides(self, rect: pygame.Rect):
-        top = [(rect.topleft[0] + i, rect.topleft[1]) for i in range(rect.top // 2 + 1)]
-        bottom = [(rect.bottomleft[0] + i, rect.bottomleft[1]) for i in range(rect.top // 2 + 1)]
-        right = [(rect.topright[0], rect.topright[1] + i) for i in range(rect.left // 2 + 1)]
-        left = [(rect.topleft[0], rect.topleft[1] + i) for i in range(rect.left // 2 + 1)]
+        top = [(rect.topleft[0] + i, rect.topleft[1]) for i in
+               range(rect.top // 2 + 1)]
+        bottom = [(rect.bottomleft[0] + i, rect.bottomleft[1]) for i in
+                  range(rect.top // 2 + 1)]
+        right = [(rect.topright[0], rect.topright[1] + i) for i in
+                 range(rect.left // 2 + 1)]
+        left = [(rect.topleft[0], rect.topleft[1] + i) for i in
+                range(rect.left // 2 + 1)]
 
         res = top + bottom + right + left
 
