@@ -16,9 +16,10 @@ class Map:
         self.seed = seed
 
         self.array = self.get_array()
+        self.tiles = self.get_tiles(self.array)
 
-        self.default_surface = self.get_surface(self.array)
-        self.surface = self.get_surface(self.array)
+        self.default_surface = self.get_surface(self.tiles)
+        self.surface = self.get_surface(self.tiles)
 
         self.rect = self.surface.get_rect()
         self.rect.center = center
@@ -58,7 +59,6 @@ class Map:
 
     def get_array(self):
         array = []
-        va = []
         for y in range(MAP_HEIGHT):
             row = []
             for x in range(MAP_WIDTH):
@@ -70,10 +70,26 @@ class Map:
                     lacunarity=self.lacunarity,
                     repeatx=1024, repeaty=1024
                 ) + 0.5
+
                 if noise_value < 0:
                     noise_value = 0
                 elif noise_value > 1:
                     noise_value = 1
+
+                row.append(noise_value)
+
+            array.append(row)
+
+        return array
+
+    def get_tiles(self, array):
+        tiles = []
+
+        for y in range(MAP_HEIGHT):
+            row = []
+
+            for x in range(MAP_WIDTH):
+                noise_value = array[y][x]
 
                 if noise_value < 0.5:
                     tile = 'water'
@@ -84,9 +100,9 @@ class Map:
 
                 row.append(tile)
 
-            array.append(row)
+            tiles.append(row)
 
-        return array
+        return tiles
 
     def get_surface(self, array):
         w, h = TILE_SIZE * MAP_WIDTH, TILE_SIZE * MAP_HEIGHT
