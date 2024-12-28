@@ -10,7 +10,7 @@ pygame.init()
 screen = pygame.display.set_mode((screen_width, screen_height), pygame.DOUBLEBUF)
 screen_rect = screen.get_rect()
 
-surface = pygame.Surface((320, 180))
+surface = pygame.Surface((WIDTH, HEIGHT))
 
 seed = random.randint(0, 100)
 map = Map(surface, seed, CENTER)

@@ -1,14 +1,14 @@
 import noise
 
 from settings import *
-
+from load_image import load_image
 
 class Map:
     def __init__(self, screen: pygame.surface.Surface, seed, center):
-        self.scale = 40.0
-        self.octaves = 4
-        self.persistence = 0.4
-        self.lacunarity = 2.0
+        self.scale = 10.0
+        self.octaves = 5
+        self.persistence = 0.55
+        self.lacunarity = 5
 
         self.screen = screen
         self.screen_rect = screen.get_rect()
@@ -91,12 +91,14 @@ class Map:
             for x in range(MAP_WIDTH):
                 noise_value = array[y][x]
 
-                if noise_value < 0.5:
-                    tile = 'water'
-                elif noise_value < 0.8:
-                    tile = 'grass'
+                if noise_value < 0.3:
+                    tile = '1'
+                elif noise_value < 0.5:
+                    tile = '2'
+                elif noise_value < 0.7:
+                    tile = '3'
                 else:
-                    tile = 'mountains'
+                    tile = '4'
 
                 row.append(tile)
 
@@ -114,15 +116,7 @@ class Map:
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
                     tile = tiles[y][x]
 
-                    if tile == 'water':
-                        color = WATER_COLOR
-                    elif tile == 'grass':
-                        color = GRASS_COLOR
-                    else:
-                        color = MOUNTAIN_COLOR
-
-                    pygame.draw.rect(surface, color, (
-                        x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+                    surface.blit(load_image(tile), (x * TILE_SIZE, y * TILE_SIZE))
 
         return surface
 
