@@ -28,7 +28,7 @@ class Map:
         self.center = center
 
         self.speed = 3
-        self.edge_threshold = screen_width // 5
+        self.edge_threshold = screen_height // 4
 
         self.dx = 0
         self.dy = 0

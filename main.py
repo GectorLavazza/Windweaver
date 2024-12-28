@@ -1,6 +1,8 @@
 import random
 import time
 
+import pygame
+
 from cursor import Cursor
 from map import Map
 from settings import *
@@ -12,13 +14,13 @@ def main():
 
     screen = pygame.display.set_mode((screen_width, screen_height),
                                      pygame.DOUBLEBUF | pygame.SRCALPHA)
-    screen_rect = screen.get_rect()
     surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+
+    cursor_g = pygame.sprite.Group()
+    tiles_g = pygame.sprite.Group()
 
     seed = random.randint(0, 100)
     map = Map(surface, seed, CENTER)
-
-    cursor_g = pygame.sprite.Group()
 
     cursor = Cursor(cursor_g)
 
@@ -36,9 +38,17 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-            if event == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     running = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button in (1, 3):
+                    cursor.pressed = True
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                if event.button in (1, 3):
+                    cursor.pressed = False
 
         map.update(dt)
 
