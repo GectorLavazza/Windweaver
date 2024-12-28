@@ -1,60 +1,57 @@
 import random
 import time
 
-
+from cursor import Cursor
 from map import Map
 from settings import *
 
-pygame.init()
 
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.DOUBLEBUF)
-screen_rect = screen.get_rect()
+def main():
+    pygame.init()
+    pygame.mouse.set_visible(False)
 
-surface = pygame.Surface((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((screen_width, screen_height),
+                                     pygame.DOUBLEBUF | pygame.SRCALPHA)
+    screen_rect = screen.get_rect()
+    surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
 
-seed = random.randint(0, 100)
-map = Map(surface, seed, CENTER)
+    seed = random.randint(0, 100)
+    map = Map(surface, seed, CENTER)
 
-running = True
-clock = pygame.time.Clock()
+    cursor_g = pygame.sprite.Group()
 
-last_time = time.time()
+    cursor = Cursor(cursor_g)
 
-while running:
-    dt = time.time() - last_time
-    dt *= 60
+    running = True
+    clock = pygame.time.Clock()
+
     last_time = time.time()
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    while running:
+        dt = time.time() - last_time
+        dt *= 60
+        last_time = time.time()
 
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:  # Move up
-                map.dy = 1
-            if event.key == pygame.K_s:  # Move down
-                map.dy = -1
-            if event.key == pygame.K_a:  # Move left
-                map.dx = 1
-            if event.key == pygame.K_d:  # Move right
-                map.dx = -1
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_w:  # Move up
-                map.dy = 0
-            if event.key == pygame.K_s:  # Move down
-                map.dy = 0
-            if event.key == pygame.K_a:  # Move left
-                map.dx = 0
-            if event.key == pygame.K_d:  # Move right
-                map.dx = 0
+            if event == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    running = False
 
-    map.update(dt)
+        map.update(dt)
 
-    pygame.display.flip()
+        screen.blit(pygame.transform.scale_by(surface, SCALE), (0, 0))
 
-    screen.blit(pygame.transform.scale_by(surface, SCALE), (0, 0))
+        cursor_g.draw(screen)
+        cursor.update()
 
-    clock.tick(FPS)
+        pygame.display.flip()
+        clock.tick(FPS)
 
-pygame.quit()
+    pygame.quit()
+
+
+if __name__ == '__main__':
+    main()
