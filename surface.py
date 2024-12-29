@@ -77,8 +77,8 @@ class Surface:
         self.velocity.x = input_direction.x * self.speed * speed_multiplier_x * dt
         self.velocity.y = input_direction.y * self.speed * speed_multiplier_y * dt
 
-        self.rect.x += self.velocity.x
-        self.rect.y += self.velocity.y
+        self.rect.x += self.velocity.x * SCALE
+        self.rect.y += self.velocity.y * SCALE
 
         self.rect.x = max(self.screen_rect.width - self.rect.width,
                           min(self.rect.x, 0))

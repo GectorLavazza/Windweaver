@@ -4,10 +4,11 @@ import time
 from settings import *
 from load_image import load_image
 from utils import get_neighbours, get_side_neighbours
+from tile import Tile
 
 
 class Map:
-    def __init__(self, screen: pygame.surface.Surface, seed, center):
+    def __init__(self, screen: pygame.surface.Surface, seed, center, tiles_g):
         self.scale = 10.0
         self.octaves = 5
         self.persistence = 0.55
@@ -18,9 +19,12 @@ class Map:
 
         self.seed = seed
 
-        w, h = TILE_SIZE * MAP_WIDTH, TILE_SIZE * MAP_HEIGHT
+        self.tiles_g = tiles_g
+
+        w, h = TILE_SIZE * MAP_WIDTH * SCALE, TILE_SIZE * MAP_HEIGHT * SCALE
         self.surface = pygame.surface.Surface((w, h)).convert_alpha()
         self.map = self.get_map()
+        # self.surface.fill('blue')
 
         self.rect = self.surface.get_rect()
         self.rect.center = center
@@ -95,8 +99,8 @@ class Map:
         if self.velocity.length() > self.speed:
             self.velocity = self.velocity.normalize() * self.speed
 
-        self.rect.x += self.velocity.x
-        self.rect.y += self.velocity.y
+        self.rect.x += self.velocity.x * SCALE
+        self.rect.y += self.velocity.y * SCALE
 
         self.rect.x = max(self.screen_rect.width - self.rect.width,
                           min(self.rect.x, 0))
@@ -138,7 +142,9 @@ class Map:
                     tile = 'house'
 
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    self.surface.blit(load_image(tile), (x * TILE_SIZE, y * TILE_SIZE))
+                    # sprite = Tile(tile, (x * TILE_SIZE, y * TILE_SIZE), self.tiles_g)
+                    self.surface.blit(load_image(tile),
+                                      (x * TILE_SIZE * SCALE, y * TILE_SIZE * SCALE))
 
                 row.append(tile)
             print(f'loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')

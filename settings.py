@@ -31,10 +31,10 @@ screen_width, screen_height = fit_aspect_ratio(w, h)
 WIDTH, HEIGHT = 320, 180
 
 SCALE = screen_width / WIDTH
-CENTER = pygame.Vector2(WIDTH // 2, HEIGHT // 2)
+CENTER = pygame.Vector2(screen_width // 2, screen_height // 2)
 
 TILE_SIZE = 8
-MAP_WIDTH, MAP_HEIGHT = 64, 64
+MAP_WIDTH, MAP_HEIGHT = 128, 128
 
 MAX_ZOOM = 2
 MIN_ZOOM = 0.5

@@ -3,13 +3,12 @@ import os
 import pygame
 from settings import SCALE
 
-def load_image(name, scale=False):
+def load_image(name):
     fullname = os.path.join("assets/sprites/", name + '.png')
 
     try:
         image = pygame.image.load(fullname).convert_alpha()
-        if scale:
-            image = pygame.transform.scale_by(image, SCALE)
+        image = pygame.transform.scale_by(image, SCALE).convert_alpha()
 
     except pygame.error as e:
         print(f"Err: {e}")

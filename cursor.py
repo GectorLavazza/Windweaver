@@ -8,8 +8,8 @@ class Cursor(Sprite):
     def __init__(self, *group):
         super().__init__(*group)
 
-        self.regular_image = load_image('cursor', True)
-        self.pressed_image = load_image('cursor_pressed', True)
+        self.regular_image = load_image('cursor')
+        self.pressed_image = load_image('cursor_pressed')
         self.image = self.regular_image
 
         self.pressed = False

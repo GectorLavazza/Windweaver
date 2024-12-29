@@ -15,14 +15,13 @@ def main():
 
     screen = pygame.display.set_mode((screen_width, screen_height),
                                      pygame.DOUBLEBUF | pygame.SRCALPHA)
-    surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
 
     cursor_g = pygame.sprite.Group()
     tiles_g = pygame.sprite.Group()
 
     seed = random.randint(0, 100)
     print(f'seed: {seed}')
-    map = Map(surface, seed, CENTER)
+    map = Map(screen, seed, CENTER, tiles_g)
 
     cursor = Cursor(cursor_g)
 
@@ -59,7 +58,9 @@ def main():
         screen.fill('black')
 
         map.update(dt)
-        screen.blit(pygame.transform.scale_by(surface, SCALE), (0, 0))
+        # tiles_g.update(screen, dt)
+
+        # tiles_g.draw(screen)
 
         cursor_g.draw(screen)
         cursor.update()
