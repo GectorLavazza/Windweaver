@@ -1,4 +1,5 @@
 import pygame
+import random
 
 from load_image import load_image
 from sprite import Sprite
@@ -11,9 +12,8 @@ class Tile(Sprite):
 
         self.name = name
 
-        self.default_image = load_image(name)
-
-        self.default_image, self.hover_image, self.pressed_image = self.get_images(name)
+        self.default_image, self.hover_image, self.pressed_image = self.get_images(
+            self.name)
         self.image = self.default_image
 
         self.pos = pos
@@ -21,6 +21,11 @@ class Tile(Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0] + self.world.rect.x,
                              pos[1] + self.world.rect.y)
+
+        self.collision_rect = self.rect.scale_by(1.1, 1.1)
+        self.collision_rect.center = self.rect.center
+
+        self.clicked = False
 
     def get_images(self, image):
         default = load_image(image)
@@ -37,17 +42,108 @@ class Tile(Sprite):
         return default, hover, pressed
 
     def update(self, dt):
-        self.rect.topleft = (self.pos[0] + self.world.rect.x,
-                             self.pos[1] + self.world.rect.y)
+        self.move()
+        self.handle_mouse()
+        self.on_update(dt)
 
+    def on_update(self, dt):
+        pass
+
+    def on_click(self):
+        pass
+
+    def on_kill(self):
+        pass
+
+    def handle_mouse(self):
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):
             if pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]:
-                self.name = 'house'
-                self.default_image, self.hover_image, self.pressed_image = self.get_images(self.name)
+
+                if not self.clicked:
+                    self.on_click()
+                    self.clicked = True
+
+                self.default_image, self.hover_image, self.pressed_image = self.get_images(
+                    self.name)
 
                 self.image = self.pressed_image
             else:
+                self.clicked = False
                 self.image = self.hover_image
         else:
+            self.clicked = False
             self.image = self.default_image
+
+    def move(self):
+        self.rect.topleft = (self.pos[0] + self.world.rect.x,
+                             self.pos[1] + self.world.rect.y)
+
+
+class Tree(Tile):
+    def __init__(self, pos, world, *group):
+        super().__init__('tree', pos, world, *group)
+        self.durability = 3
+
+    def on_click(self):
+        self.durability -= 1
+        if self.durability <= 0:
+            self.on_kill()
+
+    def on_kill(self):
+        if random.randint(1, 10) == 1:
+            new_tile = 'house'
+        else:
+            new_tile = 'grass'
+        Tile(new_tile, self.pos, self.world, self.groups())
+        self.kill()
+
+
+class Grass(Tile):
+    def __init__(self, name, pos, world, *group):
+        super().__init__(name, pos, world, *group)
+        self.max_tick = random.randint(60, 36000)
+        self.tick = self.max_tick
+
+    def grow(self):
+        self.name = 'tall_grass'
+
+        tall_grass_count = 0
+        stones_count = 0
+        trees_count = 0
+
+        for other in self.groups()[0]:
+            if self.collision_rect.colliderect(other.rect):
+
+                if other.name == 'tall_grass':
+                    tall_grass_count += 1
+                elif other.name == 'tree':
+                    trees_count += 1
+                elif other.name == 'stone':
+                    stones_count += 1
+
+                if tall_grass_count >= 4 and stones_count == 0 or trees_count > 0:
+                    if random.randint(1, 10) == 1:
+                        self.name = 'flower'
+                    break
+
+        self.default_image, self.hover_image, self.pressed_image = self.get_images(
+            self.name)
+        self.image = self.default_image
+
+    def on_click(self):
+        self.name = 'grass'
+
+        self.default_image, self.hover_image, self.pressed_image = self.get_images(
+            self.name)
+        self.image = self.default_image
+
+        self.max_tick = random.randint(60, 36000)
+        self.tick = self.max_tick
+
+    def on_update(self, dt):
+        if self.name not in ('tall_grass', 'flower'):
+            self.tick -= 1 * dt
+            if self.tick <= 0:
+                self.tick = self.max_tick
+                self.grow()

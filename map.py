@@ -6,7 +6,7 @@ import time
 from utils import get_neighbour_matrix
 from world import World
 from settings import *
-from tile import Tile
+from tile import *
 
 class Map:
     def __init__(self, world: World, seed, tiles_g):
@@ -64,38 +64,25 @@ class Map:
                 elif random.randint(1, 500) == 1:
                     tile = 'flower'
 
-                row.append(tile)
-
-            # print(f'Iteration 1: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
-
-            tiles.append(row)
-
-        sprites = []
-        for y in range(MAP_HEIGHT):
-            row = []
-
-            for x in range(MAP_WIDTH):
-                tile = tiles[y][x]
-
-                neighbours = get_neighbour_matrix(tiles, x, y)
-                if tile == 'tall_grass':
-                    if neighbours[0][1] == 'house':
-                        tile = 'stones'
-                        tiles[y][x] = tile
-
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
                     pos = (x * TILE_SIZE * SCALE, y * TILE_SIZE * SCALE)
-                    sprite = Tile(tile, pos, self.world, self.tiles_g)
 
-                row.append(sprite)
+                    if tile == 'tree':
+                        Tree(pos, self.world, self.tiles_g)
+                    elif 'grass' in tile or 'flower' in tile:
+                        Grass(tile, pos, self.world, self.tiles_g)
+                    else:
+                        Tile(tile, pos, self.world, self.tiles_g)
 
-            # print(f'Iteration 2: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
+                row.append(tile)
 
-            sprites.append(row)
+            print(f'Loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
+
+            tiles.append(row)
 
         et = time.time()
 
         print('MAP LOADED')
-        print(f'loading time: {et - st}')
+        print(f'Time: {et - st}')
 
         return tiles
