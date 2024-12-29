@@ -22,6 +22,7 @@ class World:
         self.dynamic_speed_y = 0
         self.velocity = pygame.Vector2(0, 0)
 
+
     def blit(self, surface, dest):
         self.surface.blit(surface, dest)
 
@@ -82,7 +83,7 @@ class World:
         self.rect.x += self.velocity.x * SCALE
         self.rect.y += self.velocity.y * SCALE
 
-        self.rect.x = max(self.screen_rect.width - self.rect.width,
+        self.rect.x = max(screen_width - self.rect.width,
                           min(self.rect.x, 0))
-        self.rect.y = max(self.screen_rect.height - self.rect.height,
+        self.rect.y = max(screen_height - self.rect.height,
                           min(self.rect.y, 0))

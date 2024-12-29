@@ -3,8 +3,7 @@ import time
 
 from world import World
 from settings import *
-from load_image import load_image
-
+from tile import Tile
 
 class Map:
     def __init__(self, world: World, seed, tiles_g):
@@ -24,11 +23,7 @@ class Map:
         self.surface = pygame.surface.Surface((w, h)).convert_alpha()
         self.map = self.get_map()
 
-    def update(self, dt):
-        self.world.blit(self.surface, (0, 0))
-
     def get_map(self):
-
         st = time.time()
 
         tiles = []
@@ -60,11 +55,11 @@ class Map:
                     tile = 'house'
 
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    # sprite = Tile(tile, (x * TILE_SIZE, y * TILE_SIZE), self.tiles_g)
-                    self.surface.blit(load_image(tile),
-                                      (x * TILE_SIZE * SCALE, y * TILE_SIZE * SCALE))
+                    pos = (x * TILE_SIZE * SCALE, y * TILE_SIZE * SCALE)
+                    sprite = Tile(tile, pos, self.world, self.tiles_g)
 
                 row.append(tile)
+
             print(f'loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
 
             tiles.append(row)

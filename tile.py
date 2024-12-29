@@ -5,23 +5,32 @@ from sprite import Sprite
 
 
 class Tile(Sprite):
-    def __init__(self, name, pos, *group):
+    def __init__(self, name, pos, world, *group):
         super().__init__(*group)
+        self.world = world
 
         self.name = name
 
         self.default_image = load_image(name)
-        self.other_image = load_image('test')
+        self.hover_image = load_image('test1')
+        self.pressed_image = load_image('test2')
         self.image = self.default_image
 
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        self.pos = pos
 
-    def update(self, screen, dt):
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (pos[0] + self.world.rect.x,
+                             pos[1] + self.world.rect.y)
+
+    def update(self, dt):
+        self.rect.topleft = (self.pos[0] + self.world.rect.x,
+                             self.pos[1] + self.world.rect.y)
+
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):
-            self.image = self.other_image
-            print(self.rect)
-            pygame.draw.rect(screen, 'red', self.rect)
+            if pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]:
+                self.image = self.pressed_image
+            else:
+                self.image = self.hover_image
         else:
             self.image = self.default_image
