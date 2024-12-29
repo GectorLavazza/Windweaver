@@ -14,7 +14,7 @@ def get_neighbour_matrix(array, x, y):
                 else:
                     row.append(array[ny][nx])  # Add neighbor element
             else:
-                row.append(None)  # Out of bounds
+                row.append('None')  # Out of bounds
         neighbour_matrix.append(row)
 
     return neighbour_matrix

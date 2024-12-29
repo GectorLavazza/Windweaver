@@ -12,8 +12,8 @@ class Tile(Sprite):
         self.name = name
 
         self.default_image = load_image(name)
-        self.hover_image = load_image('test1')
-        self.pressed_image = load_image('test2')
+
+        self.default_image, self.hover_image, self.pressed_image = self.get_images(name)
         self.image = self.default_image
 
         self.pos = pos
@@ -21,6 +21,20 @@ class Tile(Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0] + self.world.rect.x,
                              pos[1] + self.world.rect.y)
+
+    def get_images(self, image):
+        default = load_image(image)
+
+        hover_outline = load_image('hover')
+        pressed_outline = load_image('pressed')
+
+        hover = default.copy()
+        pressed = default.copy()
+
+        hover.blit(hover_outline, (0, 0))
+        pressed.blit(pressed_outline, (0, 0))
+
+        return default, hover, pressed
 
     def update(self, dt):
         self.rect.topleft = (self.pos[0] + self.world.rect.x,

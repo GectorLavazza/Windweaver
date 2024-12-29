@@ -1,6 +1,7 @@
 import noise
 import time
 
+from utils import get_neighbour_matrix
 from world import World
 from settings import *
 from tile import Tile
@@ -45,24 +46,66 @@ class Map:
                 elif noise_value > 1:
                     noise_value = 1
 
-                if noise_value < 0.3:
-                    tile = 'grass'
+                if noise_value < 0.2:
+                    tile = 'fertile_soil2'
+                elif noise_value < 0.4:
+                    tile = 'fertile_soil'
                 elif noise_value < 0.5:
-                    tile = 'tall_grass'
-                elif noise_value < 0.7:
-                    tile = 'tree'
+                    tile = 'soil'
+                elif noise_value < 0.6:
+                    tile = 'soil2'
+                elif noise_value < 0.65:
+                    tile = 'soil3'
+                elif noise_value < 0.8:
+                    tile = 'dry_soil'
+                elif noise_value < 0.85:
+                    tile = 'dry_soil2'
+                elif noise_value < 0.9:
+                    tile = 'dry_soil3'
+                elif noise_value < 0.95:
+                    tile = 'bad_soil'
                 else:
-                    tile = 'house'
+                    tile = 'bad_soil2'
+
+                row.append(tile)
+
+            # print(f'Iteration 1: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
+
+            tiles.append(row)
+
+        sprites = []
+        for y in range(MAP_HEIGHT):
+            row = []
+
+            for x in range(MAP_WIDTH):
+                tile = tiles[y][x]
+
+                neighbours = get_neighbour_matrix(tiles, x, y)
+                if tile == 'fertile_soil':
+                    if neighbours[2][1] == 'soil':
+                        tile = 'fertile_soil_bottom'
+                        tiles[y][x] = tile
+                    elif neighbours[1][2] == 'soil':
+                        tile = 'fertile_soil_right'
+                        tiles[y][x] = tile
+                    elif neighbours[1][0] == 'soil':
+                        tile = 'fertile_soil_left'
+                        tiles[y][x] = tile
+
+                if tile == 'soil':
+                    if 'fertile_soil' in neighbours[2][1]:
+                        tile = 'soil_bottom'
+                        tiles[y][x] = tile
 
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
                     pos = (x * TILE_SIZE * SCALE, y * TILE_SIZE * SCALE)
                     sprite = Tile(tile, pos, self.world, self.tiles_g)
 
-                row.append(tile)
+                row.append(sprite)
 
-            print(f'loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
+            # print(f'Iteration 2: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
 
-            tiles.append(row)
+            sprites.append(row)
 
         et = time.time()
 
