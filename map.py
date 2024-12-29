@@ -68,8 +68,10 @@ class Map:
                     pos = (x * TILE_SIZE * SCALE, y * TILE_SIZE * SCALE)
 
                     if tile == 'tree':
-                        if random.randint(1, 5) == 1:
+                        if random.randint(1, 10) == 1:
                             age = 0
+                        elif random.randint(1, 5) == 1:
+                            age = 2
                         else:
                             age = 1
                         Tree(pos, self.world, age, self.tiles_g)

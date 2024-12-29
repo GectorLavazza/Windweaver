@@ -14,6 +14,10 @@ def main():
     pygame.init()
     pygame.mouse.set_visible(False)
 
+    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.load('assets/music/windweaver.wav')
+    pygame.mixer.music.play(-1)
+
     screen = pygame.display.set_mode((screen_width, screen_height),
                                      pygame.DOUBLEBUF | pygame.SRCALPHA)
     world = World(screen, MAP_SIZE, CENTER)

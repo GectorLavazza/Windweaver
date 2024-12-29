@@ -103,6 +103,7 @@ class Tree(Tile):
 
     def grow(self):
         self.age += 1
+        self.durability = random.randint(2, 5) * 2 ** self.age
 
         self.name = f'tree_{self.age}'
 
@@ -111,7 +112,7 @@ class Tree(Tile):
         self.image = self.default_image
 
     def on_update(self, dt):
-        if self.age < 1:
+        if self.age < 2:
             self.tick -= 1 * dt
             if self.tick <= 0:
                 self.tick = self.max_tick
