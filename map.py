@@ -10,8 +10,8 @@ class Map:
     def __init__(self, screen: pygame.surface.Surface, seed, center):
         self.scale = 10.0
         self.octaves = 5
-        self.persistence = 0.5
-        self.lacunarity = 3
+        self.persistence = 0.55
+        self.lacunarity = 5
 
         self.screen = screen
         self.screen_rect = screen.get_rect()
@@ -129,19 +129,19 @@ class Map:
                     noise_value = 1
 
                 if noise_value < 0.3:
-                    tile = 'fertile_soil'
-                elif noise_value < 0.6:
-                    tile = 'soil'
-                elif noise_value < 0.8:
-                    tile = 'dry_soil'
+                    tile = 'grass'
+                elif noise_value < 0.5:
+                    tile = 'tall_grass'
+                elif noise_value < 0.7:
+                    tile = 'tree'
                 else:
-                    tile = 'bad_soil'
-
+                    tile = 'house'
 
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
                     self.surface.blit(load_image(tile), (x * TILE_SIZE, y * TILE_SIZE))
 
                 row.append(tile)
+                print(f'loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
 
             tiles.append(row)
 
