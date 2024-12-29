@@ -3,6 +3,8 @@ import time
 
 from settings import *
 from load_image import load_image
+from utils import get_neighbours
+
 
 class Map:
     def __init__(self, screen: pygame.surface.Surface, seed, center):
@@ -17,9 +19,8 @@ class Map:
         self.seed = seed
 
         w, h = TILE_SIZE * MAP_WIDTH, TILE_SIZE * MAP_HEIGHT
-        self.default_surface = pygame.surface.Surface((w, h)).convert_alpha()
+        self.surface = pygame.surface.Surface((w, h)).convert_alpha()
         self.map = self.get_map()
-        self.surface = self.default_surface.copy()
 
         self.rect = self.surface.get_rect()
         self.rect.center = center
@@ -97,10 +98,10 @@ class Map:
         self.rect.x += self.velocity.x
         self.rect.y += self.velocity.y
 
-        # self.rect.x = max(self.screen_rect.width - self.rect.width,
-        #                   min(self.rect.x, 0))
-        # self.rect.y = max(self.screen_rect.height - self.rect.height,
-        #                   min(self.rect.y, 0))
+        self.rect.x = max(self.screen_rect.width - self.rect.width,
+                          min(self.rect.x, 0))
+        self.rect.y = max(self.screen_rect.height - self.rect.height,
+                          min(self.rect.y, 0))
 
         self.pos = self.rect.topleft
 
@@ -128,16 +129,18 @@ class Map:
                     noise_value = 1
 
                 if noise_value < 0.3:
-                    tile = '1'
+                    tile = 'water'
                 elif noise_value < 0.5:
-                    tile = '2'
+                    tile = 'grass'
+                elif noise_value < 0.6:
+                    tile = 'tall_grass'
                 elif noise_value < 0.7:
-                    tile = '3'
+                    tile = 'tree'
                 else:
-                    tile = '4'
+                    tile = 'house'
 
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    self.default_surface.blit(load_image(tile), (x * TILE_SIZE, y * TILE_SIZE))
+                    self.surface.blit(load_image(tile), (x * TILE_SIZE, y * TILE_SIZE))
 
                 row.append(tile)
 
@@ -151,16 +154,3 @@ class Map:
         print(f'loading time: {et - st}')
 
         return tiles
-
-    def zoom(self):
-        self.zoom_factor += self.zoom_speed * self.dz
-
-        if self.zoom_factor < MIN_ZOOM:
-            self.zoom_factor = MIN_ZOOM
-        elif self.zoom_factor > MAX_ZOOM:
-            self.zoom_factor = MAX_ZOOM
-
-        zoomed_surface = pygame.transform.scale_by(self.default_surface, self.zoom_factor).convert_alpha()
-
-        self.surface = zoomed_surface
-        self.rect = self.surface.get_rect()
