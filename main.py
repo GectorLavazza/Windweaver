@@ -2,6 +2,7 @@ import random
 import time
 
 import pygame
+import sys
 
 from cursor import Cursor
 from map import Map
@@ -67,6 +68,7 @@ def main():
         clock.tick(FPS)
 
     pygame.quit()
+    sys.exit()
 
 
 if __name__ == '__main__':
