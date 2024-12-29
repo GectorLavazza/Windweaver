@@ -71,6 +71,8 @@ class Map:
                         Tree(pos, self.world, self.tiles_g)
                     elif 'grass' in tile or 'flower' in tile:
                         Grass(tile, pos, self.world, self.tiles_g)
+                    elif tile == 'stones':
+                        Stones(pos, self.world, self.tiles_g)
                     else:
                         Tile(tile, pos, self.world, self.tiles_g)
 
