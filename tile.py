@@ -140,7 +140,6 @@ class Grass(Tile):
                 if trees_count > 2:
                     if random.randint(1, 10) == 1:
                         Tree(self.pos, self.world, self.groups())
-                        print('tree')
                         self.kill()
                     break
                 elif tall_grass_count >= 4 and stones_count == 0:
