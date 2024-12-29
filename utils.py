@@ -1,26 +1,31 @@
-a = [[1, 2, 3],
-     [4, 5, 6],
-     [7, 8, 9]]
+def get_neighbour_matrix(array, x, y):
+    # Create an empty matrix to store neighbors
+    neighbour_matrix = []
+
+    # Iterate over the rows around the given (x, y) position
+    for dy in range(-1, 2):  # -1 to 1 (top, current, bottom row)
+        row = []
+        for dx in range(-1, 2):  # -1 to 1 (left, current, right column)
+            nx, ny = x + dx, y + dy
+            if 0 <= ny < len(array) and 0 <= nx < len(
+                    array[0]):  # Boundary check
+                if ny == y and nx == x:
+                    row.append("N")  # Replace the target element with "N"
+                else:
+                    row.append(array[ny][nx])  # Add neighbor element
+            else:
+                row.append(None)  # Out of bounds
+        neighbour_matrix.append(row)
+
+    return neighbour_matrix
 
 
-def get_neighbours(m, x, y):
-    rows, cols = range(len(m)), range(len(m[0]))
-    offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0),
-               (1, 1)]
-    result = []
-    for dy, dx in offsets:
-        ny, nx = y + dy, x + dx
-        if ny in rows and nx in cols:
-            result.append(m[ny][nx])
-    return result
-
-
-def get_side_neighbours(m, x, y):
-    rows, cols = range(len(m)), range(len(m[0]))
-    offsets = [(-1, 0), (0, -1), (0, 1), (1, 0)]
-    result = []
-    for dy, dx in offsets:
-        ny, nx = y + dy, x + dx
-        if ny in rows and nx in cols:
-            result.append(m[ny][nx])
-    return result
+# Example usage
+array = [[1, 2, 3, 4],
+         [4, 5, 6, 7],
+         [8, 9, 10, 11],
+         [11, 12, 13, 14]]
+x, y = 3, 1
+result = get_neighbour_matrix(array, x, y)
+for row in result:
+    print(row)
