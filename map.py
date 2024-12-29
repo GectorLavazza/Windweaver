@@ -1,4 +1,5 @@
 import noise
+import time
 
 from settings import *
 from load_image import load_image
@@ -16,7 +17,9 @@ class Map:
         self.seed = seed
 
         w, h = TILE_SIZE * MAP_WIDTH, TILE_SIZE * MAP_HEIGHT
-        self.surface = pygame.surface.Surface((w, h)).convert_alpha()
+        self.default_surface = pygame.surface.Surface((w, h)).convert_alpha()
+        self.map = self.get_map()
+        self.surface = self.default_surface.copy()
 
         self.rect = self.surface.get_rect()
         self.rect.center = center
@@ -33,7 +36,9 @@ class Map:
         self.dynamic_speed_y = 0
         self.velocity = pygame.Vector2(0, 0)
 
-        self.map = self.get_map()
+        self.zoom_speed = 0.01
+        self.zoom_factor = 1
+        self.dz = 0
 
     def update(self, dt):
         self.screen.blit(self.surface, self.pos)
@@ -86,17 +91,23 @@ class Map:
         self.velocity.x = input_direction.x * self.speed * speed_multiplier_x * dt
         self.velocity.y = input_direction.y * self.speed * speed_multiplier_y * dt
 
+        if self.velocity.length() > self.speed:
+            self.velocity = self.velocity.normalize() * self.speed
+
         self.rect.x += self.velocity.x
         self.rect.y += self.velocity.y
 
-        self.rect.x = max(self.screen_rect.width - self.rect.width,
-                          min(self.rect.x, 0))
-        self.rect.y = max(self.screen_rect.height - self.rect.height,
-                          min(self.rect.y, 0))
+        # self.rect.x = max(self.screen_rect.width - self.rect.width,
+        #                   min(self.rect.x, 0))
+        # self.rect.y = max(self.screen_rect.height - self.rect.height,
+        #                   min(self.rect.y, 0))
 
         self.pos = self.rect.topleft
 
     def get_map(self):
+
+        st = time.time()
+
         tiles = []
 
         for y in range(MAP_HEIGHT):
@@ -126,10 +137,30 @@ class Map:
                     tile = '4'
 
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    self.surface.blit(load_image(tile), (x * TILE_SIZE, y * TILE_SIZE))
+                    self.default_surface.blit(load_image(tile), (x * TILE_SIZE, y * TILE_SIZE))
 
                 row.append(tile)
 
+            print(f'loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
+
             tiles.append(row)
 
+        et = time.time()
+
+        print('WORLD LOADED')
+        print(f'loading time: {et - st}')
+
         return tiles
+
+    def zoom(self):
+        self.zoom_factor += self.zoom_speed * self.dz
+
+        if self.zoom_factor < MIN_ZOOM:
+            self.zoom_factor = MIN_ZOOM
+        elif self.zoom_factor > MAX_ZOOM:
+            self.zoom_factor = MAX_ZOOM
+
+        zoomed_surface = pygame.transform.scale_by(self.default_surface, self.zoom_factor).convert_alpha()
+
+        self.surface = zoomed_surface
+        self.rect = self.surface.get_rect()

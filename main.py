@@ -50,6 +50,10 @@ def main():
                 if event.button in (1, 3):
                     cursor.pressed = False
 
+            # if event.type == pygame.MOUSEWHEEL:
+            #     map.dz = event.y
+            #     map.zoom()
+
         screen.fill('black')
 
         map.update(dt)
