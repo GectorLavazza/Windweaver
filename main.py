@@ -60,15 +60,10 @@ def main():
 
         world.update(dt)
 
-        # pygame.draw.rect(screen, 'red', world.rect)
-        pygame.draw.rect(screen, 'yellow', tiles_g.sprites()[0])
-        pygame.draw.rect(screen, 'yellow', tiles_g.sprites()[-1])
-
         cursor_g.draw(screen)
         cursor.update()
 
         pygame.display.flip()
-        pygame.display.set_caption(str(pygame.mouse.get_pos()))
         clock.tick(FPS)
 
     pygame.quit()

@@ -1,3 +1,5 @@
+import random
+
 import noise
 import time
 
@@ -46,26 +48,21 @@ class Map:
                 elif noise_value > 1:
                     noise_value = 1
 
-                if noise_value < 0.2:
-                    tile = 'fertile_soil2'
-                elif noise_value < 0.4:
-                    tile = 'fertile_soil'
+                if noise_value < 0.4:
+                    tile = 'grass'
                 elif noise_value < 0.5:
-                    tile = 'soil'
-                elif noise_value < 0.6:
-                    tile = 'soil2'
-                elif noise_value < 0.65:
-                    tile = 'soil3'
-                elif noise_value < 0.8:
-                    tile = 'dry_soil'
-                elif noise_value < 0.85:
-                    tile = 'dry_soil2'
-                elif noise_value < 0.9:
-                    tile = 'dry_soil3'
-                elif noise_value < 0.95:
-                    tile = 'bad_soil'
+                    tile = 'tall_grass'
+                elif noise_value < 0.7:
+                    tile = 'tree'
+                elif noise_value < 0.75:
+                    tile = 'tall_grass'
                 else:
-                    tile = 'bad_soil2'
+                    tile = 'grass'
+
+                if random.randint(1, 200) == 1:
+                    tile = 'stones'
+                elif random.randint(1, 500) == 1:
+                    tile = 'flower'
 
                 row.append(tile)
 
@@ -81,20 +78,9 @@ class Map:
                 tile = tiles[y][x]
 
                 neighbours = get_neighbour_matrix(tiles, x, y)
-                if tile == 'fertile_soil':
-                    if neighbours[2][1] == 'soil':
-                        tile = 'fertile_soil_bottom'
-                        tiles[y][x] = tile
-                    elif neighbours[1][2] == 'soil':
-                        tile = 'fertile_soil_right'
-                        tiles[y][x] = tile
-                    elif neighbours[1][0] == 'soil':
-                        tile = 'fertile_soil_left'
-                        tiles[y][x] = tile
-
-                if tile == 'soil':
-                    if 'fertile_soil' in neighbours[2][1]:
-                        tile = 'soil_bottom'
+                if tile == 'tall_grass':
+                    if neighbours[0][1] == 'house':
+                        tile = 'stones'
                         tiles[y][x] = tile
 
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:

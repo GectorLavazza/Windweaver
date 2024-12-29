@@ -43,6 +43,9 @@ class Tile(Sprite):
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):
             if pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]:
+                self.name = 'house'
+                self.default_image, self.hover_image, self.pressed_image = self.get_images(self.name)
+
                 self.image = self.pressed_image
             else:
                 self.image = self.hover_image
