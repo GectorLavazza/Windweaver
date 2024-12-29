@@ -3,15 +3,15 @@ import time
 
 from settings import *
 from load_image import load_image
-from utils import get_neighbours
+from utils import get_neighbours, get_side_neighbours
 
 
 class Map:
     def __init__(self, screen: pygame.surface.Surface, seed, center):
         self.scale = 10.0
         self.octaves = 5
-        self.persistence = 0.55
-        self.lacunarity = 5
+        self.persistence = 0.5
+        self.lacunarity = 3
 
         self.screen = screen
         self.screen_rect = screen.get_rect()
@@ -129,22 +129,19 @@ class Map:
                     noise_value = 1
 
                 if noise_value < 0.3:
-                    tile = 'water'
-                elif noise_value < 0.5:
-                    tile = 'grass'
+                    tile = 'fertile_soil'
                 elif noise_value < 0.6:
-                    tile = 'tall_grass'
-                elif noise_value < 0.7:
-                    tile = 'tree'
+                    tile = 'soil'
+                elif noise_value < 0.8:
+                    tile = 'dry_soil'
                 else:
-                    tile = 'house'
+                    tile = 'bad_soil'
+
 
                 if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
                     self.surface.blit(load_image(tile), (x * TILE_SIZE, y * TILE_SIZE))
 
                 row.append(tile)
-
-            print(f'loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
 
             tiles.append(row)
 

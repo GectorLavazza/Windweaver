@@ -20,6 +20,7 @@ def main():
     tiles_g = pygame.sprite.Group()
 
     seed = random.randint(0, 100)
+    print(f'seed: {seed}')
     map = Map(surface, seed, CENTER)
 
     cursor = Cursor(cursor_g)
