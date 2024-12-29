@@ -1,22 +1,15 @@
-import noise
-
+import pygame
 from settings import *
-from load_image import load_image
 
-class Map:
-    def __init__(self, screen: pygame.surface.Surface, seed, center):
-        self.scale = 10.0
-        self.octaves = 5
-        self.persistence = 0.55
-        self.lacunarity = 5
+
+class Surface:
+    def __init__(self, screen: pygame.surface.Surface, size, center):
 
         self.screen = screen
         self.screen_rect = screen.get_rect()
 
-        self.seed = seed
-
-        w, h = TILE_SIZE * MAP_WIDTH, TILE_SIZE * MAP_HEIGHT
-        self.surface = pygame.surface.Surface((w, h)).convert_alpha()
+        self.surface = pygame.surface.Surface(size, pygame.SRCALPHA)
+        self.size = size
 
         self.rect = self.surface.get_rect()
         self.rect.center = center
@@ -32,8 +25,6 @@ class Map:
         self.dynamic_speed_x = 0
         self.dynamic_speed_y = 0
         self.velocity = pygame.Vector2(0, 0)
-
-        self.map = self.get_map()
 
     def update(self, dt):
         self.screen.blit(self.surface, self.pos)
@@ -95,41 +86,3 @@ class Map:
                           min(self.rect.y, 0))
 
         self.pos = self.rect.topleft
-
-    def get_map(self):
-        tiles = []
-
-        for y in range(MAP_HEIGHT):
-            row = []
-
-            for x in range(MAP_WIDTH):
-                noise_value = noise.pnoise2(
-                    (x + self.seed) / self.scale, (y + self.seed) / self.scale,
-                    octaves=self.octaves,
-                    persistence=self.persistence,
-                    lacunarity=self.lacunarity,
-                    repeatx=1024, repeaty=1024
-                ) + 0.5
-
-                if noise_value < 0:
-                    noise_value = 0
-                elif noise_value > 1:
-                    noise_value = 1
-
-                if noise_value < 0.3:
-                    tile = '1'
-                elif noise_value < 0.5:
-                    tile = '2'
-                elif noise_value < 0.7:
-                    tile = '3'
-                else:
-                    tile = '4'
-
-                if 0 <= x < MAP_WIDTH and 0 <= y < MAP_HEIGHT:
-                    self.surface.blit(load_image(tile), (x * TILE_SIZE, y * TILE_SIZE))
-
-                row.append(tile)
-
-            tiles.append(row)
-
-        return tiles

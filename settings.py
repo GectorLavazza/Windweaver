@@ -8,4 +8,4 @@ SCALE = screen_width // WIDTH
 CENTER = pygame.Vector2(WIDTH // 2, HEIGHT // 2)
 
 TILE_SIZE = 8
-MAP_WIDTH, MAP_HEIGHT = 64, 64
+MAP_WIDTH, MAP_HEIGHT = 256, 256
