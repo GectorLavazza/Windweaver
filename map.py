@@ -141,7 +141,7 @@ class Map:
                     self.surface.blit(load_image(tile), (x * TILE_SIZE, y * TILE_SIZE))
 
                 row.append(tile)
-                print(f'loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
+            print(f'loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
 
             tiles.append(row)
 
