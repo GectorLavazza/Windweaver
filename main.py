@@ -50,8 +50,9 @@ def main():
                 if event.button in (1, 3):
                     cursor.pressed = False
 
-        map.update(dt)
+        screen.fill('black')
 
+        map.update(dt)
         screen.blit(pygame.transform.scale_by(surface, SCALE), (0, 0))
 
         cursor_g.draw(screen)
