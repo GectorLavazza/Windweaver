@@ -68,7 +68,11 @@ class Map:
                     pos = (x * TILE_SIZE * SCALE, y * TILE_SIZE * SCALE)
 
                     if tile == 'tree':
-                        Tree(pos, self.world, self.tiles_g)
+                        if random.randint(1, 5) == 1:
+                            age = 0
+                        else:
+                            age = 1
+                        Tree(pos, self.world, age, self.tiles_g)
                     elif 'grass' in tile or 'flower' in tile:
                         Grass(tile, pos, self.world, self.tiles_g)
                     elif tile == 'stones':

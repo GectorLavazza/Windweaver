@@ -81,9 +81,12 @@ class Tile(Sprite):
 
 
 class Tree(Tile):
-    def __init__(self, pos, world, *group):
-        super().__init__('tree', pos, world, *group)
-        self.durability = random.randint(5, 10)
+    def __init__(self, pos, world, age, *group):
+        super().__init__(f'tree_{age}', pos, world, *group)
+        self.max_tick = random.randint(60, 36000)
+        self.tick = self.max_tick
+        self.durability = random.randint(2, 5) * 2 ** age
+        self.age = age
 
     def on_click(self):
         self.durability -= 1
@@ -97,6 +100,22 @@ class Tree(Tile):
             Grass('grass', self.pos, self.world, self.groups())
 
         self.kill()
+
+    def grow(self):
+        self.age += 1
+
+        self.name = f'tree_{self.age}'
+
+        self.default_image, self.hover_image, self.pressed_image = self.get_images(
+            self.name)
+        self.image = self.default_image
+
+    def on_update(self, dt):
+        if self.age < 1:
+            self.tick -= 1 * dt
+            if self.tick <= 0:
+                self.tick = self.max_tick
+                self.grow()
 
 
 class Stones(Tile):
@@ -117,7 +136,7 @@ class Stones(Tile):
 class Grass(Tile):
     def __init__(self, name, pos, world, *group):
         super().__init__(name, pos, world, *group)
-        self.max_tick = random.randint(60, 600)
+        self.max_tick = random.randint(60, 36000)
         self.tick = self.max_tick
 
     def grow(self):
@@ -126,23 +145,26 @@ class Grass(Tile):
         tall_grass_count = 0
         stones_count = 0
         trees_count = 0
+        flowers_count = 0
 
         for other in self.groups()[0]:
             if self.collision_rect.colliderect(other.rect):
 
                 if other.name == 'tall_grass':
                     tall_grass_count += 1
-                elif other.name == 'tree':
+                elif 'tree' in other.name:
                     trees_count += 1
                 elif other.name == 'stone':
                     stones_count += 1
+                elif other.name == 'flower':
+                    flowers_count += 1
 
                 if trees_count > 2:
                     if random.randint(1, 10) == 1:
-                        Tree(self.pos, self.world, self.groups())
+                        Tree(self.pos, self.world, 0, self.groups())
                         self.kill()
                     break
-                elif tall_grass_count >= 4 and stones_count == 0:
+                elif tall_grass_count >= 4 and stones_count == 0 or flowers_count > 2:
                     if random.randint(1, 10) == 1:
                         self.name = 'flower'
                     break
@@ -158,7 +180,7 @@ class Grass(Tile):
             self.name)
         self.image = self.default_image
 
-        self.max_tick = random.randint(60, 600)
+        self.max_tick = random.randint(60, 36000)
         self.tick = self.max_tick
 
     def on_update(self, dt):
