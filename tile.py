@@ -1,7 +1,6 @@
 import pygame
 
 from load_image import load_image
-from settings import SCALE
 from sprite import Sprite
 
 

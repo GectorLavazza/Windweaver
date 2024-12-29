@@ -2,20 +2,16 @@ import pygame
 from settings import *
 
 
-class Surface:
+class World:
     def __init__(self, screen: pygame.surface.Surface, size, center):
 
         self.screen = screen
         self.screen_rect = screen.get_rect()
 
         self.surface = pygame.surface.Surface(size, pygame.SRCALPHA)
-        self.size = size
 
         self.rect = self.surface.get_rect()
         self.rect.center = center
-        self.pos = self.rect.topleft
-
-        self.center = center
 
         self.speed = 3
         self.edge_threshold = screen_height // 4
@@ -26,8 +22,11 @@ class Surface:
         self.dynamic_speed_y = 0
         self.velocity = pygame.Vector2(0, 0)
 
+    def blit(self, surface, dest):
+        self.surface.blit(surface, dest)
+
     def update(self, dt):
-        self.screen.blit(self.surface, self.pos)
+        self.screen.blit(self.surface, self.rect.topleft)
         self.check_mouse_edges()
         self.move(dt)
 
@@ -47,7 +46,7 @@ class Surface:
             self.dx = -1
 
             distance_to_edge = mouse_x - (
-                        screen_width - self.edge_threshold)
+                    screen_width - self.edge_threshold)
             self.dynamic_speed_x = distance_to_edge / self.edge_threshold
 
         if mouse_y < self.edge_threshold:
@@ -60,7 +59,7 @@ class Surface:
             self.dy = -1
 
             distance_to_edge = mouse_y - (
-                        screen_height - self.edge_threshold)
+                    screen_height - self.edge_threshold)
 
             self.dynamic_speed_y = distance_to_edge / self.edge_threshold
 
@@ -77,6 +76,9 @@ class Surface:
         self.velocity.x = input_direction.x * self.speed * speed_multiplier_x * dt
         self.velocity.y = input_direction.y * self.speed * speed_multiplier_y * dt
 
+        if self.velocity.length() > self.speed:
+            self.velocity = self.velocity.normalize() * self.speed
+
         self.rect.x += self.velocity.x * SCALE
         self.rect.y += self.velocity.y * SCALE
 
@@ -84,5 +86,3 @@ class Surface:
                           min(self.rect.x, 0))
         self.rect.y = max(self.screen_rect.height - self.rect.height,
                           min(self.rect.y, 0))
-
-        self.pos = self.rect.topleft
