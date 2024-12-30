@@ -1,6 +1,7 @@
 import pygame
 import random
 
+from light import Light
 from load_image import load_image
 from sprite import Sprite
 
@@ -21,6 +22,8 @@ class Tile(Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0] + self.world.rect.x,
                              pos[1] + self.world.rect.y)
+
+        self.center = self.pos[0] + self.rect.w // 2, self.pos[1] + self.rect.h // 2
 
         self.collision_rect = pygame.rect.Rect(*self.rect.topleft,
                                                self.rect.width * 2, self.rect.height * 2)
@@ -186,6 +189,21 @@ class Stone(Tile):
         self.kill()
 
 
+class House(Tile):
+    def __init__(self, pos, world, *group):
+        super().__init__('house', pos, world, *group)
+        self.lighting = False
+        self.light_g = self.world.light_g
+        self.light = Light(8, self.center, (255, 200, 0), 0.3, self.world, self.world.light_g)
+
+    def on_update(self, dt):
+        if self.world.sky.dark:
+            self.default_image, self.hover_image, self.pressed_image = self.get_images('house_light')
+        else:
+            self.default_image, self.hover_image, self.pressed_image = self.get_images(
+                'house')
+
+
 class Grass(Tile):
     def __init__(self, name, pos, world, *group):
         super().__init__(name, pos, world, *group)
@@ -231,6 +249,10 @@ class Grass(Tile):
         self.image = self.default_image
 
     def on_click(self):
+        if self.available:
+            House(self.pos, self.world, self.groups())
+            self.kill()
+
         self.name = 'grass'
 
         self.default_image, self.hover_image, self.pressed_image = self.get_images(

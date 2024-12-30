@@ -6,6 +6,8 @@ class Sky:
     def __init__(self, screen):
         self.screen = screen
 
+        self.dark = False
+
         # Define the full gradient for transitions
         self.colors = [
             (0, 0, 0),  # Night (black)
@@ -18,10 +20,10 @@ class Sky:
 
         # Phase durations (in ticks)
         self.phase_durations = {
-            "night": 3600,  # Static night
-            "sunrise": 3600,  # Transition: night → day (black → orange → blue)
-            "day": 3600,  # Static day
-            "sunset": 3600  # Transition: day → night (blue → orange → black)
+            "night": 120,  # Static night
+            "sunrise": 120,  # Transition: night → day (black → orange → blue)
+            "day": 120,  # Static day
+            "sunset": 120  # Transition: day → night (blue → orange → black)
         }
 
         # Initial state (start with day)
@@ -47,6 +49,14 @@ class Sky:
         )
 
     def update(self, dt):
+        if self.current_phase == 'night' or self.current_phase == 'sunset' and self.tick <= \
+                self.phase_durations[
+                    'sunset'] // 3 or self.current_phase == 'sunrise' and self.tick >= \
+                self.phase_durations['sunrise'] // 3 * 2:
+            self.dark = True
+        else:
+            self.dark = False
+
         t = 1 - (self.tick / self.phase_durations[self.current_phase])
 
         # Determine behavior based on the phase
@@ -74,8 +84,7 @@ class Sky:
             self.current_alpha = self.current_alphas[0]
 
         # Draw the sky surface
-        self.surface.fill(self.current_color)
-        self.surface.set_alpha(self.current_alpha)
+        self.surface.fill((*self.current_color, self.current_alpha))
         self.screen.blit(self.surface, (0, 0))
 
         # Update tick and phase

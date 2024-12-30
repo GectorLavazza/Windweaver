@@ -3,7 +3,7 @@ from settings import *
 
 
 class World:
-    def __init__(self, screen: pygame.surface.Surface, size, center):
+    def __init__(self, screen: pygame.surface.Surface, size, center, light_g, sky):
 
         self.screen = screen
         self.screen_rect = screen.get_rect()
@@ -25,6 +25,9 @@ class World:
         self.wood = 0
         self.stone = 0
         self.houses = 0
+
+        self.light_g = light_g
+        self.sky = sky
 
     def blit(self, surface, dest):
         self.surface.blit(surface, dest)
