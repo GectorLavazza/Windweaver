@@ -22,6 +22,9 @@ class World:
         self.dynamic_speed_y = 0
         self.velocity = pygame.Vector2(0, 0)
 
+        self.wood = 0
+        self.stone = 0
+        self.houses = 0
 
     def blit(self, surface, dest):
         self.surface.blit(surface, dest)

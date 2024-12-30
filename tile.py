@@ -85,7 +85,7 @@ class Tree(Tile):
         super().__init__(f'tree_{age}', pos, world, *group)
         self.max_tick = random.randint(60, 7200)
         self.tick = self.max_tick
-        self.durability = random.randint(2, 5) + 2 * age
+        self.durability = random.randint(1, 3) + 2 + age
         self.age = age
 
     def on_click(self):
@@ -99,6 +99,7 @@ class Tree(Tile):
         else:
             Grass('grass', self.pos, self.world, self.groups())
 
+        self.world.wood += self.age + 1
         self.kill()
 
     def grow(self):
@@ -144,10 +145,11 @@ class Tree(Tile):
                     self.grow()
 
 
-class Stones(Tile):
-    def __init__(self, pos, world, *group):
-        super().__init__('stones', pos, world, *group)
-        self.durability = random.randint(2, 4)
+class Stone(Tile):
+    def __init__(self, pos, world, amount, *group):
+        super().__init__(f'stone_{amount}', pos, world, *group)
+        self.amount = amount
+        self.durability = random.randint(1, 2) + self.amount
 
     def on_click(self):
         self.durability -= 1
@@ -156,6 +158,7 @@ class Stones(Tile):
 
     def on_kill(self):
         Grass('grass', self.pos, self.world, self.groups())
+        self.world.stone += self.amount
         self.kill()
 
 
@@ -169,7 +172,6 @@ class Grass(Tile):
         self.name = 'tall_grass'
 
         tall_grass_count = 0
-        stones_count = 0
         trees_count = 0
         flowers_count = 0
 
@@ -180,8 +182,6 @@ class Grass(Tile):
                     tall_grass_count += 1
                 elif 'tree' in other.name:
                     trees_count += 1
-                elif other.name == 'stone':
-                    stones_count += 1
                 elif other.name == 'flower':
                     flowers_count += 1
 

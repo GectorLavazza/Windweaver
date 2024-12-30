@@ -92,8 +92,9 @@ class Map:
                             tile = 'tall_grass'
                         Grass(tile, pos, self.world, self.tiles_g)
 
-                    if tile == 'stones':
-                        Stones(pos, self.world, self.tiles_g)
+                    if 'stone' in tile:
+                        amount = random.randint(1, 3)
+                        Stone(pos, self.world, amount, self.tiles_g)
 
                 row.append(tile)
 

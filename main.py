@@ -73,6 +73,8 @@ def main():
         cursor.update()
 
         pygame.display.flip()
+        c = f'W: {world.wood}; S: {world.stone}; H: {world.houses}'
+        pygame.display.set_caption(c)
         clock.tick(FPS)
 
     pygame.quit()
