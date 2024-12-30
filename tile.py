@@ -193,15 +193,33 @@ class House(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('house', pos, world, *group)
         self.lighting = False
-        self.light_g = self.world.light_g
         self.light = Light(8, self.center, (255, 200, 0), 0.3, self.world, self.world.light_g)
+        self.on = 0
+        self.started = False
 
     def on_update(self, dt):
+        self.default_image, self.hover_image, self.pressed_image = self.get_images(
+            'house')
         if self.world.sky.dark:
-            self.default_image, self.hover_image, self.pressed_image = self.get_images('house_light')
+            self.lighting = True
         else:
-            self.default_image, self.hover_image, self.pressed_image = self.get_images(
-                'house')
+            self.started = False
+            self.lighting = False
+            self.light.image.set_alpha(0)
+
+        if self.lighting:
+            if not self.started:
+                self.on = random.randint(10, 120)
+                self.started = True
+            else:
+                self.on -= dt
+                if self.on < 0:
+                    self.default_image, self.hover_image, self.pressed_image = self.get_images(
+                        'house_light')
+                    self.light.image.set_alpha(self.light.density * 255)
+        else:
+            self.light.image.set_alpha(0)
+
 
 
 class Grass(Tile):

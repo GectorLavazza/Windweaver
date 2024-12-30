@@ -76,8 +76,7 @@ def main():
 
         world.update(dt)
 
-        if sky.dark:
-            light_g.draw(screen)
+        light_g.draw(screen)
         light_g.update(dt)
 
         resources.update(f'W:{world.wood}; S:{world.stone}; H:{world.houses}')

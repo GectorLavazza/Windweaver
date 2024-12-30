@@ -33,15 +33,10 @@ class Light(Sprite):
     def get_image(self):
         image = pygame.Surface((self.w, self.h)).convert_alpha()
 
-        image.set_alpha(255)
+        image.set_alpha(int(255 * self.density))
         image.fill(pygame.Color(0, 0, 0, 0))
 
-        # for i in range(4):
-        #     ck = self.density / 4 * (i + 1)
-        #     color = (*self.color, int(255 * ck))
-        #     radius = int(self.r / 4 * (4 - i))
-        #     pygame.draw.circle(image, color, (self.r, self.r), radius)
-        color = (*self.color, int(255 * self.density))
+        color = self.color
         pygame.draw.circle(image, color, (self.r, self.r), self.r)
 
         image = pygame.transform.scale_by(image, SCALE)
