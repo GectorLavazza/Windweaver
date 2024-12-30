@@ -45,7 +45,7 @@ class Light(Sprite):
     def enlight(self):
         color = pygame.Color(0, 0, 0, 0)
         center = self.rect.center
-        radius = self.r * RATIO * 1.2
+        radius = self.r * SCALE * 1.2
         pygame.draw.circle(self.darkness.surface, color, center, radius)
 
 

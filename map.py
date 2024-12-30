@@ -55,6 +55,10 @@ class Map:
                 elif noise_value < 0.7:
                     tile = 'tree'
                 elif noise_value < 0.75:
+                    tile = 'grass'
+                elif noise_value < 0.8:
+                    tile = 'stones'
+                elif noise_value < 0.85:
                     tile = 'tall_grass'
                 else:
                     tile = 'grass'
@@ -68,19 +72,28 @@ class Map:
                     pos = (x * TILE_SIZE * SCALE, y * TILE_SIZE * SCALE)
 
                     if tile == 'tree':
-                        if random.randint(1, 10) == 1:
-                            age = 0
-                        elif random.randint(1, 5) == 1:
-                            age = 2
+                        if random.randint(1, 5) == 1:
+                            tile = 'grass'
+                        elif random.randint(1, 100) == 1:
+                            tile = 'stones'
                         else:
-                            age = 1
-                        Tree(pos, self.world, age, self.tiles_g)
-                    elif 'grass' in tile or 'flower' in tile:
+                            if random.randint(1, 5) == 1:
+                                age = 0
+                            elif random.randint(1, 5) == 1:
+                                age = 2
+                            else:
+                                age = 1
+                            Tree(pos, self.world, age, self.tiles_g)
+
+                    if 'grass' in tile or 'flower' in tile:
+                        if tile == 'tall_grass' and random.randint(1, 5) == 1:
+                            tile = 'grass'
+                        elif tile == 'grass' and random.randint(1, 10) == 1:
+                            tile = 'tall_grass'
                         Grass(tile, pos, self.world, self.tiles_g)
-                    elif tile == 'stones':
+
+                    if tile == 'stones':
                         Stones(pos, self.world, self.tiles_g)
-                    else:
-                        Tile(tile, pos, self.world, self.tiles_g)
 
                 row.append(tile)
 

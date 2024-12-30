@@ -67,7 +67,7 @@ def main():
 
         world.update(dt)
 
-        # sky.update(dt)
+        sky.update(dt)
 
         cursor_g.draw(screen)
         cursor.update()
