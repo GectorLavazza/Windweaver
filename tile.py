@@ -85,7 +85,7 @@ class Tree(Tile):
         super().__init__(f'tree_{age}', pos, world, *group)
         self.max_tick = random.randint(60, 36000)
         self.tick = self.max_tick
-        self.durability = random.randint(2, 5) * 2 ** age
+        self.durability = random.randint(2, 5) + 2 * age
         self.age = age
 
     def on_click(self):
@@ -103,7 +103,7 @@ class Tree(Tile):
 
     def grow(self):
         self.age += 1
-        self.durability = random.randint(2, 5) * 2 ** self.age
+        self.durability = random.randint(2, 5) + 2 * self.age
 
         self.name = f'tree_{self.age}'
 
