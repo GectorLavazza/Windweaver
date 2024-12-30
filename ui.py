@@ -29,7 +29,7 @@ class Text(Ui):
         self.rect = self.render.get_rect()
         if self.center_align:
             pos = (self.pos[0] - self.render.get_width() // 2,
-                   self.pos[1] - self.render.get_height() // 2)
+                   self.pos[1])
         elif self.right_align:
             pos = (self.pos[0] - self.render.get_width(),
                    self.pos[1])

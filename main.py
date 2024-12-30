@@ -42,9 +42,10 @@ def main():
 
     last_time = time.time()
 
-    resources = Text(screen, screen_size, 8, 'white', (0, 0))
-    fps = Text(screen, screen_size, 8, 'white', (screen_width, 0),
+    resources = Text(screen, screen_size, 6, 'white', (0, 0))
+    fps = Text(screen, screen_size, 6, 'white', (screen_width, 0),
                right_align=True)
+    score = Text(screen, screen_size, 10, 'white', (screen_width // 2, 0), center_align=True)
 
     while running:
         dt = time.time() - last_time
@@ -79,8 +80,9 @@ def main():
         light_g.draw(screen)
         light_g.update(dt)
 
-        resources.update(f'W:{world.wood}; S:{world.stone}; H:{world.houses}')
+        resources.update(f'W:{world.wood} S:{world.stone}')
         fps.update(f'FPS:{round(clock.get_fps())}')
+        score.update(world.score)
 
         cursor_g.draw(screen)
         cursor.update()

@@ -29,6 +29,8 @@ class World:
         self.light_g = light_g
         self.sky = sky
 
+        self.score = 0
+
     def blit(self, surface, dest):
         self.surface.blit(surface, dest)
 

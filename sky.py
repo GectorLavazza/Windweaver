@@ -1,5 +1,5 @@
 import pygame
-from settings import screen_size
+from settings import screen_size, DAY_TIME
 
 
 class Sky:
@@ -20,10 +20,10 @@ class Sky:
 
         # Phase durations (in ticks)
         self.phase_durations = {
-            "night": 120,  # Static night
-            "sunrise": 120,  # Transition: night → day (black → orange → blue)
-            "day": 120,  # Static day
-            "sunset": 120  # Transition: day → night (blue → orange → black)
+            "night": DAY_TIME,  # Static night
+            "sunrise": DAY_TIME,  # Transition: night → day (black → orange → blue)
+            "day": DAY_TIME,  # Static day
+            "sunset": DAY_TIME  # Transition: day → night (blue → orange → black)
         }
 
         # Initial state (start with day)
@@ -51,8 +51,8 @@ class Sky:
     def update(self, dt):
         if self.current_phase == 'night' or self.current_phase == 'sunset' and self.tick <= \
                 self.phase_durations[
-                    'sunset'] // 3 or self.current_phase == 'sunrise' and self.tick >= \
-                self.phase_durations['sunrise'] // 3 * 2:
+                    'sunset'] // 4 or self.current_phase == 'sunrise' and self.tick >= \
+                self.phase_durations['sunrise'] // 4 * 3:
             self.dark = True
         else:
             self.dark = False
