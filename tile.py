@@ -22,10 +22,14 @@ class Tile(Sprite):
         self.rect.topleft = (pos[0] + self.world.rect.x,
                              pos[1] + self.world.rect.y)
 
-        self.collision_rect = self.rect.scale_by(1.1, 1.1)
+        self.collision_rect = pygame.rect.Rect(*self.rect.topleft,
+                                               self.rect.width * 2, self.rect.height * 2)
         self.collision_rect.center = self.rect.center
 
         self.clicked = False
+        self.available = False
+
+        self.colliding = []
 
     def get_images(self, image):
         default = load_image(image)
@@ -55,9 +59,18 @@ class Tile(Sprite):
     def on_kill(self):
         pass
 
+    def get_colliding(self):
+        for other in self.groups()[0]:
+            if self.collision_rect.colliderect(other.rect):
+                if other != self:
+                    self.colliding.append(other)
+
     def handle_mouse(self):
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):
+
+            self.check_build_availability()
+
             if pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]:
 
                 if not self.clicked:
@@ -70,7 +83,6 @@ class Tile(Sprite):
                 self.image = self.pressed_image
             else:
                 self.clicked = False
-                self.image = self.hover_image
         else:
             self.clicked = False
             self.image = self.default_image
@@ -78,6 +90,20 @@ class Tile(Sprite):
     def move(self):
         self.rect.topleft = (self.pos[0] + self.world.rect.x,
                              self.pos[1] + self.world.rect.y)
+        self.collision_rect.center = self.rect.center
+
+    def check_build_availability(self):
+        self.get_colliding()
+        check = ['tree' not in n.name for n in self.colliding]
+        if all(check) and self.name == 'grass':
+            self.available = True
+        else:
+            self.available = False
+
+        if self.available:
+            self.image = load_image('test2')
+        else:
+            self.image = self.hover_image
 
 
 class Tree(Tile):
@@ -109,22 +135,22 @@ class Tree(Tile):
         trees_0_count = 0
         grow = True
 
-        for other in self.groups()[0]:
-            if self.collision_rect.colliderect(other.rect):
+        self.get_colliding()
+        for other in self.colliding:
 
-                if other.name == 'tree_2':
-                    trees_2_count += 1
-                elif other.name == 'tree_1':
-                    trees_2_count += 1
-                elif other.name == 'tree_0':
-                    trees_2_count += 1
+            if other.name == 'tree_2':
+                trees_2_count += 1
+            elif other.name == 'tree_1':
+                trees_2_count += 1
+            elif other.name == 'tree_0':
+                trees_2_count += 1
 
-                if trees_2_count > 2:
-                    grow = False
-                    break
-                elif trees_1_count + trees_2_count > 2 and self.age == 0:
-                    grow = False
-                    break
+            if trees_2_count > 2:
+                grow = False
+                break
+            elif trees_1_count + trees_2_count > 2 and self.age == 0:
+                grow = False
+                break
 
         if grow:
             self.age += 1
@@ -176,28 +202,32 @@ class Grass(Tile):
         trees_count = 0
         flowers_count = 0
 
-        for other in self.groups()[0]:
-            if self.collision_rect.colliderect(other.rect):
+        self.get_colliding()
+        for other in self.colliding:
 
-                if other.name == 'tall_grass':
-                    tall_grass_count += 1
-                elif 'tree' in other.name:
-                    trees_count += 1
-                elif other.name == 'flower':
-                    flowers_count += 1
+            if other.name == 'tall_grass':
+                tall_grass_count += 1
+            elif 'tree' in other.name:
+                trees_count += 1
+            elif other.name == 'flower':
+                flowers_count += 1
 
-                if trees_count > 2:
-                    if random.randint(1, 10) == 1:
-                        Tree(self.pos, self.world, 0, self.groups())
-                        self.kill()
-                    break
-                elif flowers_count > 2:
-                    if random.randint(1, 10) == 1:
-                        self.name = 'flower'
-                    break
-                elif tall_grass_count > 5:
-                    self.name = 'tall_grass'
-                    break
+            if trees_count > 5:
+                Tree(self.pos, self.world, 0, self.groups())
+                self.kill()
+                break
+            elif trees_count > 2:
+                if random.randint(1, 10) == 1:
+                    Tree(self.pos, self.world, 0, self.groups())
+                    self.kill()
+                break
+            elif flowers_count > 2:
+                if random.randint(1, 10) == 1:
+                    self.name = 'flower'
+                break
+            elif tall_grass_count > 5:
+                self.name = 'tall_grass'
+                break
 
         self.default_image, self.hover_image, self.pressed_image = self.get_images(
             self.name)

@@ -1,3 +1,5 @@
+import pygame
+
 from settings import *
 
 class Ui:
@@ -30,8 +32,12 @@ class Text(Ui):
                    self.pos[1] - self.render.get_height() // 2)
         elif self.right_align:
             pos = (self.pos[0] - self.render.get_width(),
-                   self.pos[1] - self.render.get_height() // 2)
+                   self.pos[1])
         else:
             pos = (self.pos[0],
                    self.pos[1])
+        shade = pygame.surface.Surface(self.rect.size, pygame.SRCALPHA)
+        shade.set_alpha(128)
+        shade.fill('black')
+        self.screen.blit(shade, pos)
         self.screen.blit(self.render, pos)

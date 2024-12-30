@@ -41,6 +41,9 @@ def main():
 
     last_time = time.time()
 
+    resources = Text(screen, screen_size, 8, 'white', (0, 0))
+    fps = Text(screen, screen_size, 8, 'white', (screen_width, 0), right_align=True)
+
     while running:
         dt = time.time() - last_time
         dt *= 60
@@ -70,6 +73,9 @@ def main():
         world.update(dt)
 
         sky.update(dt)
+
+        resources.update(f'W:{world.wood}; S:{world.stone}; H:{world.houses}')
+        fps.update(f'FPS:{round(clock.get_fps())}')
 
         cursor_g.draw(screen)
         cursor.update()
