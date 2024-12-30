@@ -29,6 +29,7 @@ def fit_aspect_ratio(screen_width, screen_height,
 w, h = 320 * 3, 180 * 3
 # w, h = screen_info.current_w, screen_info.current_h
 screen_width, screen_height = fit_aspect_ratio(w, h)
+screen_size = screen_width, screen_height
 
 SCALE = screen_width / WIDTH
 CENTER = pygame.Vector2(screen_width // 2, screen_height // 2)

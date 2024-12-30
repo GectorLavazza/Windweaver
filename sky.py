@@ -1,5 +1,5 @@
 import pygame
-from settings import screen_width, screen_height
+from settings import screen_size
 
 
 class Sky:
@@ -28,7 +28,7 @@ class Sky:
         self.current_phase = "day"
         self.tick = self.phase_durations[self.current_phase]
         self.surface = pygame.Surface(
-            (screen_width, screen_height)).convert_alpha()
+            screen_size).convert_alpha()
 
         # Static day settings
         self.current_colors = [self.colors[2]]  # Static Blue

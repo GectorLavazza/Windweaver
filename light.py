@@ -1,6 +1,6 @@
 import pygame
 from sprite import Sprite
-from settings import SCALE, screen_width, screen_height
+from settings import SCALE, screen_size
 
 
 class Light(Sprite):
@@ -51,7 +51,7 @@ class Light(Sprite):
 
 class Darkness:
     def __init__(self):
-        self.surface = pygame.Surface((screen_width, screen_height)).convert_alpha()
+        self.surface = pygame.Surface(screen_size).convert_alpha()
         self.surface.set_alpha(70)
         self.surface.fill(pygame.Color(0, 0, 0))
 

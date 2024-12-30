@@ -10,6 +10,8 @@ from settings import *
 from world import World
 from sky import Sky
 
+from ui import Text
+
 
 def main():
     pygame.init()
@@ -19,7 +21,7 @@ def main():
     pygame.mixer.music.load('assets/music/windweaver.wav')
     pygame.mixer.music.play(-1)
 
-    screen = pygame.display.set_mode((screen_width, screen_height),
+    screen = pygame.display.set_mode(screen_size,
                                      pygame.DOUBLEBUF | pygame.SRCALPHA)
     world = World(screen, MAP_SIZE, CENTER)
 
@@ -73,8 +75,6 @@ def main():
         cursor.update()
 
         pygame.display.flip()
-        c = f'W: {world.wood}; S: {world.stone}; H: {world.houses}'
-        pygame.display.set_caption(c)
         clock.tick(FPS)
 
     pygame.quit()

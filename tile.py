@@ -96,6 +96,7 @@ class Tree(Tile):
     def on_kill(self):
         if random.randint(1, 10) == 1:
             Tile('house', self.pos, self.world, self.groups())
+            self.world.houses += 1
         else:
             Grass('grass', self.pos, self.world, self.groups())
 
