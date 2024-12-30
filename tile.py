@@ -124,10 +124,11 @@ class Tile(Sprite):
     def check_mine_build(self):
         self.get_colliding()
         check = ['stone' in n for n in self.colliding]
-        check2 = ['tree' not in n for n in self.colliding]
+        check2 = ['tree' not in n and 'mine' not in n for n in self.colliding]
         if check.count(True) > 2 and all(check2) and self.colliding.count(
                 'tall_grass') == 0 and self.name == 'grass':
-            self.mine_available = True
+            if self.world.houses // 2 >= (self.world.mines + 1):
+                self.mine_available = True
         else:
             self.mine_available = False
 
@@ -237,6 +238,8 @@ class House(Tile):
         self.started = False
         self.world.score += 1
 
+        self.world.houses += 1
+
         self.get_colliding()
         if 'flower' in self.colliding:
             self.world.score += 5
@@ -274,7 +277,9 @@ class Mine(Tile):
                            self.world.light_g)
         self.on = 0
         self.started = False
-        self.world.score += 1
+        self.world.score += 5
+
+        self.world.mines += 1
 
         self.get_colliding()
         self.around = ['stone' in n for n in self.colliding].count(True)

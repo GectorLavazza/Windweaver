@@ -25,6 +25,7 @@ class World:
         self.wood = 0
         self.stone = 0
         self.houses = 0
+        self.mines = 0
 
         self.light_g = light_g
         self.sky = sky
