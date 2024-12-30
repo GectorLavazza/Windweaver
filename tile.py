@@ -60,6 +60,7 @@ class Tile(Sprite):
         pass
 
     def get_colliding(self):
+        self.colliding.clear()
         for other in self.groups()[0]:
             if self.collision_rect.colliderect(other.rect):
                 if other != self:
@@ -94,7 +95,7 @@ class Tile(Sprite):
 
     def check_build_availability(self):
         self.get_colliding()
-        check = ['tree' not in n.name for n in self.colliding]
+        check = [n.name == 'grass' for n in self.colliding]
         if all(check) and self.name == 'grass':
             self.available = True
         else:
@@ -120,11 +121,7 @@ class Tree(Tile):
             self.on_kill()
 
     def on_kill(self):
-        if random.randint(1, 10) == 1:
-            Tile('house', self.pos, self.world, self.groups())
-            self.world.houses += 1
-        else:
-            Grass('grass', self.pos, self.world, self.groups())
+        Grass('grass', self.pos, self.world, self.groups())
 
         self.world.wood += self.age + 1
         self.kill()

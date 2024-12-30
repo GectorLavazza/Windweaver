@@ -42,18 +42,8 @@ class Light(Sprite):
 
         return image
 
-    def enlight(self):
+    def enlight(self, surface):
         color = pygame.Color(0, 0, 0, 0)
         center = self.rect.center
         radius = self.r * SCALE * 1.2
-        pygame.draw.circle(self.darkness.surface, color, center, radius)
-
-
-class Darkness:
-    def __init__(self):
-        self.surface = pygame.Surface(screen_size).convert_alpha()
-        self.surface.set_alpha(70)
-        self.surface.fill(pygame.Color(0, 0, 0))
-
-    def draw(self, screen):
-        screen.blit(self.surface, (0, 0))
+        pygame.draw.circle(surface, color, center, radius)
