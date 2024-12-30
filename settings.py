@@ -26,7 +26,7 @@ def fit_aspect_ratio(screen_width, screen_height,
     return int(max_width), int(max_height)
 
 
-w, h = 320 * 6, 180 * 6
+w, h = 320 * 3, 180 * 3
 # w, h = screen_info.current_w, screen_info.current_h
 screen_width, screen_height = fit_aspect_ratio(w, h)
 

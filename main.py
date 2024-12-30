@@ -8,6 +8,7 @@ from cursor import Cursor
 from map import Map
 from settings import *
 from world import World
+from sky import Sky
 
 
 def main():
@@ -21,6 +22,8 @@ def main():
     screen = pygame.display.set_mode((screen_width, screen_height),
                                      pygame.DOUBLEBUF | pygame.SRCALPHA)
     world = World(screen, MAP_SIZE, CENTER)
+
+    sky = Sky(screen)
 
     cursor_g = pygame.sprite.Group()
     tiles_g = pygame.sprite.Group()
@@ -63,6 +66,8 @@ def main():
         tiles_g.update(dt)
 
         world.update(dt)
+
+        # sky.update(dt)
 
         cursor_g.draw(screen)
         cursor.update()
