@@ -20,10 +20,10 @@ class Sky:
 
         # Phase durations (in ticks)
         self.phase_durations = {
-            "night": 120,  # Static night
-            "sunrise": 120,  # Transition: night → day (black → orange → blue)
-            "day": 120,  # Static day
-            "sunset": 120  # Transition: day → night (blue → orange → black)
+            "night": 3600,  # Static night
+            "sunrise": 3600,  # Transition: night → day (black → orange → blue)
+            "day": 3600,  # Static day
+            "sunset": 3600  # Transition: day → night (blue → orange → black)
         }
 
         # Initial state (start with day)
