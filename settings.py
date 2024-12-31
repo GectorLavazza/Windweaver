@@ -1,6 +1,6 @@
 import pygame
 
-FPS = 60
+FPS = 30
 
 pygame.display.init()
 screen_info = pygame.display.Info()
@@ -35,16 +35,16 @@ SCALE = screen_width / WIDTH
 CENTER = pygame.Vector2(screen_width // 2, screen_height // 2)
 
 TILE_SIZE = 8
-MAP_WIDTH, MAP_HEIGHT = 64, 64
+MAP_WIDTH, MAP_HEIGHT = 48, 48
 MAP_SIZE = TILE_SIZE * MAP_WIDTH * SCALE, TILE_SIZE * MAP_HEIGHT * SCALE
 
 GROWTH_MIN = 3600
 GROWTH_MAX = 36000
 
-HOUSE_STONE_COST = 5
-HOUSE_WOOD_COST = 5
+HOUSE_STONE_COST = 0
+HOUSE_WOOD_COST = 0
 
-MINE_STONE_COST = 10
-MINE_WOOD_COST = 10
+MINE_STONE_COST = 0
+MINE_WOOD_COST = 0
 
 DAY_TIME = 3600

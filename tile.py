@@ -6,7 +6,7 @@ from pygame.examples.cursors import image
 from light import Light
 from load_image import load_image
 from settings import GROWTH_MIN, GROWTH_MAX, HOUSE_STONE_COST, HOUSE_WOOD_COST, \
-    MINE_STONE_COST, MINE_WOOD_COST
+    MINE_STONE_COST, MINE_WOOD_COST, SCALE
 from sprite import Sprite
 
 
@@ -16,6 +16,8 @@ class Tile(Sprite):
         self.world = world
 
         self.name = name
+        self.durability = 0
+        self.max_durability = self.durability
 
         self.default_image, self.hover_image, self.pressed_image = self.get_images(
             self.name)
@@ -83,6 +85,8 @@ class Tile(Sprite):
             self.check_house_build()
             self.check_mine_build()
 
+            self.draw_durability_bar(self.world.screen)
+
             if pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]:
 
                 if not self.clicked:
@@ -148,6 +152,19 @@ class Tile(Sprite):
         self.world.stone -= MINE_STONE_COST
         self.world.wood -= MINE_WOOD_COST
 
+    def draw_durability_bar(self, screen):
+        w, h = 12, 2
+        if self.max_durability:
+            pygame.draw.rect(screen, pygame.Color('#46474c'),
+                             pygame.Rect(self.rect.centerx - (w // 2 + 1) * SCALE,
+                                         self.rect.y - (h - 1) * SCALE,
+                                         w * SCALE, h * SCALE))
+            pygame.draw.rect(screen, pygame.Color('#e0dca4'),
+                             pygame.Rect(self.rect.centerx - (w // 2) * SCALE,
+                                         self.rect.y - h * SCALE,
+                                         w / self.max_durability * self.durability * SCALE,
+                                         h * SCALE))
+
 
 class Tree(Tile):
     def __init__(self, pos, world, age, *group):
@@ -155,12 +172,14 @@ class Tree(Tile):
         self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
         self.tick = self.max_tick
         self.durability = age + 2
+        self.max_durability = self.durability
         self.age = age
 
     def on_click(self):
-        self.durability -= 1
-        if self.durability <= 0:
-            self.on_kill()
+        if pygame.mouse.get_pressed()[0]:
+            self.durability -= 1
+            if self.durability <= 0:
+                self.on_kill()
 
     def on_kill(self):
         Grass('grass', self.pos, self.world, self.groups())
@@ -194,6 +213,7 @@ class Tree(Tile):
         if grow:
             self.age += 1
             self.durability = self.age + 2
+            self.max_durability = self.durability
 
             self.name = f'tree_{self.age}'
 
@@ -216,11 +236,13 @@ class Stone(Tile):
         super().__init__(f'stone_{amount}', pos, world, *group)
         self.amount = amount
         self.durability = self.amount + 1
+        self.max_durability = self.durability
 
     def on_click(self):
-        self.durability -= 1
-        if self.durability <= 0:
-            self.on_kill()
+        if pygame.mouse.get_pressed()[0]:
+            self.durability -= 1
+            if self.durability <= 0:
+                self.on_kill()
 
     def on_kill(self):
         Grass('grass', self.pos, self.world, self.groups())
@@ -236,6 +258,7 @@ class House(Tile):
                            self.world.light_g)
         self.on = 0
         self.started = False
+        self.set = False
         self.world.score += 1
 
         self.world.houses += 1
@@ -245,7 +268,7 @@ class House(Tile):
             self.world.score += 5
             print('yes')
 
-    def on_update(self, dt):
+    def handle_light(self, dt):
         self.default_image, self.hover_image, self.pressed_image = self.get_images(
             'house')
         if self.world.sky.dark:
@@ -253,6 +276,7 @@ class House(Tile):
         else:
             self.started = False
             self.lighting = False
+            self.set = False
             self.light.image.set_alpha(0)
 
         if self.lighting:
@@ -262,9 +286,11 @@ class House(Tile):
             else:
                 self.on -= dt
                 if self.on < 0:
-                    self.default_image, self.hover_image, self.pressed_image = self.get_images(
-                        'house_light')
-                    self.light.image.set_alpha(self.light.density * 255)
+                    if not self.set:
+                        self.default_image, self.hover_image, self.pressed_image = self.get_images(
+                            'house_light')
+                        self.light.image.set_alpha(self.light.density * 255)
+                        self.set = True
         else:
             self.light.image.set_alpha(0)
 
@@ -284,36 +310,14 @@ class Mine(Tile):
         self.get_colliding()
         self.around = ['stone' in n for n in self.colliding].count(True)
 
-        self.max_tick = 1800
+        self.max_tick = 3600 // self.around
         self.tick = self.max_tick
 
     def on_update(self, dt):
-        self.default_image, self.hover_image, self.pressed_image = self.get_images(
-            'mine')
-        if self.world.sky.dark:
-            self.lighting = True
-        else:
-            self.started = False
-            self.lighting = False
-            self.light.image.set_alpha(0)
-
-        if self.lighting:
-            if not self.started:
-                self.on = random.randint(10, 120)
-                self.started = True
-            else:
-                self.on -= dt
-                if self.on < 0:
-                    self.default_image, self.hover_image, self.pressed_image = self.get_images(
-                        'mine_light')
-                    self.light.image.set_alpha(self.light.density * 255)
-        else:
-            self.light.image.set_alpha(0)
-
         self.tick -= dt
         if self.tick <= 0:
             self.tick = self.max_tick
-            self.world.stone += self.around
+            self.world.stone += 1
 
 
 class Grass(Tile):
@@ -361,26 +365,28 @@ class Grass(Tile):
         self.image = self.default_image
 
     def on_click(self):
-        if self.house_available:
-            if self.check_house_cost():
-                self.buy_house()
-                House(self.pos, self.world, self.groups())
-                self.kill()
+        if pygame.mouse.get_pressed()[2]:
+            if self.house_available:
+                if self.check_house_cost():
+                    self.buy_house()
+                    House(self.pos, self.world, self.groups())
+                    self.kill()
 
-        elif self.mine_available:
-            if self.check_mine_cost():
-                self.buy_mine()
-                Mine(self.pos, self.world, self.groups())
-                self.kill()
+            elif self.mine_available:
+                if self.check_mine_cost():
+                    self.buy_mine()
+                    Mine(self.pos, self.world, self.groups())
+                    self.kill()
 
-        self.name = 'grass'
+        elif pygame.mouse.get_pressed()[0]:
+            self.name = 'grass'
 
-        self.default_image, self.hover_image, self.pressed_image = self.get_images(
-            self.name)
-        self.image = self.default_image
+            self.default_image, self.hover_image, self.pressed_image = self.get_images(
+                self.name)
+            self.image = self.default_image
 
-        self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
-        self.tick = self.max_tick
+            self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
+            self.tick = self.max_tick
 
     def on_update(self, dt):
         if self.name not in ('tall_grass', 'flower'):

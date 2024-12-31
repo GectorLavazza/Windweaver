@@ -77,8 +77,8 @@ def main():
 
         world.update(dt)
 
-        light_g.draw(screen)
-        light_g.update(dt)
+        # light_g.draw(screen)
+        # light_g.update(dt)
 
         resources.update(f'W:{world.wood} S:{world.stone}')
         fps.update(f'FPS:{round(clock.get_fps())}')
