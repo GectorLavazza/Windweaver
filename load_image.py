@@ -3,6 +3,7 @@ import os
 import pygame
 from settings import SCALE
 
+
 def load_image(name):
     fullname = os.path.join("assets/sprites/", name + '.png')
 

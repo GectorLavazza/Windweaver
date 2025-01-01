@@ -21,12 +21,10 @@ def main():
     pygame.mixer.music.load('assets/music/windweaver.wav')
     pygame.mixer.music.play(-1)
 
-    light_g = pygame.sprite.Group()
-
     screen = pygame.display.set_mode(screen_size,
                                      pygame.DOUBLEBUF | pygame.SRCALPHA)
     sky = Sky(screen)
-    world = World(screen, MAP_SIZE, CENTER, light_g, sky)
+    world = World(screen, MAP_SIZE, CENTER, sky)
 
     cursor_g = pygame.sprite.Group()
     tiles_g = pygame.sprite.Group()
@@ -45,7 +43,8 @@ def main():
     resources = Text(screen, screen_size, 6, 'white', (0, 0))
     fps = Text(screen, screen_size, 6, 'white', (screen_width, 0),
                right_align=True)
-    score = Text(screen, screen_size, 10, 'white', (screen_width // 2, 0), center_align=True)
+    score = Text(screen, screen_size, 10, 'white', (screen_width // 2, 0),
+                 center_align=True)
 
     while running:
         dt = time.time() - last_time
@@ -73,12 +72,9 @@ def main():
         tiles_g.draw(screen)
         tiles_g.update(dt)
 
-        sky.update(dt)
-
         world.update(dt)
 
-        # light_g.draw(screen)
-        # light_g.update(dt)
+        # sky.update(dt)
 
         resources.update(f'W:{world.wood} S:{world.stone}')
         fps.update(f'FPS:{round(clock.get_fps())}')

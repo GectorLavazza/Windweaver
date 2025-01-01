@@ -1,9 +1,6 @@
 import pygame
 import random
 
-from pygame.examples.cursors import image
-
-from light import Light
 from load_image import load_image
 from settings import GROWTH_MIN, GROWTH_MAX, HOUSE_STONE_COST, HOUSE_WOOD_COST, \
     MINE_STONE_COST, MINE_WOOD_COST, SCALE
@@ -56,6 +53,11 @@ class Tile(Sprite):
         pressed.blit(pressed_outline, (0, 0))
 
         return default, hover, pressed
+
+    def update_images(self):
+        self.default_image, self.hover_image, self.pressed_image = self.get_images(
+            self.name)
+        self.image = self.default_image
 
     def update(self, dt):
         self.move()
@@ -154,9 +156,10 @@ class Tile(Sprite):
         w, h = 12, 2
         if self.max_durability:
             pygame.draw.rect(screen, pygame.Color('#46474c'),
-                             pygame.Rect(self.rect.centerx - (w // 2 + 1) * SCALE,
-                                         self.rect.y - (h - 1) * SCALE,
-                                         w * SCALE, h * SCALE))
+                             pygame.Rect(
+                                 self.rect.centerx - (w // 2 + 1) * SCALE,
+                                 self.rect.y - (h - 1) * SCALE,
+                                 w * SCALE, h * SCALE))
             pygame.draw.rect(screen, pygame.Color('#e0dca4'),
                              pygame.Rect(self.rect.centerx - (w // 2) * SCALE,
                                          self.rect.y - h * SCALE,
@@ -171,17 +174,17 @@ class Grass(Tile):
         self.tick = self.max_tick
 
     def grow(self):
-        if random.randint(1, 1000) == 1:
-            Tree(self.pos, self.world, 0, self.groups())
-            self.kill()
-        elif random.randint(1, 500) == 1:
-            self.name = 'flower'
-        else:
-            self.name = 'tall_grass'
+        if random.randint(1, 10) == 1:
 
-        self.default_image, self.hover_image, self.pressed_image = self.get_images(
-            self.name)
-        self.image = self.default_image
+            if random.randint(1, 1000) == 1:
+                Tree(self.pos, self.world, 0, self.groups())
+                self.kill()
+            elif random.randint(1, 500) == 1:
+                self.name = 'flower'
+            else:
+                self.name = 'tall_grass'
+
+            self.update_images()
 
     def on_click(self):
         if pygame.mouse.get_pressed()[2]:
@@ -200,9 +203,7 @@ class Grass(Tile):
         elif pygame.mouse.get_pressed()[0]:
             self.name = 'grass'
 
-            self.default_image, self.hover_image, self.pressed_image = self.get_images(
-                self.name)
-            self.image = self.default_image
+            self.update_images()
 
             self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
             self.tick = self.max_tick
@@ -213,15 +214,16 @@ class Grass(Tile):
             if self.tick <= 0:
                 self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
                 self.tick = self.max_tick
-                if random.randint(1, 10) == 1:
-                    self.grow()
+                self.grow()
 
 
 class Tree(Tile):
     def __init__(self, pos, world, age, *group):
         super().__init__(f'tree_{age}', pos, world, *group)
+
         self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
         self.tick = self.max_tick
+
         self.durability = age + 2
         self.max_durability = self.durability
         self.age = age
@@ -245,9 +247,7 @@ class Tree(Tile):
 
         self.name = f'tree_{self.age}'
 
-        self.default_image, self.hover_image, self.pressed_image = self.get_images(
-            self.name)
-        self.image = self.default_image
+        self.update_images()
 
     def on_update(self, dt):
         if self.age < 2:
@@ -281,58 +281,16 @@ class Stone(Tile):
 class House(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('house', pos, world, *group)
-        self.lighting = False
-        self.light = Light(8, self.center, (255, 200, 0), 0.3, self.world,
-                           self.world.light_g)
-        self.on = 0
-        self.started = False
-        self.set = False
+
         self.world.score += 1
-
         self.world.houses += 1
-
-        self.get_colliding()
-        if 'flower' in self.colliding:
-            self.world.score += 5
-            print('yes')
-
-    def handle_light(self, dt):
-        self.default_image, self.hover_image, self.pressed_image = self.get_images(
-            'house')
-        if self.world.sky.dark:
-            self.lighting = True
-        else:
-            self.started = False
-            self.lighting = False
-            self.set = False
-            self.light.image.set_alpha(0)
-
-        if self.lighting:
-            if not self.started:
-                self.on = random.randint(10, 120)
-                self.started = True
-            else:
-                self.on -= dt
-                if self.on < 0:
-                    if not self.set:
-                        self.default_image, self.hover_image, self.pressed_image = self.get_images(
-                            'house_light')
-                        self.light.image.set_alpha(self.light.density * 255)
-                        self.set = True
-        else:
-            self.light.image.set_alpha(0)
 
 
 class Mine(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('mine', pos, world, *group)
-        self.lighting = False
-        self.light = Light(8, self.center, (255, 200, 0), 0.3, self.world,
-                           self.world.light_g)
-        self.on = 0
-        self.started = False
-        self.world.score += 5
 
+        self.world.score += 5
         self.world.mines += 1
 
         self.get_colliding()

@@ -3,7 +3,7 @@ from settings import *
 
 
 class World:
-    def __init__(self, screen: pygame.surface.Surface, size, center, light_g, sky):
+    def __init__(self, screen: pygame.surface.Surface, size, center, sky):
 
         self.screen = screen
         self.screen_rect = screen.get_rect()
@@ -27,7 +27,6 @@ class World:
         self.houses = 0
         self.mines = 0
 
-        self.light_g = light_g
         self.sky = sky
 
         self.score = 0
