@@ -38,6 +38,8 @@ class Tile(Sprite):
         self.house_available = False
         self.mine_available = False
 
+        self.colliding_checked = False
+
         self.colliding = []
 
     def get_images(self, image):
@@ -60,7 +62,8 @@ class Tile(Sprite):
         self.image = self.default_image
 
     def update(self, dt):
-        self.move()
+        if self.world.check_mouse_edges():
+            self.move()
         self.handle_mouse()
         self.on_update(dt)
 
@@ -84,8 +87,11 @@ class Tile(Sprite):
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):
 
-            self.check_house_build()
-            self.check_mine_build()
+            if not self.colliding_checked:
+                self.get_colliding()
+                self.check_house_build()
+                self.check_mine_build()
+                self.colliding_checked = True
 
             if pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]:
 
@@ -109,6 +115,7 @@ class Tile(Sprite):
 
                 self.clicked = False
         else:
+            self.colliding_checked = False
             self.clicked = False
             self.image = self.default_image
 
@@ -118,7 +125,6 @@ class Tile(Sprite):
         self.collision_rect.center = self.rect.center
 
     def check_house_build(self):
-        self.get_colliding()
         check = [n in ('grass', 'flower') for n in self.colliding]
         if all(check) and self.name == 'grass':
             self.house_available = True
@@ -126,7 +132,6 @@ class Tile(Sprite):
             self.house_available = False
 
     def check_mine_build(self):
-        self.get_colliding()
         check = ['stone' in n for n in self.colliding]
         check2 = ['tree' not in n and 'mine' not in n for n in self.colliding]
         if check.count(True) > 2 and all(check2) and self.colliding.count(
@@ -151,20 +156,6 @@ class Tile(Sprite):
     def buy_mine(self):
         self.world.stone -= MINE_STONE_COST
         self.world.wood -= MINE_WOOD_COST
-
-    def draw_durability_bar(self, screen):
-        w, h = 12, 2
-        if self.max_durability:
-            pygame.draw.rect(screen, pygame.Color('#46474c'),
-                             pygame.Rect(
-                                 self.rect.centerx - (w // 2 + 1) * SCALE,
-                                 self.rect.y - (h - 1) * SCALE,
-                                 w * SCALE, h * SCALE))
-            pygame.draw.rect(screen, pygame.Color('#e0dca4'),
-                             pygame.Rect(self.rect.centerx - (w // 2) * SCALE,
-                                         self.rect.y - h * SCALE,
-                                         w / self.max_durability * self.durability * SCALE,
-                                         h * SCALE))
 
 
 class Grass(Tile):

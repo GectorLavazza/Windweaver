@@ -1,4 +1,6 @@
 import pygame
+from pygame import Vector2
+
 from settings import *
 
 
@@ -31,13 +33,20 @@ class World:
 
         self.score = 0
 
+        self.visible_rect = pygame.Rect(0, 0, self.screen.get_width(),
+                                   self.screen.get_height())
+        self.visible_rect = self.visible_rect.clip(self.surface.get_rect())
+
+
     def blit(self, surface, dest):
         self.surface.blit(surface, dest)
 
     def update(self, dt):
-        self.screen.blit(self.surface, self.rect.topleft)
-        self.check_mouse_edges()
-        self.move(dt)
+        if self.check_mouse_edges():
+            self.move(dt)
+
+        self.screen.blit(self.surface, (0, 0), self.visible_rect)
+
 
     def check_mouse_edges(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -72,6 +81,9 @@ class World:
 
             self.dynamic_speed_y = distance_to_edge / self.edge_threshold
 
+        if self.dx or self.dy:
+            return True
+
     def move(self, dt):
         input_direction = pygame.Vector2(self.dx, self.dy)
         if input_direction.length() > 0:
@@ -95,3 +107,5 @@ class World:
                           min(self.rect.x, 0))
         self.rect.y = max(screen_height - self.rect.height,
                           min(self.rect.y, 0))
+
+        self.visible_rect.topleft = -Vector2(self.rect.topleft)

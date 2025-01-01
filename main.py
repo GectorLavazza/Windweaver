@@ -29,7 +29,7 @@ def main():
     cursor_g = pygame.sprite.Group()
     tiles_g = pygame.sprite.Group()
 
-    seed = random.randint(0, 100)
+    seed = random.randint(0, 100000)
     print(f'seed: {seed}')
     map = Map(world, seed, tiles_g)
 
@@ -69,10 +69,10 @@ def main():
 
         screen.fill('black')
 
+        world.update(dt)
+
         tiles_g.draw(screen)
         tiles_g.update(dt)
-
-        world.update(dt)
 
         # sky.update(dt)
 
@@ -84,7 +84,7 @@ def main():
         cursor.update()
 
         pygame.display.flip()
-        clock.tick(FPS)
+        clock.tick()
 
     pygame.quit()
     sys.exit()
