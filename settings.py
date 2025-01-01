@@ -1,6 +1,6 @@
 import pygame
 
-FPS = 60
+FPS = 120
 
 pygame.display.init()
 screen_info = pygame.display.Info()
@@ -26,7 +26,7 @@ def fit_aspect_ratio(screen_width, screen_height,
     return int(max_width), int(max_height)
 
 
-w, h = 320 * 3, 180 * 3
+w, h = WIDTH * 3, HEIGHT * 3
 # w, h = screen_info.current_w, screen_info.current_h
 screen_width, screen_height = fit_aspect_ratio(w, h)
 screen_size = screen_width, screen_height

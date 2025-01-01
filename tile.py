@@ -16,10 +16,10 @@ class Tile(Sprite):
         self.durability = 0
         self.max_durability = self.durability
 
-        self.default_image, self.hover_image, self.pressed_image = self.get_images(
-            self.name)
-        self.image = self.default_image
+        self.image = load_image(self.name)
 
+        self.hover_outline = load_image('hover')
+        self.pressed_outline = load_image('pressed')
         self.house_image = load_image('build_house')
         self.mine_image = load_image('build_mine')
 
@@ -37,6 +37,8 @@ class Tile(Sprite):
                                                self.rect.height * 2)
         self.collision_rect.center = self.rect.center
 
+        self.center = self.rect.center
+
         self.clicked = False
         self.house_available = False
         self.mine_available = False
@@ -47,30 +49,24 @@ class Tile(Sprite):
 
         self.image_set = False
 
-    def get_images(self, image):
-        default = load_image(image)
-
-        hover_outline = load_image('hover')
-        pressed_outline = load_image('pressed')
-
-        hover = default.copy()
-        pressed = default.copy()
-
-        hover.blit(hover_outline, (0, 0))
-        pressed.blit(pressed_outline, (0, 0))
-
-        return default, hover, pressed
-
-    def update_images(self):
-        self.default_image, self.hover_image, self.pressed_image = self.get_images(
-            self.name)
-        self.image = self.default_image
-
     def update(self, dt):
         if self.world.check_mouse_edges():
             self.move()
+
         self.handle_mouse()
         self.on_update(dt)
+
+    def draw_hover(self):
+        self.world.screen.blit(self.hover_outline, self.rect.topleft)
+
+    def draw_pressed(self):
+        self.world.screen.blit(self.pressed_outline, self.rect.topleft)
+
+    def draw_house(self):
+        self.world.screen.blit(self.house_image, self.rect.topleft)
+
+    def draw_mine(self):
+        self.world.screen.blit(self.mine_image, self.rect.topleft)
 
     def on_update(self, dt):
         pass
@@ -99,30 +95,26 @@ class Tile(Sprite):
                 self.colliding_checked = True
 
             if pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]:
+                self.draw_pressed()
 
                 if not self.clicked:
                     self.on_click()
                     self.clicked = True
 
-                self.default_image, self.hover_image, self.pressed_image = self.get_images(
-                    self.name)
-
-                self.image = self.pressed_image
             else:
-                self.image = self.hover_image
+                self.draw_hover()
 
                 if self.house_available:
                     if self.check_house_cost():
-                        self.image = self.house_image
+                        self.draw_house()
                 elif self.mine_available:
                     if self.check_mine_cost():
-                        self.image = self.mine_image
+                        self.draw_mine()
 
                 self.clicked = False
         else:
             self.colliding_checked = False
             self.clicked = False
-            self.image = self.default_image
 
     def move(self):
         self.rect.topleft = (self.pos[0] + self.world.rect.x,
@@ -180,7 +172,7 @@ class Grass(Tile):
             else:
                 self.name = 'tall_grass'
 
-            self.update_images()
+            self.image = load_image(self.name)
 
     def on_click(self):
         if pygame.mouse.get_pressed()[2]:
@@ -199,7 +191,7 @@ class Grass(Tile):
         elif pygame.mouse.get_pressed()[0]:
             self.name = 'grass'
 
-            self.update_images()
+            self.image = load_image(self.name)
 
             self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
             self.tick = self.max_tick
@@ -243,7 +235,7 @@ class Tree(Tile):
 
         self.name = f'tree_{self.age}'
 
-        self.update_images()
+        self.image = load_image(self.name)
 
     def on_update(self, dt):
         if self.age < 2:
