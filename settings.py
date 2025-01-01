@@ -1,6 +1,6 @@
 import pygame
 
-FPS = 30
+FPS = 60
 
 pygame.display.init()
 screen_info = pygame.display.Info()
@@ -38,8 +38,8 @@ TILE_SIZE = 8
 MAP_WIDTH, MAP_HEIGHT = 48, 48
 MAP_SIZE = TILE_SIZE * MAP_WIDTH * SCALE, TILE_SIZE * MAP_HEIGHT * SCALE
 
-GROWTH_MIN = 3600
-GROWTH_MAX = 36000
+GROWTH_MIN = 60
+GROWTH_MAX = 600
 
 HOUSE_STONE_COST = 0
 HOUSE_WOOD_COST = 0

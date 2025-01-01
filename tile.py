@@ -85,8 +85,6 @@ class Tile(Sprite):
             self.check_house_build()
             self.check_mine_build()
 
-            self.draw_durability_bar(self.world.screen)
-
             if pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]:
 
                 if not self.clicked:
@@ -166,6 +164,59 @@ class Tile(Sprite):
                                          h * SCALE))
 
 
+class Grass(Tile):
+    def __init__(self, name, pos, world, *group):
+        super().__init__(name, pos, world, *group)
+        self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
+        self.tick = self.max_tick
+
+    def grow(self):
+        if random.randint(1, 1000) == 1:
+            Tree(self.pos, self.world, 0, self.groups())
+            self.kill()
+        elif random.randint(1, 500) == 1:
+            self.name = 'flower'
+        else:
+            self.name = 'tall_grass'
+
+        self.default_image, self.hover_image, self.pressed_image = self.get_images(
+            self.name)
+        self.image = self.default_image
+
+    def on_click(self):
+        if pygame.mouse.get_pressed()[2]:
+            if self.house_available:
+                if self.check_house_cost():
+                    self.buy_house()
+                    House(self.pos, self.world, self.groups())
+                    self.kill()
+
+            elif self.mine_available:
+                if self.check_mine_cost():
+                    self.buy_mine()
+                    Mine(self.pos, self.world, self.groups())
+                    self.kill()
+
+        elif pygame.mouse.get_pressed()[0]:
+            self.name = 'grass'
+
+            self.default_image, self.hover_image, self.pressed_image = self.get_images(
+                self.name)
+            self.image = self.default_image
+
+            self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
+            self.tick = self.max_tick
+
+    def on_update(self, dt):
+        if self.name not in ('tall_grass', 'flower'):
+            self.tick -= 1 * dt
+            if self.tick <= 0:
+                self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
+                self.tick = self.max_tick
+                if random.randint(1, 10) == 1:
+                    self.grow()
+
+
 class Tree(Tile):
     def __init__(self, pos, world, age, *group):
         super().__init__(f'tree_{age}', pos, world, *group)
@@ -188,38 +239,15 @@ class Tree(Tile):
         self.kill()
 
     def grow(self):
-        trees_2_count = 0
-        trees_1_count = 0
-        trees_0_count = 0
-        grow = True
+        self.age += 1
+        self.durability = self.age + 2
+        self.max_durability = self.durability
 
-        self.get_colliding()
-        for other in self.colliding:
+        self.name = f'tree_{self.age}'
 
-            if other == 'tree_2':
-                trees_2_count += 1
-            elif other == 'tree_1':
-                trees_2_count += 1
-            elif other == 'tree_0':
-                trees_2_count += 1
-
-            if trees_2_count > 2:
-                grow = False
-                break
-            elif trees_1_count + trees_2_count > 2 and self.age == 0:
-                grow = False
-                break
-
-        if grow:
-            self.age += 1
-            self.durability = self.age + 2
-            self.max_durability = self.durability
-
-            self.name = f'tree_{self.age}'
-
-            self.default_image, self.hover_image, self.pressed_image = self.get_images(
-                self.name)
-            self.image = self.default_image
+        self.default_image, self.hover_image, self.pressed_image = self.get_images(
+            self.name)
+        self.image = self.default_image
 
     def on_update(self, dt):
         if self.age < 2:
@@ -227,7 +255,7 @@ class Tree(Tile):
             if self.tick <= 0:
                 self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
                 self.tick = self.max_tick
-                if random.randint(1, 10) == 1:
+                if random.randint(1, 10 * (self.age + 1)) == 1:
                     self.grow()
 
 
@@ -318,81 +346,3 @@ class Mine(Tile):
         if self.tick <= 0:
             self.tick = self.max_tick
             self.world.stone += 1
-
-
-class Grass(Tile):
-    def __init__(self, name, pos, world, *group):
-        super().__init__(name, pos, world, *group)
-        self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
-        self.tick = self.max_tick
-
-    def grow(self):
-        self.name = 'tall_grass'
-
-        tall_grass_count = 0
-        trees_count = 0
-        flowers_count = 0
-
-        self.get_colliding()
-        for other in self.colliding:
-
-            if other == 'tall_grass':
-                tall_grass_count += 1
-            elif 'tree' in other:
-                trees_count += 1
-            elif other == 'flower':
-                flowers_count += 1
-
-            if trees_count > 5:
-                Tree(self.pos, self.world, 0, self.groups())
-                self.kill()
-                break
-            elif trees_count > 2:
-                if random.randint(1, 10) == 1:
-                    Tree(self.pos, self.world, 0, self.groups())
-                    self.kill()
-                break
-            elif random.randint(1, 1000) == 1:
-                self.name = 'flower'
-                print('flower grown')
-                break
-            elif tall_grass_count > 5:
-                self.name = 'tall_grass'
-                break
-
-        self.default_image, self.hover_image, self.pressed_image = self.get_images(
-            self.name)
-        self.image = self.default_image
-
-    def on_click(self):
-        if pygame.mouse.get_pressed()[2]:
-            if self.house_available:
-                if self.check_house_cost():
-                    self.buy_house()
-                    House(self.pos, self.world, self.groups())
-                    self.kill()
-
-            elif self.mine_available:
-                if self.check_mine_cost():
-                    self.buy_mine()
-                    Mine(self.pos, self.world, self.groups())
-                    self.kill()
-
-        elif pygame.mouse.get_pressed()[0]:
-            self.name = 'grass'
-
-            self.default_image, self.hover_image, self.pressed_image = self.get_images(
-                self.name)
-            self.image = self.default_image
-
-            self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
-            self.tick = self.max_tick
-
-    def on_update(self, dt):
-        if self.name not in ('tall_grass', 'flower'):
-            self.tick -= 1 * dt
-            if self.tick <= 0:
-                self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
-                self.tick = self.max_tick
-                if random.randint(1, 5) == 1:
-                    self.grow()
