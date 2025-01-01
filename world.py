@@ -26,12 +26,11 @@ class World:
 
         self.wood = 0
         self.stone = 0
+
         self.houses = 0
         self.mines = 0
 
         self.sky = sky
-
-        self.score = 0
 
         self.visible_rect = pygame.Rect(0, 0, self.screen.get_width(),
                                    self.screen.get_height())

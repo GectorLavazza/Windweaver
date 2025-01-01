@@ -1,9 +1,10 @@
-import pygame
 import random
+
+import pygame
 
 from load_image import load_image
 from settings import GROWTH_MIN, GROWTH_MAX, HOUSE_STONE_COST, HOUSE_WOOD_COST, \
-    MINE_STONE_COST, MINE_WOOD_COST, SCALE
+    MINE_STONE_COST, MINE_WOOD_COST
 from sprite import Sprite
 
 
@@ -82,7 +83,7 @@ class Tile(Sprite):
         for other in self.groups()[0]:
             if self.collision_rect.colliderect(other.rect):
                 if other != self:
-                    self.colliding.append(other.name)
+                    self.colliding.append(other)
 
     def handle_mouse(self):
         mouse_pos = pygame.mouse.get_pos()
@@ -122,15 +123,16 @@ class Tile(Sprite):
         self.collision_rect.center = self.rect.center
 
     def check_house_build(self):
-        check = [n in ('grass', 'flower') for n in self.colliding]
+        check = [n.name in ('grass', 'flower') for n in self.colliding]
         if all(check) and self.name == 'grass':
             self.house_available = True
         else:
             self.house_available = False
 
     def check_mine_build(self):
-        check = ['stone' in n for n in self.colliding]
-        check2 = ['tree' not in n and 'mine' not in n for n in self.colliding]
+        check = ['stone' in n.name for n in self.colliding]
+        check2 = ['tree' not in n.name and 'mine' not in n.name for n in
+                  self.colliding]
         if check.count(True) > 2 and all(check2) and self.colliding.count(
                 'tall_grass') == 0 and self.name == 'grass':
             if self.world.houses // 2 >= (self.world.mines + 1):
@@ -146,6 +148,9 @@ class Tile(Sprite):
         self.world.stone -= HOUSE_STONE_COST
         self.world.wood -= HOUSE_WOOD_COST
 
+        Windmill(self.pos, self.world, self.groups())
+        self.kill()
+
     def check_mine_cost(self):
         if self.world.stone - MINE_STONE_COST >= 0 and self.world.wood - MINE_WOOD_COST >= 0:
             return True
@@ -153,6 +158,9 @@ class Tile(Sprite):
     def buy_mine(self):
         self.world.stone -= MINE_STONE_COST
         self.world.wood -= MINE_WOOD_COST
+
+        Mine(self.pos, self.world, self.groups())
+        self.kill()
 
 
 class Grass(Tile):
@@ -179,14 +187,10 @@ class Grass(Tile):
             if self.house_available:
                 if self.check_house_cost():
                     self.buy_house()
-                    House(self.pos, self.world, self.groups())
-                    self.kill()
 
             elif self.mine_available:
                 if self.check_mine_cost():
                     self.buy_mine()
-                    Mine(self.pos, self.world, self.groups())
-                    self.kill()
 
         elif pygame.mouse.get_pressed()[0]:
             self.name = 'grass'
@@ -269,20 +273,15 @@ class Stone(Tile):
 class House(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('house', pos, world, *group)
-
-        self.world.score += 1
         self.world.houses += 1
 
 
 class Mine(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('mine', pos, world, *group)
-
-        self.world.score += 5
         self.world.mines += 1
 
-        self.get_colliding()
-        self.around = ['stone' in n for n in self.colliding].count(True)
+        self.around = ['stone' in n.name for n in self.colliding].count(True)
 
         self.max_tick = 3600 // self.around
         self.tick = self.max_tick
@@ -292,3 +291,67 @@ class Mine(Tile):
         if self.tick <= 0:
             self.tick = self.max_tick
             self.world.stone += 1
+
+
+class Windmill(Tile):
+    def __init__(self, pos, world, *group):
+        super().__init__('windmill', pos, world, *group)
+
+        self.max_tick = 600
+        self.tick = self.max_tick
+
+    def on_update(self, dt):
+        self.tick -= dt
+        if self.tick <= 0:
+            self.tick = self.max_tick
+            self.spread()
+
+    def spread(self):
+        if random.randint(1, 2) == 1:
+            self.get_colliding()
+            tiles = list(filter(lambda n: n.name == 'grass', self.colliding))
+            if tiles:
+                tile = random.choice(tiles)
+                House(tile.pos, tile.world, self.groups())
+                tile.kill()
+
+
+class Farmland(Tile):
+    def __init__(self, pos, world, *group):
+        self.age = 0
+
+        super().__init__(f'farmland_{self.age}', pos, world, *group)
+
+        self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
+        self.tick = self.max_tick
+
+        self.max_spread_tick = 120
+        self.spread_tick = self.max_spread_tick
+
+    def grow(self):
+        if random.randint(1, 10) == 1:
+            self.age += 1
+            self.name = f'farmland_{self.age}'
+            self.image = load_image(self.name)
+
+    def on_update(self, dt):
+        if self.age < 2:
+            self.tick -= 1 * dt
+            if self.tick <= 0:
+                self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
+                self.tick = self.max_tick
+                self.grow()
+        else:
+            self.spread_tick -= dt
+            if self.spread_tick <= 0:
+                self.spread_tick = self.max_spread_tick
+                self.spread()
+
+    def spread(self):
+        if random.randint(1, 5) == 1:
+            self.get_colliding()
+            tiles = list(filter(lambda n: n.name == 'grass', self.colliding))
+            if tiles:
+                tile = random.choice(tiles)
+                House(tile.pos, tile.world, self.groups())
+                tile.kill()
