@@ -20,6 +20,9 @@ class Tile(Sprite):
             self.name)
         self.image = self.default_image
 
+        self.house_image = load_image('build_house')
+        self.mine_image = load_image('build_mine')
+
         self.pos = pos
 
         self.rect = self.image.get_rect()
@@ -41,6 +44,8 @@ class Tile(Sprite):
         self.colliding_checked = False
 
         self.colliding = []
+
+        self.image_set = False
 
     def get_images(self, image):
         default = load_image(image)
@@ -108,10 +113,10 @@ class Tile(Sprite):
 
                 if self.house_available:
                     if self.check_house_cost():
-                        self.image = load_image('build_house')
+                        self.image = self.house_image
                 elif self.mine_available:
                     if self.check_mine_cost():
-                        self.image = load_image('build_mine')
+                        self.image = self.mine_image
 
                 self.clicked = False
         else:
