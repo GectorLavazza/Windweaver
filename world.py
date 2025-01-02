@@ -26,7 +26,7 @@ class World:
 
         self.wood = 0
         self.stone = 0
-        self.food = 0
+        self.food = 100
 
         self.current_build = 'house'
 

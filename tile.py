@@ -147,7 +147,7 @@ class Tile(Sprite):
         build = self.world.current_build
         if build == 'house':
             names = [n.name for n in self.colliding]
-            check = [n in ('grass', 'flower', 'pathway') for n in names]
+            check = [n in ('grass', 'flower', 'pathway', 'farmland_0', 'farmland_1', 'farmland_2') for n in names]
             if not self.world.house_placed and all(
                     check) or self.world.house_placed and all(
                 check) and names.count('pathway') > 0:
@@ -321,18 +321,27 @@ class House(Tile):
 
         self.pathway = self.make_pathway()
 
+        self.max_tick = 3600
+        self.tick = self.max_tick
+
     def on_update(self, dt):
         if self.world.sky.dark:
             self.image = self.light
         else:
             self.image = self.no_light
 
-        if self.spread_count < 3:
-            self.spread_tick -= dt
-            if self.spread_tick <= 0:
-                self.spread_count += 1
-                self.spread_tick = self.max_spread_tick
-                self.pathway.spread()
+        if self.pathway:
+            if self.spread_count < 3:
+                self.spread_tick -= dt
+                if self.spread_tick <= 0:
+                    self.spread_count += 1
+                    self.spread_tick = self.max_spread_tick
+                    self.pathway.spread()
+
+        self.tick -= dt
+        if self.tick <= 0:
+            self.tick = self.max_tick
+            self.world.food -= 1
 
     def make_pathway(self):
         sides = self.get_sides()
@@ -344,7 +353,9 @@ class House(Tile):
             pathway = Pathway(tile.pos, tile.world, self.groups())
             tile.kill()
 
-        return pathway
+            return pathway
+
+        return 0
 
 
 class Mine(Tile):
@@ -438,7 +449,7 @@ class Farmland(Tile):
                 self.spread()
 
     def spread(self):
-        if random.randint(1, 5) == 1:
+        if random.randint(1, 2) == 1:
             self.get_colliding()
             tiles = list(filter(lambda n: n.name == 'grass', self.colliding))
             if tiles:
