@@ -85,6 +85,16 @@ class Tile(Sprite):
                 if other != self:
                     self.colliding.append(other)
 
+    def get_sides(self):
+        sides = []
+
+        self.get_colliding()
+        for other in self.colliding:
+            if other.rect.x == self.rect.x or other.rect.y == self.rect.y:
+                sides.append(other)
+
+        return sides
+
     def handle_mouse(self):
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):
@@ -271,6 +281,16 @@ class House(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('house', pos, world, *group)
         self.world.houses += 1
+        self.spread()
+
+    def spread(self):
+        sides = self.get_sides()
+        tiles = list(filter(lambda n: n.name == 'grass', sides))
+        if tiles:
+            tile = random.choice(tiles)
+            Pathway(tile.pos, tile.world, self.groups())
+            tile.kill()
+
 
 
 class Mine(Tile):
@@ -382,3 +402,29 @@ class Farmland(Tile):
             self.image = load_image(self.name)
 
             self.world.food += 2
+
+
+class Pathway(Tile):
+    def __init__(self, pos, world, *group):
+        super().__init__('pathway', pos, world, *group)
+
+        self.max_spread_tick = 120
+        self.spread_tick = self.max_spread_tick
+
+        self.spreaded = False
+
+    def on_update(self, dt):
+        if not self.spreaded:
+            self.spread_tick -= dt
+            if self.spread_tick <= 0:
+                self.spread_tick = self.max_spread_tick
+                self.spread()
+
+    def spread(self):
+        sides = self.get_sides()
+        tiles = list(filter(lambda n: n.name == 'grass', sides))
+        if tiles:
+            tile = random.choice(tiles)
+            Pathway(tile.pos, tile.world, self.groups())
+            tile.kill()
+            self.spreaded = True
