@@ -1,11 +1,6 @@
-import pygame
-
 FPS = 120
 
-pygame.display.init()
-screen_info = pygame.display.Info()
-
-WIDTH, HEIGHT = 320, 200
+WIDTH, HEIGHT = 320, 180
 
 
 def fit_aspect_ratio(screen_width, screen_height,
@@ -26,26 +21,28 @@ def fit_aspect_ratio(screen_width, screen_height,
     return int(max_width), int(max_height)
 
 
-w, h = WIDTH * 3, HEIGHT * 3
+# w, h = WIDTH * 3, HEIGHT * 3
 # w, h = screen_info.current_w, screen_info.current_h
-screen_width, screen_height = fit_aspect_ratio(w, h)
+# screen_width, screen_height = fit_aspect_ratio(w, h)
+screen_width, screen_height = WIDTH, HEIGHT
 screen_size = screen_width, screen_height
 
-SCALE = screen_width / WIDTH
-CENTER = pygame.Vector2(screen_width // 2, screen_height // 2)
+# SCALE = screen_width / WIDTH
+SCALE = 1
+CENTER = screen_width // 2, screen_height // 2
 
 TILE_SIZE = 8
-MAP_WIDTH, MAP_HEIGHT = 40, 25  # 48 x 48
+MAP_WIDTH, MAP_HEIGHT = 128, 128  # 48 x 48
 MAP_SIZE = TILE_SIZE * MAP_WIDTH * SCALE, TILE_SIZE * MAP_HEIGHT * SCALE
 
 GROWTH_MIN = 3600
 GROWTH_MAX = 36000
 
-WOOD_COST = {'house': 5,
-             'mine': 5,
-             'windmill': 10}
-STONE_COST = {'house': 5,
-             'mine': 10,
-             'windmill': 5}
+WOOD_COST = {'house': 0,
+             'mine': 0,
+             'windmill': 0}
+STONE_COST = {'house': 0,
+             'mine': 0,
+             'windmill': 0}
 
 DAY_TIME = 9000

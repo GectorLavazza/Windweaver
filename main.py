@@ -1,61 +1,67 @@
-import random
-import time
+from sys import exit
+from time import time
 
 import pygame
-import sys
 
 from cursor import Cursor
 from map import Map
 from settings import *
-from world import World
 from sky import Sky
-
 from ui import Text
+from world import World
 
 
 def main():
+    st = time()
+
     pygame.init()
     pygame.mouse.set_visible(False)
+    pygame.event.set_allowed(
+        [pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.MOUSEBUTTONDOWN,
+         pygame.MOUSEBUTTONUP])
 
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.load('assets/music/windweaver.wav')
     pygame.mixer.music.play(-1)
 
-    screen = pygame.display.set_mode(screen_size,
-                                     pygame.DOUBLEBUF | pygame.SRCALPHA)
+    flags = pygame.DOUBLEBUF | pygame.SCALED
+    screen = pygame.display.set_mode(screen_size, flags, depth=8, vsync=1)
+
     sky = Sky(screen)
     world = World(screen, MAP_SIZE, CENTER, sky)
 
     cursor_g = pygame.sprite.Group()
     tiles_g = pygame.sprite.Group()
 
-    seed = random.randint(0, 100000)
-    print(f'seed: {seed}')
-    map = Map(world, seed, tiles_g)
+    map = Map(world, tiles_g)
 
     cursor = Cursor(cursor_g)
 
-    running = True
+    running = 1
     clock = pygame.time.Clock()
 
-    last_time = time.time()
+    last_time = time()
 
-    resources = Text(screen, screen_size, 6, 'white', (0, 0))
-    fps = Text(screen, screen_size, 6, 'white', (screen_width, 0),
+    resources = Text(screen, 10, 'white', (0, 0))
+    fps = Text(screen, 10, 'white', (screen_width, 0),
                right_align=True)
 
+    et = time()
+
+    print(f'Startup time: {et - st}')
+
     while running:
-        dt = time.time() - last_time
+        dt = time() - last_time
         dt *= 60
-        last_time = time.time()
+        last_time = time()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                running = 0
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
-                    running = False
+                    running = 0
 
                 if event.key == pygame.K_1:
                     world.current_build = 'house'
@@ -91,7 +97,7 @@ def main():
         clock.tick()
 
     pygame.quit()
-    sys.exit()
+    exit()
 
 
 if __name__ == '__main__':

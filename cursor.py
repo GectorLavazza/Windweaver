@@ -1,7 +1,7 @@
 import pygame
+from pygame.sprite import Sprite
 
 from load_image import load_image
-from sprite import Sprite
 
 
 class Cursor(Sprite):

@@ -1,18 +1,14 @@
-import os
+from os import path
 
-import pygame
-from settings import SCALE
+from pygame.image import load
 
 
-def load_image(name):
-    fullname = os.path.join("assets/sprites/", name + '.png')
+def load_image(name, alpha=False):
+    fullname = path.join("assets/sprites/", name + '.png')
 
-    try:
-        image = pygame.image.load(fullname).convert_alpha()
-        image = pygame.transform.scale_by(image, SCALE).convert_alpha()
+    image = load(fullname)
+    image = image.convert() if alpha else image.convert_alpha()
 
-    except pygame.error as e:
-        print(f"Err: {e}")
-        raise SystemExit(e)
+    # image = pygame.transform.scale_by(image, SCALE).convert_alpha()
 
     return image

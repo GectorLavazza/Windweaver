@@ -1,43 +1,56 @@
-import pygame
+from pygame.font import Font
+from pygame.transform import scale
+from pygame import SRCALPHA, Surface
 
-from settings import *
+from settings import screen_height, screen_width
+
 
 class Ui:
-    def __init__(self, screen, screen_size):
+    def __init__(self, screen):
         self.screen = screen
-        self.width = screen_size[0]
-        self.height = screen_size[1]
 
 
 class Text(Ui):
-    def __init__(self, screen, screen_size, font_size, color='white',
+    def __init__(self, screen, font_size, color='white',
                  pos=(0, 0), center_align=False, right_align=False):
-        super().__init__(screen, screen_size)
-        self.font = pygame.font.Font('assets/fonts/PixelOperator8-Bold.ttf',
-                                     int(font_size * SCALE))
+
+        super().__init__(screen)
+        self.font = Font('assets/fonts/PixelOperator8-Bold.ttf',
+                                     font_size)
         self.pos = pos
-        self.color = pygame.Color(color)
+        self.color = color
         self.center_align = center_align
         self.right_align = right_align
 
         self.render = self.font.render('', True, self.color).convert_alpha()
         self.rect = self.render.get_rect()
 
+        self.prev = ''
+
+        self.shade = Surface(self.rect.size, SRCALPHA)
+        self.shade.set_alpha(128)
+        self.shade.fill('black')
+
     def update(self, message):
-        self.render = self.font.render(str(message), True,
-                                       self.color).convert_alpha()
-        self.rect = self.render.get_rect()
-        if self.center_align:
-            pos = (self.pos[0] - self.render.get_width() // 2,
-                   self.pos[1])
-        elif self.right_align:
-            pos = (self.pos[0] - self.render.get_width(),
-                   self.pos[1])
-        else:
-            pos = (self.pos[0],
-                   self.pos[1])
-        shade = pygame.surface.Surface(self.rect.size, pygame.SRCALPHA)
-        shade.set_alpha(128)
-        shade.fill('black')
-        self.screen.blit(shade, pos)
-        self.screen.blit(self.render, pos)
+
+        if message != self.prev:
+            self.render = self.font.render(str(message), True,
+                                           self.color).convert_alpha()
+            self.rect = self.render.get_rect()
+
+            if self.center_align:
+                self.rect.topleft = (self.pos[0] - self.render.get_width() // 2,
+                       self.pos[1])
+            elif self.right_align:
+                self.rect.topleft = (self.pos[0] - self.render.get_width(),
+                       self.pos[1])
+            else:
+                self.rect.topleft = (self.pos[0],
+                       self.pos[1])
+
+            self.shade = scale(self.shade, self.rect.size)
+
+        self.screen.blit(self.shade, self.rect.topleft)
+        self.screen.blit(self.render, self.rect.topleft)
+
+        self.prev = message

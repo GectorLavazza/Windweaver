@@ -1,16 +1,16 @@
-import pygame
-from pygame import Vector2
+from pygame import Vector2, mouse, Surface, Rect
 
-from settings import *
+from load_image import load_image
+from settings import screen_width, screen_height
 
 
 class World:
-    def __init__(self, screen: pygame.surface.Surface, size, center, sky):
+    def __init__(self, screen: Surface, size, center, sky):
 
         self.screen = screen
         self.screen_rect = screen.get_rect()
 
-        self.surface = pygame.surface.Surface(size, pygame.SRCALPHA)
+        self.surface = Surface(size)
 
         self.rect = self.surface.get_rect()
         self.rect.center = center
@@ -22,7 +22,7 @@ class World:
         self.dy = 0
         self.dynamic_speed_x = 0
         self.dynamic_speed_y = 0
-        self.velocity = pygame.Vector2(0, 0)
+        self.velocity = Vector2(0, 0)
 
         self.wood = 0
         self.stone = 0
@@ -38,13 +38,39 @@ class World:
 
         self.sky = sky
 
-        self.visible_rect = pygame.Rect(0, 0, self.screen.get_width(),
-                                   self.screen.get_height())
+        self.visible_rect = Rect(0, 0, self.screen.get_width(),
+                                 self.screen.get_height())
         self.visible_rect = self.visible_rect.clip(self.surface.get_rect())
 
+        self.hover_outline = load_image('hover')
+        self.pressed_outline = load_image('pressed')
 
-    def blit(self, surface, dest):
-        self.surface.blit(surface, dest)
+        self.build_images = {
+            'house': load_image('build_house'),
+            'mine': load_image('build_mine'),
+            'windmill': load_image('windmill_build')
+        }
+
+        self.images = {
+            'grass': load_image('grass'),
+            'tall_grass': load_image('tall_grass'),
+            'farmland_0': load_image('farmland_0'),
+            'farmland_1': load_image('farmland_1'),
+            'farmland_2': load_image('farmland_2'),
+            'flower': load_image('flower'),
+            'house': load_image('house'),
+            'house_light': load_image('house_light'),
+            'mine': load_image('mine'),
+            'pathway': load_image('pathway'),
+            'stone_1': load_image('stone_1'),
+            'stone_2': load_image('stone_2'),
+            'stone_3': load_image('stone_3'),
+            'tree_0': load_image('tree_0'),
+            'tree_1': load_image('tree_1'),
+            'tree_2': load_image('tree_2'),
+            'windmill_1': load_image('windmill_1'),
+            'windmill_2': load_image('windmill_2'),
+        }
 
     def update(self, dt):
         if self.check_mouse_edges():
@@ -52,9 +78,8 @@ class World:
 
         self.screen.blit(self.surface, (0, 0), self.visible_rect)
 
-
     def check_mouse_edges(self):
-        mouse_x, mouse_y = pygame.mouse.get_pos()
+        mouse_x, mouse_y = mouse.get_pos()
 
         self.dx = 0
         self.dy = 0
@@ -90,14 +115,12 @@ class World:
             return True
 
     def move(self, dt):
-        input_direction = pygame.Vector2(self.dx, self.dy)
+        input_direction = Vector2(self.dx, self.dy)
         if input_direction.length() > 0:
             input_direction = input_direction.normalize()
 
-        speed_multiplier_x = max(0,
-                                 min(1, self.dynamic_speed_x))
-        speed_multiplier_y = max(0,
-                                 min(1, self.dynamic_speed_y))
+        speed_multiplier_x = max(0, min(1, self.dynamic_speed_x))
+        speed_multiplier_y = max(0, min(1, self.dynamic_speed_y))
 
         self.velocity.x = input_direction.x * self.speed * speed_multiplier_x * dt
         self.velocity.y = input_direction.y * self.speed * speed_multiplier_y * dt
@@ -105,11 +128,10 @@ class World:
         if self.velocity.length() > self.speed:
             self.velocity = self.velocity.normalize() * self.speed
 
-        self.rect.x += self.velocity.x * SCALE
-        self.rect.y += self.velocity.y * SCALE
+        self.rect.x += self.velocity.x
+        self.rect.y += self.velocity.y
 
-        self.rect.x = max(screen_width - self.rect.width,
-                          min(self.rect.x, 0))
+        self.rect.x = max(screen_width - self.rect.width, min(self.rect.x, 0))
         self.rect.y = max(screen_height - self.rect.height,
                           min(self.rect.y, 0))
 
