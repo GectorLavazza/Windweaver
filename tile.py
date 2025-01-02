@@ -41,6 +41,11 @@ class Tile(Sprite):
                                                self.rect.height * 2)
         self.collision_rect.center = self.rect.center
 
+        self.area = pygame.rect.Rect(*self.rect.topleft,
+                                     self.rect.width * 7,
+                                     self.rect.height * 7)
+        self.area.center = self.rect.center
+
         self.center = self.rect.center
 
         self.clicked = False
@@ -49,6 +54,7 @@ class Tile(Sprite):
         self.colliding_checked = False
 
         self.colliding = []
+        self.in_area = []
 
         self.image_set = False
 
@@ -85,6 +91,13 @@ class Tile(Sprite):
                 if other != self:
                     self.colliding.append(other)
 
+    def get_in_area(self):
+        self.in_area.clear()
+        for other in self.groups()[0]:
+            if self.area.colliderect(other.rect):
+                if other != self:
+                    self.in_area.append(other)
+
     def get_sides(self):
         sides = []
 
@@ -98,9 +111,9 @@ class Tile(Sprite):
     def handle_mouse(self):
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):
-
             if not self.colliding_checked:
                 self.get_colliding()
+                self.get_in_area()
                 self.colliding_checked = True
 
                 if self.name == 'grass':
@@ -128,6 +141,7 @@ class Tile(Sprite):
         self.rect.topleft = (self.pos[0] + self.world.rect.x,
                              self.pos[1] + self.world.rect.y)
         self.collision_rect.center = self.rect.center
+        self.area.center = self.rect.center
 
     def check_build(self):
         build = self.world.current_build
@@ -136,7 +150,7 @@ class Tile(Sprite):
             check = [n in ('grass', 'flower', 'pathway') for n in names]
             if not self.world.house_placed and all(
                     check) or self.world.house_placed and all(
-                    check) and names.count('pathway') > 0:
+                check) and names.count('pathway') > 0:
                 self.available = True
             else:
                 self.available = False
@@ -153,8 +167,16 @@ class Tile(Sprite):
                 self.available = False
 
         elif build == 'windmill':
-            check = [n.name in ('grass', 'flower') for n in self.colliding]
-            if all(check) and self.name == 'grass':
+            check = [n.name in (
+                'grass', 'pathway', 'farmland_0', 'farmland_1', 'farmland_2')
+                     for n
+                     in self.colliding]
+            in_area = [n.name for n in self.in_area]
+            if all(check) and self.name == 'grass' and in_area.count(
+                    'house') + in_area.count('windmill_1') + in_area.count(
+                'windmill_2') + in_area.count(
+                'farmland_0') + in_area.count(
+                'farmland_1') + in_area.count('farmland_2') > 0:
                 self.available = True
             else:
                 self.available = False
@@ -289,6 +311,9 @@ class House(Tile):
         if not self.world.house_placed:
             self.world.house_placed = True
 
+        self.light = load_image('house_light')
+        self.no_light = load_image('house')
+
         self.max_spread_tick = 120
         self.spread_tick = self.max_spread_tick
 
@@ -297,6 +322,11 @@ class House(Tile):
         self.pathway = self.make_pathway()
 
     def on_update(self, dt):
+        if self.world.sky.dark:
+            self.image = self.light
+        else:
+            self.image = self.no_light
+
         if self.spread_count < 3:
             self.spread_tick -= dt
             if self.spread_tick <= 0:
@@ -382,14 +412,14 @@ class Farmland(Tile):
 
         super().__init__(f'farmland_{self.age}', pos, world, *group)
 
-        self.max_tick = random.randint(900, 1800)
+        self.max_tick = random.randint(1800, 3600)
         self.tick = self.max_tick
 
         self.max_spread_tick = 600
         self.spread_tick = self.max_spread_tick
 
     def grow(self):
-        if random.randint(1, 2) == 1:
+        if random.randint(1, 5) == 1:
             self.age += 1
             self.name = f'farmland_{self.age}'
             self.image = load_image(self.name)
@@ -398,7 +428,7 @@ class Farmland(Tile):
         if self.age < 2:
             self.tick -= 1 * dt
             if self.tick <= 0:
-                self.max_tick = random.randint(900, 1800)
+                self.max_tick = random.randint(1800, 3600)
                 self.tick = self.max_tick
                 self.grow()
         else:
@@ -418,7 +448,7 @@ class Farmland(Tile):
 
     def on_click(self):
         if self.age == 2:
-            self.max_tick = random.randint(900, 1800)
+            self.max_tick = random.randint(1800, 3600)
             self.tick = self.max_tick
 
             self.age = 0
