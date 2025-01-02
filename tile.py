@@ -161,7 +161,7 @@ class Tile(Sprite):
                       self.colliding]
             if check.count(True) > 2 and all(check2) and self.colliding.count(
                     'tall_grass') == 0 and self.name == 'grass':
-                if self.world.houses // 2 >= (self.world.mines + 1):
+                if self.world.houses // 5 >= (self.world.mines + 1):
                     self.available = True
             else:
                 self.available = False
@@ -177,7 +177,8 @@ class Tile(Sprite):
                 'windmill_2') + in_area.count(
                 'farmland_0') + in_area.count(
                 'farmland_1') + in_area.count('farmland_2') > 0:
-                self.available = True
+                if self.world.houses // 2 >= (self.world.windmills + 1):
+                    self.available = True
             else:
                 self.available = False
 
@@ -381,6 +382,8 @@ class Windmill(Tile):
 
         self.max_tick = 120
         self.tick = self.max_tick
+
+        self.world.windmills += 1
 
         self.frame = 1
         self.max_animation_tick = 30

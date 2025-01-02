@@ -34,6 +34,7 @@ class World:
 
         self.houses = 0
         self.mines = 0
+        self.windmills = 0
 
         self.sky = sky
 
