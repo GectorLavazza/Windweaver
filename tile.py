@@ -295,10 +295,19 @@ class Mine(Tile):
 
 class Windmill(Tile):
     def __init__(self, pos, world, *group):
-        super().__init__('windmill', pos, world, *group)
+        super().__init__('windmill_1', pos, world, *group)
 
         self.max_tick = 600
         self.tick = self.max_tick
+
+        self.frame = 1
+        self.max_animation_tick = 30
+        self.animation_tick = self.max_animation_tick
+
+        self.frames = {
+            1: load_image('windmill_1'),
+            2: load_image('windmill_2')
+        }
 
     def on_update(self, dt):
         self.tick -= dt
@@ -306,13 +315,23 @@ class Windmill(Tile):
             self.tick = self.max_tick
             self.spread()
 
+        self.animation_tick -= dt
+        if self.animation_tick <= 0:
+            self.animation_tick = self.max_animation_tick
+            self.change_frame()
+
+    def change_frame(self):
+        self.frame = 2 if self.frame == 1 else 1
+        self.name = f'windmill_{self.frame}'
+        self.image = self.frames[self.frame]
+
     def spread(self):
         if random.randint(1, 2) == 1:
             self.get_colliding()
             tiles = list(filter(lambda n: n.name == 'grass', self.colliding))
             if tiles:
                 tile = random.choice(tiles)
-                House(tile.pos, tile.world, self.groups())
+                Farmland(tile.pos, tile.world, self.groups())
                 tile.kill()
 
 
@@ -322,14 +341,14 @@ class Farmland(Tile):
 
         super().__init__(f'farmland_{self.age}', pos, world, *group)
 
-        self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
+        self.max_tick = random.randint(1800, 3600)
         self.tick = self.max_tick
 
-        self.max_spread_tick = 120
+        self.max_spread_tick = 3600
         self.spread_tick = self.max_spread_tick
 
     def grow(self):
-        if random.randint(1, 10) == 1:
+        if random.randint(1, 5 * (self.age + 1)) == 1:
             self.age += 1
             self.name = f'farmland_{self.age}'
             self.image = load_image(self.name)
@@ -338,8 +357,9 @@ class Farmland(Tile):
         if self.age < 2:
             self.tick -= 1 * dt
             if self.tick <= 0:
-                self.max_tick = random.randint(GROWTH_MIN, GROWTH_MAX)
+                self.max_tick = random.randint(1800, 3600)
                 self.tick = self.max_tick
+                print('grow')
                 self.grow()
         else:
             self.spread_tick -= dt
@@ -348,10 +368,10 @@ class Farmland(Tile):
                 self.spread()
 
     def spread(self):
-        if random.randint(1, 5) == 1:
+        if random.randint(1, 10) == 1:
             self.get_colliding()
             tiles = list(filter(lambda n: n.name == 'grass', self.colliding))
             if tiles:
                 tile = random.choice(tiles)
-                House(tile.pos, tile.world, self.groups())
+                Farmland(tile.pos, tile.world, self.groups())
                 tile.kill()
