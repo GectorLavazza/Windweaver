@@ -30,6 +30,8 @@ class World:
 
         self.current_build = 'house'
 
+        self.house_placed = False
+
         self.houses = 0
         self.mines = 0
 

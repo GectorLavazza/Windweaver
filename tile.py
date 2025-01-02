@@ -132,8 +132,11 @@ class Tile(Sprite):
     def check_build(self):
         build = self.world.current_build
         if build == 'house':
-            check = all([n.name in ('grass', 'flower') for n in self.colliding])
-            if check:
+            names = [n.name for n in self.colliding]
+            check = [n in ('grass', 'flower', 'pathway') for n in names]
+            if not self.world.house_placed and all(
+                    check) or self.world.house_placed and all(
+                    check) and names.count('pathway') > 0:
                 self.available = True
             else:
                 self.available = False
@@ -174,6 +177,7 @@ class Tile(Sprite):
                 Windmill(self.pos, self.world, self.groups())
 
             self.kill()
+
 
 class Grass(Tile):
     def __init__(self, name, pos, world, *group):
@@ -281,16 +285,36 @@ class House(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('house', pos, world, *group)
         self.world.houses += 1
-        self.spread()
 
-    def spread(self):
+        if not self.world.house_placed:
+            self.world.house_placed = True
+
+        self.max_spread_tick = 120
+        self.spread_tick = self.max_spread_tick
+
+        self.spread_count = 1
+
+        self.pathway = self.make_pathway()
+
+    def on_update(self, dt):
+        if self.spread_count < 3:
+            self.spread_tick -= dt
+            if self.spread_tick <= 0:
+                self.spread_count += 1
+                self.spread_tick = self.max_spread_tick
+                self.pathway.spread()
+
+    def make_pathway(self):
         sides = self.get_sides()
-        tiles = list(filter(lambda n: n.name == 'grass', sides))
+        tiles = list(filter(lambda
+                                n: n.name == 'grass' and n.rect.topleft != self.rect.topleft,
+                            sides))
         if tiles:
             tile = random.choice(tiles)
-            Pathway(tile.pos, tile.world, self.groups())
+            pathway = Pathway(tile.pos, tile.world, self.groups())
             tile.kill()
 
+        return pathway
 
 
 class Mine(Tile):
@@ -413,17 +437,11 @@ class Pathway(Tile):
 
         self.spreaded = False
 
-    def on_update(self, dt):
-        if not self.spreaded:
-            self.spread_tick -= dt
-            if self.spread_tick <= 0:
-                self.spread_tick = self.max_spread_tick
-                self.spread()
-
     def spread(self):
         sides = self.get_sides()
         tiles = list(filter(lambda n: n.name == 'grass', sides))
-        if tiles:
+        check = [n.name for n in self.colliding]
+        if tiles and check.count('pathway') < 2:
             tile = random.choice(tiles)
             Pathway(tile.pos, tile.world, self.groups())
             tile.kill()
