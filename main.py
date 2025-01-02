@@ -57,6 +57,13 @@ def main():
                 if event.key == pygame.K_q:
                     running = False
 
+                if event.key == pygame.K_1:
+                    world.current_build = 'house'
+                if event.key == pygame.K_2:
+                    world.current_build = 'mine'
+                if event.key == pygame.K_3:
+                    world.current_build = 'windmill'
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
                     cursor.pressed = True
@@ -72,7 +79,7 @@ def main():
         tiles_g.draw(screen)
         tiles_g.update(dt)
 
-        # sky.update(dt)
+        sky.update(dt)
 
         resources.update(f'W:{world.wood} S:{world.stone} F:{world.food}')
         fps.update(f'FPS:{round(clock.get_fps())}')

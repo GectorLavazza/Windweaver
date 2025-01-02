@@ -3,8 +3,7 @@ import random
 import pygame
 
 from load_image import load_image
-from settings import GROWTH_MIN, GROWTH_MAX, HOUSE_STONE_COST, HOUSE_WOOD_COST, \
-    MINE_STONE_COST, MINE_WOOD_COST
+from settings import GROWTH_MIN, GROWTH_MAX, STONE_COST, WOOD_COST
 from sprite import Sprite
 
 
@@ -21,8 +20,12 @@ class Tile(Sprite):
 
         self.hover_outline = load_image('hover')
         self.pressed_outline = load_image('pressed')
-        self.house_image = load_image('build_house')
-        self.mine_image = load_image('build_mine')
+
+        self.build_images = {
+            'house': load_image('build_house'),
+            'mine': load_image('build_mine'),
+            'windmill': load_image('windmill_build')
+        }
 
         self.pos = pos
 
@@ -41,8 +44,7 @@ class Tile(Sprite):
         self.center = self.rect.center
 
         self.clicked = False
-        self.house_available = False
-        self.mine_available = False
+        self.available = False
 
         self.colliding_checked = False
 
@@ -63,11 +65,9 @@ class Tile(Sprite):
     def draw_pressed(self):
         self.world.screen.blit(self.pressed_outline, self.rect.topleft)
 
-    def draw_house(self):
-        self.world.screen.blit(self.house_image, self.rect.topleft)
-
-    def draw_mine(self):
-        self.world.screen.blit(self.mine_image, self.rect.topleft)
+    def draw_build(self):
+        image = self.build_images[self.world.current_build]
+        self.world.screen.blit(image, self.rect.topleft)
 
     def on_update(self, dt):
         pass
@@ -91,9 +91,10 @@ class Tile(Sprite):
 
             if not self.colliding_checked:
                 self.get_colliding()
-                self.check_house_build()
-                self.check_mine_build()
                 self.colliding_checked = True
+
+                if self.name == 'grass':
+                    self.check_build()
 
             if pygame.mouse.get_pressed()[0] or pygame.mouse.get_pressed()[2]:
                 self.draw_pressed()
@@ -105,12 +106,8 @@ class Tile(Sprite):
             else:
                 self.draw_hover()
 
-                if self.house_available:
-                    if self.check_house_cost():
-                        self.draw_house()
-                elif self.mine_available:
-                    if self.check_mine_cost():
-                        self.draw_mine()
+                if self.available:
+                    self.draw_build()
 
                 self.clicked = False
         else:
@@ -122,46 +119,51 @@ class Tile(Sprite):
                              self.pos[1] + self.world.rect.y)
         self.collision_rect.center = self.rect.center
 
-    def check_house_build(self):
-        check = [n.name in ('grass', 'flower') for n in self.colliding]
-        if all(check) and self.name == 'grass':
-            self.house_available = True
-        else:
-            self.house_available = False
+    def check_build(self):
+        build = self.world.current_build
+        if build == 'house':
+            check = all([n.name in ('grass', 'flower') for n in self.colliding])
+            if check:
+                self.available = True
+            else:
+                self.available = False
 
-    def check_mine_build(self):
-        check = ['stone' in n.name for n in self.colliding]
-        check2 = ['tree' not in n.name and 'mine' not in n.name for n in
-                  self.colliding]
-        if check.count(True) > 2 and all(check2) and self.colliding.count(
-                'tall_grass') == 0 and self.name == 'grass':
-            if self.world.houses // 2 >= (self.world.mines + 1):
-                self.mine_available = True
-        else:
-            self.mine_available = False
+        elif build == 'mine':
+            check = ['stone' in n.name for n in self.colliding]
+            check2 = ['tree' not in n.name and 'mine' not in n.name for n in
+                      self.colliding]
+            if check.count(True) > 2 and all(check2) and self.colliding.count(
+                    'tall_grass') == 0 and self.name == 'grass':
+                if self.world.houses // 2 >= (self.world.mines + 1):
+                    self.available = True
+            else:
+                self.available = False
 
-    def check_house_cost(self):
-        if self.world.stone - HOUSE_STONE_COST >= 0 and self.world.wood - HOUSE_WOOD_COST >= 0:
-            return True
+        elif build == 'windmill':
+            check = [n.name in ('grass', 'flower') for n in self.colliding]
+            if all(check) and self.name == 'grass':
+                self.available = True
+            else:
+                self.available = False
 
-    def buy_house(self):
-        self.world.stone -= HOUSE_STONE_COST
-        self.world.wood -= HOUSE_WOOD_COST
+    def buy(self):
+        build = self.world.current_build
+        stone = STONE_COST[build]
+        wood = WOOD_COST[build]
 
-        Windmill(self.pos, self.world, self.groups())
-        self.kill()
+        if self.world.stone - stone >= 0 and self.world.wood - wood >= 0:
 
-    def check_mine_cost(self):
-        if self.world.stone - MINE_STONE_COST >= 0 and self.world.wood - MINE_WOOD_COST >= 0:
-            return True
+            self.world.stone -= stone
+            self.world.wood -= wood
 
-    def buy_mine(self):
-        self.world.stone -= MINE_STONE_COST
-        self.world.wood -= MINE_WOOD_COST
+            if build == 'house':
+                House(self.pos, self.world, self.groups())
+            elif build == 'mine':
+                Mine(self.pos, self.world, self.groups())
+            elif build == 'windmill':
+                Windmill(self.pos, self.world, self.groups())
 
-        Mine(self.pos, self.world, self.groups())
-        self.kill()
-
+            self.kill()
 
 class Grass(Tile):
     def __init__(self, name, pos, world, *group):
@@ -184,13 +186,8 @@ class Grass(Tile):
 
     def on_click(self):
         if pygame.mouse.get_pressed()[2]:
-            if self.house_available:
-                if self.check_house_cost():
-                    self.buy_house()
-
-            elif self.mine_available:
-                if self.check_mine_cost():
-                    self.buy_mine()
+            if self.available:
+                self.buy()
 
         elif pygame.mouse.get_pressed()[0]:
             self.name = 'grass'
@@ -283,7 +280,7 @@ class Mine(Tile):
 
         self.around = ['stone' in n.name for n in self.colliding].count(True)
 
-        self.max_tick = 3600 // self.around
+        self.max_tick = 3600
         self.tick = self.max_tick
 
     def on_update(self, dt):
@@ -297,7 +294,7 @@ class Windmill(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('windmill_1', pos, world, *group)
 
-        self.max_tick = 600
+        self.max_tick = 120
         self.tick = self.max_tick
 
         self.frame = 1
@@ -376,11 +373,12 @@ class Farmland(Tile):
                 tile.kill()
 
     def on_click(self):
-        self.max_tick = random.randint(900, 1800)
-        self.tick = self.max_tick
+        if self.age == 2:
+            self.max_tick = random.randint(900, 1800)
+            self.tick = self.max_tick
 
-        self.age = 0
-        self.name = f'farmland_{self.age}'
-        self.image = load_image(self.name)
+            self.age = 0
+            self.name = f'farmland_{self.age}'
+            self.image = load_image(self.name)
 
-        self.world.food += 10
+            self.world.food += 2

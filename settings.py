@@ -41,10 +41,11 @@ MAP_SIZE = TILE_SIZE * MAP_WIDTH * SCALE, TILE_SIZE * MAP_HEIGHT * SCALE
 GROWTH_MIN = 3600
 GROWTH_MAX = 36000
 
-HOUSE_STONE_COST = 0
-HOUSE_WOOD_COST = 0
-
-MINE_STONE_COST = 0
-MINE_WOOD_COST = 0
+WOOD_COST = {'house': 5,
+             'mine': 5,
+             'windmill': 10}
+STONE_COST = {'house': 5,
+             'mine': 10,
+             'windmill': 5}
 
 DAY_TIME = 9000
