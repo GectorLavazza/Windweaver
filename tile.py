@@ -53,8 +53,9 @@ class Tile(Sprite):
         if self.world.check_mouse_edges():
             self.move()
         if self.name not in (
-        'house', 'farmland_0', 'farmland_1', 'farmland_2', 'windmill_1',
-        'windmill_2', 'mine'):
+                'house', 'farmland_0', 'farmland_1', 'farmland_2',
+                'windmill_1',
+                'windmill_2', 'mine'):
             if self.rect.colliderect(self.world.screen_rect):
                 self.handle_mouse()
                 self.on_update(dt)
