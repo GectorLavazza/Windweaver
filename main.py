@@ -74,7 +74,7 @@ def main():
 
         # sky.update(dt)
 
-        resources.update(f'W:{world.wood} S:{world.stone}')
+        resources.update(f'W:{world.wood} S:{world.stone} F:{world.food}')
         fps.update(f'FPS:{round(clock.get_fps())}')
 
         cursor_g.draw(screen)

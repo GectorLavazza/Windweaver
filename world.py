@@ -26,6 +26,7 @@ class World:
 
         self.wood = 0
         self.stone = 0
+        self.food = 0
 
         self.houses = 0
         self.mines = 0

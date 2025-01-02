@@ -341,14 +341,14 @@ class Farmland(Tile):
 
         super().__init__(f'farmland_{self.age}', pos, world, *group)
 
-        self.max_tick = random.randint(1800, 3600)
+        self.max_tick = random.randint(900, 1800)
         self.tick = self.max_tick
 
-        self.max_spread_tick = 3600
+        self.max_spread_tick = 600
         self.spread_tick = self.max_spread_tick
 
     def grow(self):
-        if random.randint(1, 5 * (self.age + 1)) == 1:
+        if random.randint(1, 2) == 1:
             self.age += 1
             self.name = f'farmland_{self.age}'
             self.image = load_image(self.name)
@@ -357,9 +357,8 @@ class Farmland(Tile):
         if self.age < 2:
             self.tick -= 1 * dt
             if self.tick <= 0:
-                self.max_tick = random.randint(1800, 3600)
+                self.max_tick = random.randint(900, 1800)
                 self.tick = self.max_tick
-                print('grow')
                 self.grow()
         else:
             self.spread_tick -= dt
@@ -368,10 +367,20 @@ class Farmland(Tile):
                 self.spread()
 
     def spread(self):
-        if random.randint(1, 10) == 1:
+        if random.randint(1, 5) == 1:
             self.get_colliding()
             tiles = list(filter(lambda n: n.name == 'grass', self.colliding))
             if tiles:
                 tile = random.choice(tiles)
                 Farmland(tile.pos, tile.world, self.groups())
                 tile.kill()
+
+    def on_click(self):
+        self.max_tick = random.randint(900, 1800)
+        self.tick = self.max_tick
+
+        self.age = 0
+        self.name = f'farmland_{self.age}'
+        self.image = load_image(self.name)
+
+        self.world.food += 10
