@@ -4,7 +4,7 @@ from time import time
 import pygame
 
 from cursor import Cursor
-from map import Map
+from engine import Engine
 from settings import *
 from sky import Sky
 from ui import Text
@@ -27,15 +27,14 @@ def main():
     flags = pygame.DOUBLEBUF | pygame.SCALED
     screen = pygame.display.set_mode(screen_size, flags, depth=8, vsync=1)
 
+    engine = Engine()
+
     sky = Sky(screen)
-    world = World(screen, MAP_SIZE, CENTER, sky)
+    world = World(screen, CENTER, sky, engine)
 
     cursor_g = pygame.sprite.Group()
-    tiles_g = pygame.sprite.Group()
 
-    map = Map(world, tiles_g)
-
-    cursor = Cursor(cursor_g)
+    cursor = Cursor(engine, cursor_g)
 
     running = 1
     clock = pygame.time.Clock()
@@ -82,12 +81,12 @@ def main():
 
         world.update(dt)
 
-        tiles_g.draw(screen)
-        tiles_g.update(dt)
+        # tiles_g.draw(screen)
+        # tiles_g.update(dt)
 
         sky.update(dt)
 
-        resources.update(f'W:{world.wood} S:{world.stone} F:{world.food}')
+        # resources.update(f'W:{world.wood} S:{world.stone} F:{world.food}')
         fps.update(f'FPS:{round(clock.get_fps())}')
 
         cursor_g.draw(screen)

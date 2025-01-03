@@ -1,15 +1,14 @@
 import pygame
 from pygame.sprite import Sprite
 
-from load_image import load_image
-
+from engine import Engine
 
 class Cursor(Sprite):
-    def __init__(self, *group):
+    def __init__(self, engine, *group):
         super().__init__(*group)
 
-        self.regular_image = load_image('cursor')
-        self.pressed_image = load_image('cursor_pressed')
+        self.regular_image = engine.load_image('cursor')
+        self.pressed_image = engine.load_image('cursor_pressed')
         self.image = self.regular_image
 
         self.pressed = False
@@ -17,14 +16,14 @@ class Cursor(Sprite):
 
     def update(self, render=True):
         mouse_pos = pygame.mouse.get_pos()
-        mouseFocus = pygame.mouse.get_focused()
+        mouse_focus = pygame.mouse.get_focused()
 
         if self.pressed:
             self.image = self.pressed_image
         else:
             self.image = self.regular_image
 
-        if mouseFocus:
+        if mouse_focus:
             self.rect.topleft = mouse_pos
         else:
             self.rect.topleft = (-100, -100)
