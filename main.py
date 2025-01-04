@@ -86,13 +86,14 @@ def main():
 
         sky.update(dt)
 
-        resources.update(f'{len(world.chunks)}')
+        resources.update(f'{len(world.chunks)} chunks')
         fps.update(f'FPS:{round(clock.get_fps())}')
 
         cursor_g.draw(screen)
         cursor.update()
 
         pygame.display.flip()
+        pygame.display.set_caption(str(world.camera_pos))
         clock.tick()
 
     pygame.quit()

@@ -3,7 +3,7 @@ from pygame import Vector2, mouse, Surface, Rect
 from chunk import Chunk
 from engine import Engine
 from settings import screen_width, screen_height, CHUNK_WIDTH, CHUNK_HEIGHT, \
-    TILE_SIZE
+    TILE_SIZE, screen_size
 
 
 class World:
@@ -11,21 +11,19 @@ class World:
         self.screen = screen
         self.screen_rect = screen.get_rect()
         self.engine = engine
-        self.surface = Surface((screen_width, screen_height))  # Fixed size
+        self.surface = Surface(screen_size)  # Fixed size
         self.rect = self.surface.get_rect()
         self.rect.center = center
 
-        self.speed = 3
+        self.speed = 10
         self.edge_threshold = screen_height // 4
 
-        self.dx = 0
-        self.dy = 0
-        self.dynamic_speed_x = 0
-        self.dynamic_speed_y = 0
+        self.d = Vector2(0, 0)
+        self.dynamic_speed = Vector2(0, 0)
         self.velocity = Vector2(0, 0)
 
         self.sky = sky
-        self.camera_offset = Vector2(0, 0)
+        self.camera_pos = Vector2(0, 0)
 
         self.chunks = {}
 
@@ -37,16 +35,13 @@ class World:
             self.move(dt)
 
         self.update_chunks()
-        self.draw_chunks()
+        self.draw_chunks(dt)
 
-    def draw_chunks(self):
-        for chunk_pos, chunk in self.chunks.items():
-            screen_chunk_pos = (
-                chunk.pos[0] * CHUNK_WIDTH * TILE_SIZE - self.camera_offset.x,
-                chunk.pos[1] * CHUNK_HEIGHT * TILE_SIZE - self.camera_offset.y,
-            )
-            self.surface.blit(chunk.surface, screen_chunk_pos)
+    def draw_chunks(self, dt):
+        for pos, chunk in self.chunks.items():
+            chunk.update(dt)
 
+    def draw(self):
         self.screen.blit(self.surface, (0, 0), self.visible_rect)
 
     def update_chunks(self):
@@ -54,15 +49,15 @@ class World:
 
         for chunk_pos in visible_chunks:
             if chunk_pos not in self.chunks:
-                self.chunks[chunk_pos] = Chunk(chunk_pos, self.engine)
+                self.chunks[chunk_pos] = Chunk(chunk_pos, self, self.engine)
 
     def get_visible_chunks(self):
-        start_x = int(self.camera_offset.x // (CHUNK_WIDTH * TILE_SIZE))
-        start_y = int(self.camera_offset.y // (CHUNK_HEIGHT * TILE_SIZE))
+        start_x = int(self.camera_pos.x // (CHUNK_WIDTH * TILE_SIZE))
+        start_y = int(self.camera_pos.y // (CHUNK_HEIGHT * TILE_SIZE))
         end_x = int(
-            (self.camera_offset.x + screen_width) // (CHUNK_WIDTH * TILE_SIZE))
-        end_y = int((self.camera_offset.y + screen_height) // (
-                    CHUNK_HEIGHT * TILE_SIZE))
+            (self.camera_pos.x + screen_width) // (CHUNK_WIDTH * TILE_SIZE))
+        end_y = int((self.camera_pos.y + screen_height) // (
+                CHUNK_HEIGHT * TILE_SIZE))
 
         visible_chunks = [
             (x, y)
@@ -73,44 +68,45 @@ class World:
         return visible_chunks
 
     def check_mouse_edges(self):
-        mouse_x, mouse_y = mouse.get_pos()
+        mouse_pos = Vector2(mouse.get_pos())
 
-        self.dx = 0
-        self.dy = 0
+        self.d = Vector2(0, 0)
 
-        if mouse_x < self.edge_threshold:
-            self.dx = -1
-            distance_to_edge = self.edge_threshold - mouse_x
-            self.dynamic_speed_x = distance_to_edge / self.edge_threshold
+        if mouse_pos.x < self.edge_threshold:
+            self.d.x = -1
+            distance_to_edge = self.edge_threshold - mouse_pos.x
+            self.dynamic_speed.x = distance_to_edge / self.edge_threshold
 
-        elif mouse_x > screen_width - self.edge_threshold:
-            self.dx = 1
-            distance_to_edge = mouse_x - (screen_width - self.edge_threshold)
-            self.dynamic_speed_x = distance_to_edge / self.edge_threshold
+        elif mouse_pos.x > screen_width - self.edge_threshold:
+            self.d.x = 1
+            distance_to_edge = mouse_pos.x - (
+                        screen_width - self.edge_threshold)
+            self.dynamic_speed.x = distance_to_edge / self.edge_threshold
 
-        if mouse_y < self.edge_threshold:
-            self.dy = -1
-            distance_to_edge = self.edge_threshold - mouse_y
-            self.dynamic_speed_y = distance_to_edge / self.edge_threshold
+        if mouse_pos.y < self.edge_threshold:
+            self.d.y = -1
+            distance_to_edge = self.edge_threshold - mouse_pos.y
+            self.dynamic_speed.y = distance_to_edge / self.edge_threshold
 
-        elif mouse_y > screen_height - self.edge_threshold:
-            self.dy = 1
-            distance_to_edge = mouse_y - (screen_height - self.edge_threshold)
-            self.dynamic_speed_y = distance_to_edge / self.edge_threshold
+        elif mouse_pos.y > screen_height - self.edge_threshold:
+            self.d.y = 1
+            distance_to_edge = mouse_pos.y - (
+                        screen_height - self.edge_threshold)
+            self.dynamic_speed.y = distance_to_edge / self.edge_threshold
 
-        return self.dx != 0 or self.dy != 0
+        return self.d.x or self.d.y
 
     def move(self, dt):
-        input_direction = Vector2(self.dx, self.dy)
+        input_direction = Vector2(self.d.x, self.d.y)
         if input_direction.length() > 0:
             input_direction = input_direction.normalize()
 
-        speed_multiplier_x = max(0, min(1, self.dynamic_speed_x))
-        speed_multiplier_y = max(0, min(1, self.dynamic_speed_y))
+        speed_multiplier = Vector2(max(0, min(1, self.dynamic_speed.x)),
+                                   max(0, min(1, self.dynamic_speed.y)))
 
-        self.velocity.x = input_direction.x * self.speed * speed_multiplier_x * dt
-        self.velocity.y = input_direction.y * self.speed * speed_multiplier_y * dt
+        self.velocity.x = input_direction.x * self.speed * speed_multiplier.x * dt
+        self.velocity.y = input_direction.y * self.speed * speed_multiplier.y * dt
 
-        self.camera_offset += self.velocity
+        self.camera_pos += self.velocity
 
         self.visible_rect.topleft = -Vector2(self.rect.topleft)

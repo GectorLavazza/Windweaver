@@ -10,7 +10,8 @@ screen_size = screen_width, screen_height
 CENTER = screen_width // 2, screen_height // 2
 
 TILE_SIZE = 8
-CHUNK_WIDTH, CHUNK_HEIGHT = 64, 64
+
+CHUNK_WIDTH, CHUNK_HEIGHT = 32, 32
 CHUNK_SIZE = TILE_SIZE * CHUNK_WIDTH, TILE_SIZE * CHUNK_HEIGHT
 
 GROWTH_MIN = 3600

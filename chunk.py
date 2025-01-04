@@ -1,5 +1,6 @@
 from pygame.surface import Surface
-from pygame import draw
+from pygame import draw, Rect, mouse, SRCALPHA
+from pygame.sprite import Group, Sprite
 
 from engine import Engine
 from settings import CHUNK_WIDTH, CHUNK_HEIGHT, TILE_SIZE, CHUNK_SIZE, COLORS
@@ -11,19 +12,61 @@ from random import randint
 from noise import pnoise2
 
 
-class Chunk:
-    def __init__(self, pos, engine: Engine):
-        self.surface = Surface(CHUNK_SIZE)
+class TestTile(Sprite):
+    def __init__(self, pos, chunk, color, *group):
+        super().__init__(*group)
+        self.image = Surface((TILE_SIZE, TILE_SIZE))
+        self.image.fill(color)
+        self.rect = self.image.get_rect()
+        self.chunk = chunk
+        self.rect.topleft = pos
         self.pos = pos
 
+    def update(self, dt):
+        self.rect.topleft = (self.pos[0] + self.chunk.rect.x,
+                             self.pos[1] + self.chunk.rect.y)
+        self.handle_mouse()
+
+    def draw_hover(self):
+        self.chunk.world.screen.blit(self.chunk.engine.hover_outline,
+                              self.rect.topleft)
+
+    def draw_pressed(self):
+        self.chunk.world.screen.blit(self.chunk.engine.pressed_outline,
+                                     self.rect.topleft)
+
+    def handle_mouse(self):
+        mouse_pos = mouse.get_pos()
+        if self.rect.collidepoint(mouse_pos):
+            if mouse.get_pressed()[0] or mouse.get_pressed()[2]:
+                self.draw_pressed()
+            else:
+                self.draw_hover()
+
+
+class Chunk:
+    def __init__(self, pos, world, engine: Engine):
+        self.surface = Surface(CHUNK_SIZE, SRCALPHA)
+        self.surface.fill((0, 0, 0, 0))
+        self.rect = self.surface.get_rect()
+        self.pos = pos
+        self.world = world
+
+        self.group = Group()
         self.engine = engine
 
         self.get_chunk()
 
+        draw.rect(self.surface,
+                  (randint(1, 255),
+                   randint(1, 255),
+                   randint(1, 255)),
+                  self.rect, 1)
+
         # self.surface.fill((randint(1, 255), randint(1, 255), randint(1, 255)))
 
     def get_chunk(self):
-        st = time()
+        # st = time()
 
         chunk_offset_x = self.pos[0] * CHUNK_WIDTH
         chunk_offset_y = self.pos[1] * CHUNK_HEIGHT
@@ -53,40 +96,21 @@ class Chunk:
                         int(160 * noise_value), int(160 * noise_value),
                         int(160 * noise_value))
 
-                # random_chance = randint(1, 100)
-                # if random_chance <= 5:
-                #     tile = 'grass'
-                # elif random_chance <= 15:
-                #     tile = 'tall_grass'
-                # elif random_chance <= 20:
-                #     tile = 'tree'
-                # elif random_chance <= 25:
-                #     tile = 'stone'
-                # elif random_chance == 50:
-                #     tile = 'flower'
-
                 pos = (x * TILE_SIZE, y * TILE_SIZE)
-                # (int(255 * noise_value), int(255 * noise_value), int(255 * noise_value))
-                draw.rect(self.surface, color, (*pos, TILE_SIZE, TILE_SIZE))
+                TestTile(pos, self, color, self.group)
+                # draw.rect(self.surface, color, (*pos, TILE_SIZE, TILE_SIZE))
 
-                # if tile == 'tree':
-                #     age = randint(0, 2)
-                #     i = self.engine.images[f'tree_{age}']
-                #     self.surface.blit(i, pos)
-                #
-                # elif 'grass' in tile or 'flower' in tile:
-                #
-                #     i = self.engine.images[tile]
-                #     self.surface.blit(i, pos)
-                # elif tile == 'stone':
-                #
-                #     amount = randint(1, 3)
-                #     i = self.engine.images[f'stone_{amount}']
-                #     self.surface.blit(i, pos)
+        # et = time()
 
-        et = time()
+        # print(f'CHUNK LOADED in {et - st}s')
 
-        print(f'CHUNK LOADED in {et - st}s')
+    def update(self, dt):
+        self.rect.topleft = (
+            self.pos[0] * CHUNK_WIDTH * TILE_SIZE - self.world.camera_pos.x,
+            self.pos[1] * CHUNK_HEIGHT * TILE_SIZE - self.world.camera_pos.y)
 
-    def draw(self, surface):
-        surface.blit(self.surface, self.pos)
+        if self.rect.colliderect(self.world.screen_rect):
+            self.group.update(dt)
+            self.group.draw(self.world.screen)
+
+            self.world.screen.blit(self.surface, self.rect.topleft)

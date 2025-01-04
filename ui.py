@@ -2,8 +2,6 @@ from pygame.font import Font
 from pygame.transform import scale
 from pygame import SRCALPHA, Surface
 
-from settings import screen_height, screen_width
-
 
 class Ui:
     def __init__(self, screen):
