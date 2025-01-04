@@ -47,6 +47,9 @@ def main():
 
     print(f'Startup time: {time() - st}')
 
+    mouse_pos_set = False
+    set_to_center = False
+
     while running:
         dt = time() - last_time
         dt *= 60
@@ -77,7 +80,15 @@ def main():
 
         screen.fill('black')
 
+        if not mouse_pos_set:
+            pygame.mouse.set_pos((0, 0))
+            mouse_pos_set = True
+
         world.update(dt)
+
+        if not set_to_center:
+            pygame.mouse.set_pos(CENTER)
+            set_to_center = True
 
         sky.update(dt)
 
@@ -88,7 +99,7 @@ def main():
         cursor.update()
 
         pygame.display.flip()
-        pygame.display.set_caption(str(world.camera_pos))
+        pygame.display.set_caption('Some Game with Procedural Generation')
         clock.tick()
 
     pygame.quit()
