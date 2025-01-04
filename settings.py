@@ -25,9 +25,17 @@ STONE_COST = {'house': 0,
 
 DAY_TIME = 9000
 
-SCALE = 10.0
+SCALE = 50.0
 OCTAVES = 5
-PERSISTENCE = 0.55
-LACUNARITY = 5
+PERSISTENCE = 0.3
+LACUNARITY = 4
 SEED = randint(0, 10000)
 print(f'seed: {SEED}')
+
+COLORS = {
+    'water': (0, 0, 255),
+    'grass': (0, 255, 0),
+    'forest': (0, 128, 0),
+    'mountains': (128, 128, 128),
+    'snow': (255, 255, 255)
+}

@@ -1,7 +1,8 @@
 from pygame.surface import Surface
+from pygame import draw
 
 from engine import Engine
-from settings import CHUNK_WIDTH, CHUNK_HEIGHT, TILE_SIZE, CHUNK_SIZE
+from settings import CHUNK_WIDTH, CHUNK_HEIGHT, TILE_SIZE, CHUNK_SIZE, COLORS
 from settings import SCALE, OCTAVES, PERSISTENCE, LACUNARITY, SEED
 
 from time import time
@@ -38,48 +39,50 @@ class Chunk:
                     octaves=OCTAVES,
                     persistence=PERSISTENCE,
                     lacunarity=LACUNARITY,
-                    repeatx=8, repeaty=8
+                    repeatx=2 ** 24, repeaty=2 ** 24
                 ) + 0.5
 
                 noise_value = max(0, min(1, noise_value))
 
-                if noise_value < 0.42:
-                    tile = 'grass'
-                elif noise_value < 0.52:
-                    tile = 'tall_grass'
-                elif noise_value < 0.7:
-                    tile = 'tree'
+                if noise_value < 0.3:
+                    color = (0, 0, int(255 * (noise_value / 0.3)))
+                elif noise_value < 0.6:
+                    color = (0, int(255 * (noise_value / 0.6)), 0)
                 else:
-                    tile = 'stone'
+                    color = (
+                        int(160 * noise_value), int(160 * noise_value),
+                        int(160 * noise_value))
 
-                random_chance = randint(1, 100)
-                if random_chance <= 5:
-                    tile = 'grass'
-                elif random_chance <= 15:
-                    tile = 'tall_grass'
-                elif random_chance <= 20:
-                    tile = 'tree'
-                elif random_chance <= 25:
-                    tile = 'stone'
-                elif random_chance == 50:
-                    tile = 'flower'
+                # random_chance = randint(1, 100)
+                # if random_chance <= 5:
+                #     tile = 'grass'
+                # elif random_chance <= 15:
+                #     tile = 'tall_grass'
+                # elif random_chance <= 20:
+                #     tile = 'tree'
+                # elif random_chance <= 25:
+                #     tile = 'stone'
+                # elif random_chance == 50:
+                #     tile = 'flower'
 
                 pos = (x * TILE_SIZE, y * TILE_SIZE)
+                # (int(255 * noise_value), int(255 * noise_value), int(255 * noise_value))
+                draw.rect(self.surface, color, (*pos, TILE_SIZE, TILE_SIZE))
 
-                if tile == 'tree':
-                    age = randint(0, 2)
-                    i = self.engine.images[f'tree_{age}']
-                    self.surface.blit(i, pos)
-
-                elif 'grass' in tile or 'flower' in tile:
-
-                    i = self.engine.images[tile]
-                    self.surface.blit(i, pos)
-                elif tile == 'stone':
-
-                    amount = randint(1, 3)
-                    i = self.engine.images[f'stone_{amount}']
-                    self.surface.blit(i, pos)
+                # if tile == 'tree':
+                #     age = randint(0, 2)
+                #     i = self.engine.images[f'tree_{age}']
+                #     self.surface.blit(i, pos)
+                #
+                # elif 'grass' in tile or 'flower' in tile:
+                #
+                #     i = self.engine.images[tile]
+                #     self.surface.blit(i, pos)
+                # elif tile == 'stone':
+                #
+                #     amount = randint(1, 3)
+                #     i = self.engine.images[f'stone_{amount}']
+                #     self.surface.blit(i, pos)
 
         et = time()
 
