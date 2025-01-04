@@ -1,4 +1,4 @@
-from pygame import Vector2, mouse, Surface, Rect
+from pygame import Vector2, mouse, Surface
 
 from chunk import Chunk
 from engine import Engine
@@ -29,6 +29,18 @@ class World:
 
         self.visible_rect = self.screen_rect
         self.visible_rect = self.visible_rect.clip(self.surface.get_rect())
+
+        self.wood = 0
+        self.stone = 0
+        self.food = 100
+
+        self.current_build = 'house'
+
+        self.house_placed = False
+
+        self.houses = 0
+        self.mines = 0
+        self.windmills = 0
 
     def update(self, dt):
         if self.check_mouse_edges():

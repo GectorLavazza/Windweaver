@@ -45,9 +45,7 @@ def main():
     fps = Text(screen, 10, 'white', (screen_width, 0),
                right_align=True)
 
-    et = time()
-
-    print(f'Startup time: {et - st}')
+    print(f'Startup time: {time() - st}')
 
     while running:
         dt = time() - last_time
@@ -80,9 +78,6 @@ def main():
         screen.fill('black')
 
         world.update(dt)
-
-        # tiles_g.draw(screen)
-        # tiles_g.update(dt)
 
         sky.update(dt)
 

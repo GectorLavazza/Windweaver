@@ -10,13 +10,14 @@ class Tile(Sprite):
     def __init__(self, name, pos, chunk, *group):
         super().__init__(*group)
         self.chunk = chunk
-        self.images = self.chunk.world.engine.images
+        self.world = self.chunk.world
+        self.images = self.world.engine.images
 
         self.name = name
         self.durability = 0
         self.max_durability = self.durability
 
-        self.image = self.chunk.images[self.name]
+        self.image = self.images[self.name]
 
         self.pos = pos
 
@@ -50,28 +51,23 @@ class Tile(Sprite):
         self.image_set = False
 
     def update(self, dt):
-        if self.chunk.check_mouse_edges():
+        if self.world.check_mouse_edges():
             self.move()
-        if self.name not in (
-                'house', 'farmland_0', 'farmland_1', 'farmland_2',
-                'windmill_1',
-                'windmill_2', 'mine'):
-            if self.rect.colliderect(self.chunk.screen_rect):
-                self.handle_mouse()
-                self.on_update(dt)
-        else:
-            self.handle_mouse()
-            self.on_update(dt)
+
+        # self.handle_mouse()
+        self.on_update(dt)
 
     def draw_hover(self):
-        self.chunk.screen.blit(self.chunk.hover_outline, self.rect.topleft)
+        self.world.screen.blit(self.world.engine.hover_outline,
+                               self.rect.topleft)
 
     def draw_pressed(self):
-        self.chunk.screen.blit(self.chunk.pressed_outline, self.rect.topleft)
+        self.world.screen.blit(self.world.engine.pressed_outline,
+                               self.rect.topleft)
 
-    def draw_build(self):
-        image = self.chunk.build_images[self.chunk.current_build]
-        self.chunk.screen.blit(image, self.rect.topleft)
+    # def draw_build(self):
+    #     image = self.world.build_images[self.world.current_build]
+    #     self.chunk.screen.blit(image, self.rect.topleft)
 
     def on_update(self, dt):
         pass
@@ -127,8 +123,8 @@ class Tile(Sprite):
             else:
                 self.draw_hover()
 
-                if self.available:
-                    self.draw_build()
+                # if self.available:
+                #     self.draw_build()
 
                 self.clicked = False
         else:
@@ -142,14 +138,14 @@ class Tile(Sprite):
         self.area.center = self.rect.center
 
     def check_build(self):
-        build = self.chunk.current_build
+        build = self.world.current_build
         if build == 'house':
             names = [n.name for n in self.colliding]
             check = [n in (
                 'grass', 'flower', 'pathway', 'farmland_0', 'farmland_1',
                 'farmland_2') for n in names]
-            if not self.chunk.house_placed and all(
-                    check) or self.chunk.house_placed and all(
+            if not self.world.house_placed and all(
+                    check) or self.world.house_placed and all(
                 check) and names.count('pathway') > 0:
                 self.available = True
             else:
@@ -161,7 +157,7 @@ class Tile(Sprite):
                       self.colliding]
             if check.count(True) > 2 and all(check2) and self.colliding.count(
                     'tall_grass') == 0 and self.name == 'grass':
-                if self.chunk.houses // 5 >= (self.chunk.mines + 1):
+                if self.world.houses // 5 >= (self.world.mines + 1):
                     self.available = True
             else:
                 self.available = False
@@ -177,20 +173,20 @@ class Tile(Sprite):
                 'windmill_2') + in_area.count(
                 'farmland_0') + in_area.count(
                 'farmland_1') + in_area.count('farmland_2') > 0:
-                if self.chunk.houses // 2 >= (self.chunk.windmills + 1):
+                if self.world.houses // 2 >= (self.world.windmills + 1):
                     self.available = True
             else:
                 self.available = False
 
     def buy(self):
-        build = self.chunk.current_build
+        build = self.world.current_build
         stone = STONE_COST[build]
         wood = WOOD_COST[build]
 
-        if self.chunk.stone - stone >= 0 and self.chunk.wood - wood >= 0:
+        if self.world.stone - stone >= 0 and self.world.wood - wood >= 0:
 
-            self.chunk.stone -= stone
-            self.chunk.wood -= wood
+            self.world.stone -= stone
+            self.world.wood -= wood
 
             if build == 'house':
                 House(self.pos, self.chunk, self.groups())
@@ -263,7 +259,7 @@ class Tree(Tile):
     def on_kill(self):
         Grass('grass', self.pos, self.chunk, self.groups())
 
-        self.chunk.world.wood += self.age + 1
+        self.world.wood += self.age + 1
         self.kill()
 
     def grow(self):
@@ -300,17 +296,17 @@ class Stone(Tile):
 
     def on_kill(self):
         Grass('grass', self.pos, self.chunk, self.groups())
-        self.chunk.world.stone += self.amount
+        self.world.stone += self.amount
         self.kill()
 
 
 class House(Tile):
     def __init__(self, pos, chunk, *group):
         super().__init__('house', pos, chunk, *group)
-        self.chunk.world.houses += 1
+        self.world.houses += 1
 
-        if not self.chunk.house_placed:
-            self.chunk.house_placed = True
+        if not self.world.house_placed:
+            self.world.house_placed = True
 
         self.light = self.images['house_light']
         self.no_light = self.images['house']
@@ -326,7 +322,7 @@ class House(Tile):
         self.tick = self.max_tick
 
     def on_update(self, dt):
-        if self.chunk.world.sky.dark:
+        if self.world.sky.dark:
             self.image = self.light
         else:
             self.image = self.no_light
@@ -342,7 +338,7 @@ class House(Tile):
         self.tick -= dt
         if self.tick <= 0:
             self.tick = self.max_tick
-            self.chunk.world.food -= 1
+            self.world.food -= 1
 
     def make_pathway(self):
         sides = self.get_sides()
@@ -362,7 +358,7 @@ class House(Tile):
 class Mine(Tile):
     def __init__(self, pos, chunk, *group):
         super().__init__('mine', pos, chunk, *group)
-        self.chunk.world.mines += 1
+        self.world.mines += 1
 
         self.around = ['stone' in n.name for n in self.colliding].count(True)
 
@@ -373,7 +369,7 @@ class Mine(Tile):
         self.tick -= dt
         if self.tick <= 0:
             self.tick = self.max_tick
-            self.chunk.world.stone += 1
+            self.world.stone += 1
 
 
 class Windmill(Tile):
@@ -383,7 +379,7 @@ class Windmill(Tile):
         self.max_tick = 120
         self.tick = self.max_tick
 
-        self.chunk.world.windmills += 1
+        self.world.windmills += 1
 
         self.frame = 1
         self.max_animation_tick = 30
@@ -469,7 +465,7 @@ class Farmland(Tile):
             self.name = f'farmland_{self.age}'
             self.image = self.images[self.name]
 
-            self.chunk.world.food += 2
+            self.world.food += 2
 
 
 class Pathway(Tile):
