@@ -51,10 +51,8 @@ class Tile(Sprite):
         self.image_set = False
 
     def update(self, dt):
-        if self.world.check_mouse_edges():
-            self.move()
+        self.move()
 
-        # self.handle_mouse()
         self.on_update(dt)
 
     def draw_hover(self):

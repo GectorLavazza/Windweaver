@@ -31,7 +31,9 @@ OCTAVES = 5
 PERSISTENCE = 0.55
 LACUNARITY = 5
 SEED = randint(0, 10000)
-print(f'seed: {SEED}')
+
+print('-' * 20)
+print(f'Seed: {SEED}')
 
 COLORS = {
     'water': (0, 0, 255),

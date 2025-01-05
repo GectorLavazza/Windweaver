@@ -28,6 +28,7 @@ def main():
     screen = pygame.display.set_mode(screen_size, flags, depth=8, vsync=1)
 
     engine = Engine()
+    pygame.display.set_icon(pygame.transform.scale_by(engine.images['house'], 8))
 
     sky = Sky(screen)
     world = World(screen, CENTER, sky, engine)
@@ -46,6 +47,7 @@ def main():
                right_align=True)
 
     print(f'Startup time: {time() - st}')
+    print('[F12] - toggle fullscreen')
 
     mouse_pos_set = False
     set_to_center = False
@@ -69,6 +71,9 @@ def main():
                     world.current_build = 'mine'
                 if event.key == pygame.K_3:
                     world.current_build = 'windmill'
+
+                if event.key == pygame.K_F12:
+                    pygame.display.toggle_fullscreen()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
@@ -108,3 +113,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

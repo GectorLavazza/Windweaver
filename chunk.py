@@ -105,7 +105,7 @@ class Chunk:
              sprite.rect.colliderect(self.world.screen_rect)
              else None for sprite in self.group.sprites()]
 
-            # self.world.screen.blit(self.surface, self.rect.topleft)
+            self.world.screen.blit(self.surface, self.rect.topleft)
 
 
 class TestTile(Sprite):
