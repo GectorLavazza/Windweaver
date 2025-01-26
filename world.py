@@ -15,7 +15,7 @@ class World:
         self.rect = self.surface.get_rect()
         self.rect.center = center
 
-        self.speed = 3
+        self.speed = 10
         self.edge_threshold = screen_height // 4
 
         self.dx = 0
@@ -131,8 +131,8 @@ class World:
         self.rect.x += self.velocity.x
         self.rect.y += self.velocity.y
 
-        self.rect.x = max(screen_width - self.rect.width, min(self.rect.x, 0))
-        self.rect.y = max(screen_height - self.rect.height,
-                          min(self.rect.y, 0))
+        # self.rect.x = max(screen_width - self.rect.width, min(self.rect.x, 0))
+        # self.rect.y = max(screen_height - self.rect.height,
+        #                   min(self.rect.y, 0))
 
         self.visible_rect.topleft = -Vector2(self.rect.topleft)
