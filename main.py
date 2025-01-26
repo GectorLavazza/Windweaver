@@ -26,6 +26,7 @@ def main():
 
     flags = pygame.DOUBLEBUF | pygame.SCALED
     screen = pygame.display.set_mode(screen_size, flags, depth=8, vsync=1)
+    # screen = pygame.transform.scale_by(screen, 1.1)
 
     sky = Sky(screen)
     world = World(screen, MAP_SIZE, CENTER, sky)
@@ -69,6 +70,8 @@ def main():
                     world.current_build = 'mine'
                 if event.key == pygame.K_3:
                     world.current_build = 'windmill'
+                if event.key == pygame.K_F10:
+                    pygame.display.toggle_fullscreen()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
