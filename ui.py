@@ -22,20 +22,20 @@ class Text(Ui):
         self.center_align = center_align
         self.right_align = right_align
 
-        self.render = self.font.render('', True, self.color).convert_alpha()
+        self.render = self.font.render('', True, self.color)
         self.rect = self.render.get_rect()
 
         self.prev = ''
 
         self.shade = Surface(self.rect.size, SRCALPHA)
-        self.shade.set_alpha(128)
+        self.shade.set_alpha(100)
         self.shade.fill('black')
 
     def update(self, message):
 
         if message != self.prev:
             self.render = self.font.render(str(message), True,
-                                           self.color).convert_alpha()
+                                           self.color)
             self.rect = self.render.get_rect()
 
             if self.center_align:
@@ -48,9 +48,6 @@ class Text(Ui):
                 self.rect.topleft = (self.pos[0],
                        self.pos[1])
 
-            self.shade = scale(self.shade, self.rect.size)
-
-        self.screen.blit(self.shade, self.rect.topleft)
         self.screen.blit(self.render, self.rect.topleft)
 
         self.prev = message
