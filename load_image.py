@@ -1,6 +1,8 @@
 from os import path
 
 from pygame.image import load
+from pygame import transform
+from settings import SCALE
 
 
 def load_image(name, alpha=False):
@@ -9,6 +11,6 @@ def load_image(name, alpha=False):
     image = load(fullname)
     image = image.convert() if alpha else image.convert_alpha()
 
-    # image = pygame.transform.scale_by(image, SCALE).convert_alpha()
+    image = transform.scale_by(image, SCALE)
 
     return image

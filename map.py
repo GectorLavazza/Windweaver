@@ -69,13 +69,19 @@ class Map:
 
                 if tile == 'tree':
                     age = randint(0, 2)
+                    # self.world.surface.blit(self.world.images['tree_2'], pos)
+                    # self.world.orig_surface.blit(self.world.images['tree_2'], pos)
                     Tree(pos, self.world, age, self.tiles_g)
 
                 elif 'grass' in tile or 'flower' in tile:
+                    # self.world.surface.blit(self.world.images['grass'], pos)
+                    # self.world.orig_surface.blit(self.world.images['grass'], pos)
                     Grass(tile, pos, self.world, self.tiles_g)
 
                 elif tile == 'stone':
                     amount = randint(1, 3)
+                    # self.world.surface.blit(self.world.images['stone_2'], pos)
+                    # self.world.orig_surface.blit(self.world.images['stone_2'], pos)
                     Stone(pos, self.world, amount, self.tiles_g)
 
             print(f'Loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')

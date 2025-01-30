@@ -1,14 +1,14 @@
 FPS = 120
 
-TILE_SIZE = 8
-MAP_WIDTH, MAP_HEIGHT = 64, 64  # 48 x 48
-
 WIDTH, HEIGHT = 320, 180
-
-screen_width, screen_height = WIDTH, HEIGHT
+screen_width, screen_height = WIDTH * 4, HEIGHT * 4
+SCALE = screen_width // WIDTH
 screen_size = screen_width, screen_height
 
 CENTER = screen_width // 2, screen_height // 2
+
+TILE_SIZE = 8 * SCALE
+MAP_WIDTH, MAP_HEIGHT = 64, 64  # 48 x 48
 
 MAP_SIZE = TILE_SIZE * MAP_WIDTH, TILE_SIZE * MAP_HEIGHT
 

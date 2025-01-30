@@ -29,7 +29,7 @@ def main():
     # screen = pygame.transform.scale_by(screen, 1.1)
 
     sky = Sky(screen)
-    world = World(screen, MAP_SIZE, CENTER, sky)
+    world = World(screen, MAP_SIZE, sky)
 
     cursor_g = pygame.sprite.Group()
     tiles_g = pygame.sprite.Group()
@@ -43,8 +43,8 @@ def main():
 
     last_time = time()
 
-    resources = Text(screen, 10, 'white', (0, 0))
-    fps = Text(screen, 10, 'white', (screen_width, 0),
+    resources = Text(screen, 20, 'white', (0, 0))
+    fps = Text(screen, 20, 'white', (screen_width, 0),
                right_align=True)
 
     et = time()
@@ -88,6 +88,12 @@ def main():
                 if event.button in (1, 3):
                     cursor.pressed = False
 
+            if event.type == pygame.MOUSEWHEEL:
+                if not pygame.mouse.get_pressed()[1]:
+                    world.zoom(event.y)
+                    for t in tiles_g.sprites():
+                        t.zoom()
+
         screen.fill('black')
 
         world.update(dt)
@@ -104,7 +110,7 @@ def main():
         cursor.update()
 
         pygame.display.flip()
-        clock.tick()
+        clock.tick(FPS)
 
     pygame.quit()
     exit()

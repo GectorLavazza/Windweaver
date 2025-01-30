@@ -1,6 +1,6 @@
 from random import randint, choice
 
-from pygame import Rect, mouse
+from pygame import Rect, mouse, transform
 from pygame.sprite import Sprite
 
 from load_image import load_image
@@ -48,6 +48,9 @@ class Tile(Sprite):
         self.in_area = []
 
         self.image_set = False
+
+        self.orig_pos = self.rect.topleft
+        self.orig_rect = self.image.get_rect()
 
     def update(self, dt):
         if self.world.check_moving():
@@ -200,6 +203,14 @@ class Tile(Sprite):
                 Windmill(self.pos, self.world, self.groups())
 
             self.kill()
+
+    def zoom(self):
+        w = int(self.orig_rect.w * self.world.zoom_factor)
+        h = int(self.orig_rect.h * self.world.zoom_factor)
+        scaled_size = w - w % 2, h - h % 2
+        self.image = transform.scale(self.world.images[self.name], scaled_size)
+        self.rect = self.image.get_rect()
+        self.rect.topleft = self.orig_pos[0] * self.world.zoom_factor, self.orig_pos[1] * self.world.zoom_factor
 
 
 class Grass(Tile):

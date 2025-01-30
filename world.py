@@ -1,23 +1,25 @@
+import pygame
 from pygame import Vector2, mouse, Surface, Rect
 
 from load_image import load_image
-from settings import screen_width, screen_height, CENTER
+from settings import screen_width, screen_height, CENTER, SCALE
 
 
 class World:
-    def __init__(self, screen: Surface, size, center, sky):
+    def __init__(self, screen: Surface, size, sky):
 
         self.screen = screen
         self.screen_rect = screen.get_rect()
 
-        self.surface = Surface(size)
+        self.surface = Surface(size, pygame.SRCALPHA)
+        self.orig_surface = Surface(size, pygame.SRCALPHA)
 
         self.movement_type = 1
 
         self.rect = self.surface.get_rect()
-        self.rect.center = center
+        self.rect.center = CENTER
 
-        self.speed = 10
+        self.speed = 10 * SCALE
         self.edge_threshold = screen_height // 4
 
         self.dx = 0
@@ -75,6 +77,7 @@ class World:
         }
 
         self.offset = Vector2(self.rect.topleft) - Vector2(mouse.get_pos())
+        self.zoom_factor = 1
 
     def update(self, dt):
         if self.check_moving():
@@ -136,8 +139,8 @@ class World:
             speed_multiplier_x = max(0, min(1, self.dynamic_speed_x))
             speed_multiplier_y = max(0, min(1, self.dynamic_speed_y))
 
-            self.velocity.x = input_direction.x * self.speed * speed_multiplier_x * dt
-            self.velocity.y = input_direction.y * self.speed * speed_multiplier_y * dt
+            self.velocity.x = input_direction.x * self.speed * speed_multiplier_x * dt * self.zoom_factor ** -1
+            self.velocity.y = input_direction.y * self.speed * speed_multiplier_y * dt * self.zoom_factor ** -1
 
             if self.velocity.length() > self.speed:
                 self.velocity = self.velocity.normalize() * self.speed
@@ -145,12 +148,34 @@ class World:
             self.rect.x += self.velocity.x
             self.rect.y += self.velocity.y
 
-        self.rect.x = max(screen_width - self.rect.width, min(self.rect.x, 0))
-        self.rect.y = max(screen_height - self.rect.height,
-                          min(self.rect.y, 0))
+        # self.rect.x = max(screen_width - self.rect.width, min(self.rect.x, 0))
+        # self.rect.y = max(screen_height - self.rect.height,
+        #                   min(self.rect.y, 0))
 
         self.visible_rect.topleft = -Vector2(self.rect.topleft)
 
     def get_offset(self):
         self.offset = Vector2(self.rect.topleft) - Vector2(mouse.get_pos())
+
+    def zoom(self, d):
+            if d == -1 and self.zoom_factor <= 2:
+                self.zoom_factor += 0.05
+                w = int(self.screen_rect.w * self.zoom_factor)
+                h = int(self.screen_rect.h * self.zoom_factor)
+                scaled_size = w - w % 2, h - h % 2
+                self.surface = pygame.transform.scale(self.orig_surface, scaled_size)
+                pos = self.rect.topleft
+                self.rect = self.surface.get_rect()
+                self.rect.topleft = pos
+            elif d == 1 and self.zoom_factor >= 0.5:
+                self.zoom_factor -= 0.05
+
+                w = int(self.screen_rect.w * self.zoom_factor)
+                h = int(self.screen_rect.h * self.zoom_factor)
+                scaled_size = w - w % 2, h - h % 2
+                self.surface = pygame.transform.scale(self.orig_surface,
+                                                      scaled_size)
+                pos = self.rect.topleft
+                self.rect = self.surface.get_rect()
+                self.rect.topleft = pos
 
