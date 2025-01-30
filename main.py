@@ -70,12 +70,19 @@ def main():
                     world.current_build = 'mine'
                 if event.key == pygame.K_3:
                     world.current_build = 'windmill'
+
                 if event.key == pygame.K_F10:
                     pygame.display.toggle_fullscreen()
+
+                if event.key == pygame.K_F1:
+                    world.movement_type = 1 if world.movement_type == 2 else 2
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
                     cursor.pressed = True
+
+                if event.button == 2:
+                    world.get_offset()
 
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button in (1, 3):

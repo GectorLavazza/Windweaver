@@ -50,7 +50,7 @@ class Tile(Sprite):
         self.image_set = False
 
     def update(self, dt):
-        if self.world.check_mouse_edges():
+        if self.world.check_moving():
             self.move()
         if self.name not in (
                 'house', 'farmland_0', 'farmland_1', 'farmland_2',

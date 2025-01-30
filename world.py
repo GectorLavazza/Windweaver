@@ -1,7 +1,7 @@
 from pygame import Vector2, mouse, Surface, Rect
 
 from load_image import load_image
-from settings import screen_width, screen_height
+from settings import screen_width, screen_height, CENTER
 
 
 class World:
@@ -11,6 +11,8 @@ class World:
         self.screen_rect = screen.get_rect()
 
         self.surface = Surface(size)
+
+        self.movement_type = 1
 
         self.rect = self.surface.get_rect()
         self.rect.center = center
@@ -72,13 +74,15 @@ class World:
             'windmill_2': load_image('windmill_2'),
         }
 
+        self.offset = Vector2(self.rect.topleft) - Vector2(mouse.get_pos())
+
     def update(self, dt):
-        if self.check_mouse_edges():
+        if self.check_moving():
             self.move(dt)
 
         self.screen.blit(self.surface, (0, 0), self.visible_rect)
 
-    def check_mouse_edges(self):
+    def check_moving(self):
         mouse_x, mouse_y = mouse.get_pos()
 
         self.dx = 0
@@ -111,28 +115,42 @@ class World:
 
             self.dynamic_speed_y = distance_to_edge / self.edge_threshold
 
-        if self.dx or self.dy:
-            return True
+        if self.movement_type == 1:
+            if mouse.get_pressed()[1]:
+                return True
+        else:
+            if self.dx or self.dy:
+                return True
 
     def move(self, dt):
-        input_direction = Vector2(self.dx, self.dy)
-        if input_direction.length() > 0:
-            input_direction = input_direction.normalize()
+        mp = mouse.get_pos()
 
-        speed_multiplier_x = max(0, min(1, self.dynamic_speed_x))
-        speed_multiplier_y = max(0, min(1, self.dynamic_speed_y))
+        if self.movement_type == 1:
+            self.rect.topleft = self.offset + Vector2(mp)
 
-        self.velocity.x = input_direction.x * self.speed * speed_multiplier_x * dt
-        self.velocity.y = input_direction.y * self.speed * speed_multiplier_y * dt
+        else:
+            input_direction = Vector2(self.dx, self.dy)
+            if input_direction.length() > 0:
+                input_direction = input_direction.normalize()
 
-        if self.velocity.length() > self.speed:
-            self.velocity = self.velocity.normalize() * self.speed
+            speed_multiplier_x = max(0, min(1, self.dynamic_speed_x))
+            speed_multiplier_y = max(0, min(1, self.dynamic_speed_y))
 
-        self.rect.x += self.velocity.x
-        self.rect.y += self.velocity.y
+            self.velocity.x = input_direction.x * self.speed * speed_multiplier_x * dt
+            self.velocity.y = input_direction.y * self.speed * speed_multiplier_y * dt
+
+            if self.velocity.length() > self.speed:
+                self.velocity = self.velocity.normalize() * self.speed
+
+            self.rect.x += self.velocity.x
+            self.rect.y += self.velocity.y
 
         self.rect.x = max(screen_width - self.rect.width, min(self.rect.x, 0))
         self.rect.y = max(screen_height - self.rect.height,
                           min(self.rect.y, 0))
 
         self.visible_rect.topleft = -Vector2(self.rect.topleft)
+
+    def get_offset(self):
+        self.offset = Vector2(self.rect.topleft) - Vector2(mouse.get_pos())
+
