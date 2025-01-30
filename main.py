@@ -26,10 +26,12 @@ def main():
 
     flags = pygame.DOUBLEBUF | pygame.SCALED
     screen = pygame.display.set_mode(screen_size, flags, depth=8, vsync=1)
-    # screen = pygame.transform.scale_by(screen, 1.1)
+    pygame.display.set_caption('Some Game')
 
     sky = Sky(screen)
     world = World(screen, MAP_SIZE, CENTER, sky)
+
+    pygame.display.set_icon(pygame.transform.scale_by(world.images['house'], 8))
 
     cursor_g = pygame.sprite.Group()
     tiles_g = pygame.sprite.Group()
