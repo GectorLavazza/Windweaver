@@ -63,6 +63,8 @@ def main():
     zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
     zone_surface.set_alpha(40)
 
+    show_zone = True
+
     while running:
         dt = time() - last_time
         dt *= 60
@@ -90,6 +92,8 @@ def main():
 
                 if event.key == pygame.K_F1:
                     world.movement_type = 1 if world.movement_type == 2 else 2
+                if event.key == pygame.K_F2:
+                    show_zone = False if show_zone else True
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
@@ -126,9 +130,21 @@ def main():
 
         zone_surface.fill((0, 0, 0, 0))
         for b in buildings_g.sprites() + pathways_g.sprites():
-            pygame.draw.rect(zone_surface, 'blue', b.zone)
+            pygame.draw.rect(zone_surface, 'green', b.zone)
 
-        screen.blit(zone_surface, (0, 0))
+        if show_zone:
+            screen.blit(zone_surface, (0, 0))
+            a = 255
+        else:
+            a = 128
+        mask = pygame.mask.from_surface(zone_surface)
+        outline = mask.outline()
+        surface = mask.to_surface()
+        surface.fill((0, 0, 0, 0))
+        for p in outline:
+            surface.set_at(p, (0, 255, 0, a))
+        surface.set_colorkey((0, 0, 0, 0))
+        screen.blit(surface, (0, 0))
 
         sky.update(dt)
 

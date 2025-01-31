@@ -76,6 +76,7 @@ class Tile(Sprite):
 
     def draw_build(self):
         image = self.world.build_images[self.world.current_build]
+        image.set_alpha(128)
         self.world.screen.blit(image, self.rect.topleft)
 
     def on_update(self, dt):

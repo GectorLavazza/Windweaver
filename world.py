@@ -1,7 +1,10 @@
+import pygame.surface
 from pygame import Vector2, mouse, Surface, Rect
 
 from load_image import load_image
 from settings import screen_width, screen_height, CENTER
+
+from os import listdir
 
 
 class World:
@@ -27,7 +30,7 @@ class World:
         self.velocity = Vector2(0, 0)
 
         self.wood = 10
-        self.stone = 10
+        self.stone = 20
         self.food = 100
 
         self.current_build = 'house'
@@ -40,8 +43,12 @@ class World:
                                  self.screen.get_height())
         self.visible_rect = self.visible_rect.clip(self.surface.get_rect())
 
-        self.hover_outline = load_image('hover')
-        self.pressed_outline = load_image('pressed')
+        self.hover_outline = Surface((8, 8), pygame.SRCALPHA)
+        self.hover_outline.fill('white')
+        self.hover_outline.set_alpha(60)
+        self.pressed_outline = Surface((8, 8), pygame.SRCALPHA)
+        self.pressed_outline.fill('white')
+        self.pressed_outline.set_alpha(100)
 
         self.build_images = {
             'house': load_image('house'),
@@ -50,26 +57,10 @@ class World:
             'pathway': load_image('pathway')
         }
 
-        self.images = {
-            'grass': load_image('grass'),
-            'tall_grass': load_image('tall_grass'),
-            'farmland_0': load_image('farmland_0'),
-            'farmland_1': load_image('farmland_1'),
-            'farmland_2': load_image('farmland_2'),
-            'flower': load_image('flower'),
-            'house': load_image('house'),
-            'house_light': load_image('house_light'),
-            'mine': load_image('mine'),
-            'pathway': load_image('pathway'),
-            'stone_1': load_image('stone_1'),
-            'stone_2': load_image('stone_2'),
-            'stone_3': load_image('stone_3'),
-            'tree_0': load_image('tree_0'),
-            'tree_1': load_image('tree_1'),
-            'tree_2': load_image('tree_2'),
-            'windmill_1': load_image('windmill_1'),
-            'windmill_2': load_image('windmill_2'),
-        }
+        images = [load_image(s.replace('.png', '')) for s in listdir('assets/sprites')]
+        keys = [s.replace('.png', '') for s in listdir('assets/sprites')]
+
+        self.images = dict(zip(keys, images))
 
         self.offset = Vector2(self.rect.topleft) - Vector2(mouse.get_pos())
 
