@@ -51,9 +51,9 @@ def main():
     last_time = time()
 
     resources = Text(screen, 10, 'white', (0, 0))
-    objects = Text(screen, 10, 'white', (0, 10))
-    build = Text(screen, 10, 'white', (0, 20))
-    fps = Text(screen, 10, 'white', (screen_width, 0),
+    objects = Text(screen, 10, 'white', (WIDTH, 0), right_align=True)
+    build = Text(screen, 10, 'white', (0, HEIGHT - 10))
+    fps = Text(screen, 10, 'white', (screen_width, HEIGHT - 10),
                right_align=True)
 
     et = time()
@@ -86,6 +86,8 @@ def main():
                     world.current_build = 'windmill'
                 if event.key == pygame.K_4:
                     world.current_build = 'pathway'
+                if event.key == pygame.K_5:
+                    world.current_build = 'food_storage'
 
                 if event.key == pygame.K_F10:
                     pygame.display.toggle_fullscreen()

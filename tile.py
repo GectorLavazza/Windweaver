@@ -1,6 +1,6 @@
 from random import randint, choice
 
-from pygame import Rect, mouse
+from pygame import Rect, mouse, draw
 from pygame.sprite import Sprite
 
 from load_image import load_image
@@ -332,6 +332,7 @@ class House(Tile):
         self.zone.center = self.rect.center
 
         self.food = 10
+        self.max_food = 10
 
     def on_update(self, dt):
         if self.world.sky.dark:
@@ -344,6 +345,19 @@ class House(Tile):
             self.tick = self.max_tick
             self.world.food -= 1
             self.food -= 1
+
+    def draw_hover(self):
+        self.world.screen.blit(self.world.hover_outline, self.rect.topleft)
+        self.draw_stats()
+
+    def draw_pressed(self):
+        self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
+        self.draw_stats()
+
+    def draw_stats(self):
+        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2, self.rect.w, 1))
+        draw.rect(self.world.screen, '#e0dca4',
+                  Rect(self.rect.x, self.rect.y - 2, self.rect.w / self.max_food * self.food, 1))
 
 
 class Mine(Tile):

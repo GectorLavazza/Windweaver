@@ -54,7 +54,8 @@ class World:
             'house': load_image('house'),
             'mine': load_image('mine'),
             'windmill': load_image('windmill_1'),
-            'pathway': load_image('pathway')
+            'pathway': load_image('pathway'),
+            'food_storage': load_image('food_storage')
         }
 
         images = [load_image(s.replace('.png', '')) for s in listdir('assets/sprites')]
