@@ -55,7 +55,7 @@ class World:
             'mine': load_image('mine'),
             'windmill': load_image('windmill_1'),
             'pathway': load_image('pathway'),
-            'food_storage': load_image('food_storage')
+            'barn': load_image('barn')
         }
 
         images = [load_image(s.replace('.png', '')) for s in listdir('assets/sprites')]
@@ -71,12 +71,14 @@ class World:
         self.houses = 0
         self.mines = 0
         self.windmills = 0
+        self.barns = 0
 
     def update(self, dt):
         if self.check_moving():
             self.move(dt)
 
         self.screen.blit(self.surface, (0, 0), self.visible_rect)
+        self.count_objects()
 
     def check_moving(self):
         mouse_x, mouse_y = mouse.get_pos()
@@ -122,6 +124,7 @@ class World:
         self.houses = len(list(filter(lambda b: 'house' in b.name, self.buildings_g.sprites())))
         self.mines = len(list(filter(lambda b: 'mine' in b.name, self.buildings_g.sprites())))
         self.windmills = len(list(filter(lambda b: 'windmill' in b.name, self.buildings_g.sprites())))
+        self.barns = len(list(filter(lambda b: 'barn' in b.name, self.buildings_g.sprites())))
 
     def move(self, dt):
         mp = mouse.get_pos()

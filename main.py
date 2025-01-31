@@ -62,8 +62,11 @@ def main():
 
     zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
     zone_surface.set_alpha(40)
+    usage_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
+    usage_surface.set_alpha(40)
 
-    show_zone = True
+    show_zone = False
+    show_usage = False
 
     while running:
         dt = time() - last_time
@@ -87,7 +90,7 @@ def main():
                 if event.key == pygame.K_4:
                     world.current_build = 'pathway'
                 if event.key == pygame.K_5:
-                    world.current_build = 'food_storage'
+                    world.current_build = 'barn'
 
                 if event.key == pygame.K_F10:
                     pygame.display.toggle_fullscreen()
@@ -96,6 +99,8 @@ def main():
                     world.movement_type = 1 if world.movement_type == 2 else 2
                 if event.key == pygame.K_F2:
                     show_zone = False if show_zone else True
+                if event.key == pygame.K_F3:
+                    show_usage = False if show_usage else True
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
@@ -147,6 +152,21 @@ def main():
             surface.set_at(p, (0, 255, 0, a))
         surface.set_colorkey((0, 0, 0, 0))
         screen.blit(surface, (0, 0))
+
+        # usage_surface.fill((0, 0, 0, 0))
+        # for b in [b for b in buildings_g.sprites() if b.name == 'barn']:
+        #     pygame.draw.rect(usage_surface, 'blue', b.usage_zone)
+        #
+        # if show_usage:
+        #     a = 128
+        #     mask = pygame.mask.from_surface(usage_surface)
+        #     outline = mask.outline()
+        #     surface = mask.to_surface()
+        #     surface.fill((0, 0, 0, 0))
+        #     for p in outline:
+        #         surface.set_at(p, (0, 0, 255, a))
+        #     surface.set_colorkey((0, 0, 0, 0))
+        #     screen.blit(surface, (0, 0))
 
         sky.update(dt)
 

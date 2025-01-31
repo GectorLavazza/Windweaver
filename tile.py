@@ -1,6 +1,7 @@
 from random import randint, choice
 
-from pygame import Rect, mouse, draw
+import pygame
+from pygame import Rect, mouse, draw, Surface
 from pygame.sprite import Sprite
 
 from load_image import load_image
@@ -53,6 +54,11 @@ class Tile(Sprite):
                          self.rect.width * 3,
                          self.rect.height * 3)
         self.zone.center = self.rect.center
+
+        self.usage_zone = Rect(*self.rect.topleft,
+                               self.rect.width * 7,
+                               self.rect.height * 7)
+        self.usage_zone.center = self.rect.center
 
     def update(self, dt):
         if self.world.check_moving():
@@ -123,6 +129,7 @@ class Tile(Sprite):
         self.collision_rect.center = self.rect.center
         self.area.center = self.rect.center
         self.zone.center = self.rect.center
+        self.usage_zone.center = self.rect.center
 
     def in_zone(self):
         return (any([self.rect.colliderect(p.zone) for p in
@@ -176,6 +183,14 @@ class Tile(Sprite):
                 if any(check_1) and not any(check_2) and self.world.houses // 2 > self.world.windmills:
                     self.available = True
 
+            elif build == 'barn':
+                check_1 = [self.rect.colliderect(p.collision_rect) and
+                           (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                           for p in self.world.pathways_g.sprites()]
+
+                if any(check_1):
+                    self.available = True
+
     def buy(self):
         build = self.world.current_build
         stone = STONE_COST[build]
@@ -196,6 +211,8 @@ class Tile(Sprite):
                         Windmill(self.pos, self.world, self.world.buildings_g)
                     elif build == 'pathway':
                         Pathway(self.pos, self.world, self.world.pathways_g)
+                    elif build == 'barn':
+                        Barn(self.pos, self.world, self.world.buildings_g)
                     self.kill()
 
                 else:
@@ -310,18 +327,11 @@ class Stone(Tile):
 class House(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('house', pos, world, *group)
-        self.world.houses += 1
-
         if not self.world.house_placed:
             self.world.house_placed = True
 
         self.light = load_image('house_light')
         self.no_light = load_image('house')
-
-        self.max_spread_tick = 120
-        self.spread_tick = self.max_spread_tick
-
-        self.spread_count = 1
 
         self.max_tick = 600
         self.tick = self.max_tick
@@ -343,8 +353,14 @@ class House(Tile):
         self.tick -= dt
         if self.tick <= 0:
             self.tick = self.max_tick
-            self.world.food -= 1
-            self.food -= 1
+
+            v = [p for p in self.world.buildings_g.sprites() if
+                         self.rect.colliderect(p.usage_zone) and p.name == 'barn' and p.food > 0]
+            print(v)
+            if v:
+                barn = choice(v)
+                barn.food -= 1
+
 
     def draw_hover(self):
         self.world.screen.blit(self.world.hover_outline, self.rect.topleft)
@@ -352,7 +368,7 @@ class House(Tile):
 
     def draw_pressed(self):
         self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
-        self.draw_stats()
+        # self.draw_stats()
 
     def draw_stats(self):
         draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2, self.rect.w, 1))
@@ -363,8 +379,6 @@ class House(Tile):
 class Mine(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('mine', pos, world, *group)
-        self.world.mines += 1
-
         self.around = ['stone' in n.name for n in self.colliding].count(True)
 
         self.max_tick = 1800
@@ -388,8 +402,6 @@ class Windmill(Tile):
 
         self.max_tick = 60
         self.tick = self.max_tick
-
-        self.world.windmills += 1
 
         self.frame = 1
         self.max_animation_tick = 30
@@ -472,3 +484,37 @@ class Farmland(Tile):
 class Pathway(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('pathway', pos, world, *group)
+
+
+class Barn(Tile):
+    def __init__(self, pos, world, *group):
+        super().__init__('barn', pos, world, *group)
+
+        if not self.world.house_placed:
+            self.world.house_placed = True
+
+        self.zone = Rect(*self.rect.topleft,
+                         self.rect.width * 5,
+                         self.rect.height * 5)
+        self.zone.center = self.rect.center
+
+        self.food = 50
+        self.capacity = 50
+
+    def draw_hover(self):
+        self.world.screen.blit(self.world.hover_outline, self.rect.topleft)
+        self.draw_stats()
+
+    def draw_pressed(self):
+        self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
+        self.draw_stats()
+
+    def draw_stats(self):
+        surface = Surface(self.usage_zone.size, pygame.SRCALPHA)
+        surface.set_alpha(40)
+        surface.fill('blue')
+        self.world.screen.blit(surface, self.usage_zone.topleft)
+        draw.rect(self.world.screen, 'blue', self.usage_zone, 1)
+        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2, self.rect.w, 1))
+        draw.rect(self.world.screen, '#e0dca4',
+                  Rect(self.rect.x, self.rect.y - 2, self.rect.w / self.capacity * self.food, 1))
