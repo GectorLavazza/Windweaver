@@ -17,9 +17,11 @@ GROWTH_MAX = 36000
 
 WOOD_COST = {'house': 0,
              'mine': 0,
-             'windmill': 0}
+             'windmill': 0,
+             'pathway': 0}
 STONE_COST = {'house': 0,
              'mine': 0,
-             'windmill': 0}
+             'windmill': 0,
+              'pathway': 0}
 
 DAY_TIME = 9000

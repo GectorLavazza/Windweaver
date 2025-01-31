@@ -5,7 +5,7 @@ from settings import screen_width, screen_height, CENTER
 
 
 class World:
-    def __init__(self, screen: Surface, size, center, sky):
+    def __init__(self, screen: Surface, size, center, sky, *groups):
 
         self.screen = screen
         self.screen_rect = screen.get_rect()
@@ -48,9 +48,10 @@ class World:
         self.pressed_outline = load_image('pressed')
 
         self.build_images = {
-            'house': load_image('build_house'),
-            'mine': load_image('build_mine'),
-            'windmill': load_image('windmill_build')
+            'house': load_image('house'),
+            'mine': load_image('mine'),
+            'windmill': load_image('windmill_1'),
+            'pathway': load_image('pathway')
         }
 
         self.images = {
@@ -75,6 +76,8 @@ class World:
         }
 
         self.offset = Vector2(self.rect.topleft) - Vector2(mouse.get_pos())
+
+        self.buildings_g, self.grass_g, self.trees_g, self.stones_g, self.pathways_g = groups
 
     def update(self, dt):
         if self.check_moving():

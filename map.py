@@ -6,7 +6,7 @@ from world import World
 
 
 class Map:
-    def __init__(self, world: World, tiles_g):
+    def __init__(self, world: World, *groups):
         self.scale = 10.0
         self.octaves = 5
         self.persistence = 0.55
@@ -18,7 +18,7 @@ class Map:
         self.seed = randint(0, 100)
         print(f'seed: {self.seed}')
 
-        self.tiles_g = tiles_g
+        self.grass_g, self.trees_g, self.stones_g = groups
 
         self.get_map()
 
@@ -69,14 +69,14 @@ class Map:
 
                 if tile == 'tree':
                     age = randint(0, 2)
-                    Tree(pos, self.world, age, self.tiles_g)
+                    Tree(pos, self.world, age, self.trees_g)
 
                 elif 'grass' in tile or 'flower' in tile:
-                    Grass(tile, pos, self.world, self.tiles_g)
+                    Grass(tile, pos, self.world, self.grass_g)
 
                 elif tile == 'stone':
                     amount = randint(1, 3)
-                    Stone(pos, self.world, amount, self.tiles_g)
+                    Stone(pos, self.world, amount, self.stones_g)
 
             print(f'Loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
 

@@ -49,6 +49,11 @@ class Tile(Sprite):
 
         self.image_set = False
 
+        self.zone = Rect(*self.rect.topleft,
+                         self.rect.width * 3,
+                         self.rect.height * 3)
+        self.zone.center = self.rect.center
+
     def update(self, dt):
         if self.world.check_moving():
             self.move()
@@ -108,98 +113,101 @@ class Tile(Sprite):
 
     def handle_mouse(self):
         mouse_pos = mouse.get_pos()
-        if self.rect.collidepoint(mouse_pos):
-            if not self.colliding_checked:
-                self.get_colliding()
-                self.get_in_area()
-                self.colliding_checked = True
 
-                if self.name == 'grass':
-                    self.check_build()
+        if self.in_zone():
+            if self.rect.collidepoint(mouse_pos):
+                if not self.colliding_checked:
+                    self.get_colliding()
+                    self.get_in_area()
+                    self.colliding_checked = True
 
-            if mouse.get_pressed()[0] or mouse.get_pressed()[2]:
-                self.draw_pressed()
+                    if self.name == 'grass':
+                        self.check_build()
 
-                if not self.clicked:
-                    self.on_click()
-                    self.clicked = True
+                if mouse.get_pressed()[0] or mouse.get_pressed()[2]:
+                    self.draw_pressed()
 
+                    if not self.clicked:
+                        self.on_click()
+                        self.clicked = True
+
+                else:
+                    self.draw_hover()
+
+                    if self.available:
+                        self.draw_build()
+
+                    self.clicked = False
             else:
-                self.draw_hover()
-
-                if self.available:
-                    self.draw_build()
-
+                self.colliding_checked = False
                 self.clicked = False
-        else:
-            self.colliding_checked = False
-            self.clicked = False
 
     def move(self):
         self.rect.topleft = (self.pos[0] + self.world.rect.x,
                              self.pos[1] + self.world.rect.y)
         self.collision_rect.center = self.rect.center
         self.area.center = self.rect.center
+        self.zone.center = self.rect.center
+
+    def in_zone(self):
+        return (any([self.rect.colliderect(p.zone) for p in
+             self.world.pathways_g.sprites() + self.world.buildings_g.sprites()])
+                or not self.world.house_placed)
 
     def check_build(self):
         build = self.world.current_build
-        if build == 'house':
-            names = [n.name for n in self.colliding]
-            check = [n in (
-                'grass', 'flower', 'pathway', 'farmland_0', 'farmland_1',
-                'farmland_2') for n in names]
-            if not self.world.house_placed and all(
-                    check) or self.world.house_placed and all(
-                check) and names.count('pathway') > 0:
+        self.available = False
+
+        if self.in_zone():
+            if build == 'pathway':
+                check_1 = [self.rect.colliderect(p.collision_rect) and
+                           (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                           for p in self.world.pathways_g.sprites()]
+                check_2 = [self.rect.colliderect(p.collision_rect) and
+                           (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                           for p in self.world.buildings_g.sprites()]
+
+                if any(check_1) or any(check_2):
+                    self.available = True
+
+            elif build == 'house':
+                if not self.world.house_placed:
+                    self.available = True
+                else:
+                    check_1 = [self.rect.colliderect(p.collision_rect) and
+                           (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                           for p in self.world.pathways_g.sprites()]
+
+                    if any(check_1):
+                        self.available = True
+
+            elif build == 'mine':
                 self.available = True
-            else:
-                self.available = False
+            elif build == 'windmill':
+                self.available = True
 
-        elif build == 'mine':
-            check = ['stone' in n.name for n in self.colliding]
-            check2 = ['tree' not in n.name and 'mine' not in n.name for n in
-                      self.colliding]
-            if check.count(True) > 2 and all(check2) and self.colliding.count(
-                    'tall_grass') == 0 and self.name == 'grass':
-                if self.world.houses // 5 >= (self.world.mines + 1):
-                    self.available = True
-            else:
-                self.available = False
-
-        elif build == 'windmill':
-            check = [n.name in (
-                'grass', 'pathway', 'farmland_0', 'farmland_1', 'farmland_2')
-                     for n
-                     in self.colliding]
-            in_area = [n.name for n in self.in_area]
-            if all(check) and self.name == 'grass' and in_area.count(
-                    'house') + in_area.count('windmill_1') + in_area.count(
-                'windmill_2') + in_area.count(
-                'farmland_0') + in_area.count(
-                'farmland_1') + in_area.count('farmland_2') > 0:
-                if self.world.houses // 2 >= (self.world.windmills + 1):
-                    self.available = True
-            else:
-                self.available = False
 
     def buy(self):
         build = self.world.current_build
         stone = STONE_COST[build]
         wood = WOOD_COST[build]
 
-        if self.world.stone - stone >= 0 and self.world.wood - wood >= 0:
+        if self.available:
+            if self.world.stone - stone >= 0 and self.world.wood - wood >= 0:
 
-            self.world.stone -= stone
-            self.world.wood -= wood
+                self.world.stone -= stone
+                self.world.wood -= wood
 
-            if build == 'house':
-                House(self.pos, self.world, self.groups())
-            elif build == 'mine':
-                Mine(self.pos, self.world, self.groups())
-            elif build == 'windmill':
-                Windmill(self.pos, self.world, self.groups())
+                if build == 'house':
+                    House(self.pos, self.world, self.world.buildings_g)
+                elif build == 'mine':
+                    Mine(self.pos, self.world, self.world.buildings_g)
+                elif build == 'windmill':
+                    Windmill(self.pos, self.world, self.world.buildings_g)
+                elif build == 'pathway':
+                    Pathway(self.pos, self.world, self.world.pathways_g)
 
-            self.kill()
+                self.kill()
 
 
 class Grass(Tile):
@@ -320,10 +328,13 @@ class House(Tile):
 
         self.spread_count = 1
 
-        self.pathway = self.make_pathway()
-
         self.max_tick = 3600
         self.tick = self.max_tick
+
+        self.zone = Rect(*self.rect.topleft,
+                         self.rect.width * 5,
+                         self.rect.height * 5)
+        self.zone.center = self.rect.center
 
     def on_update(self, dt):
         if self.world.sky.dark:
@@ -331,32 +342,10 @@ class House(Tile):
         else:
             self.image = self.no_light
 
-        if self.pathway:
-            if self.spread_count < 3:
-                self.spread_tick -= dt
-                if self.spread_tick <= 0:
-                    self.spread_count += 1
-                    self.spread_tick = self.max_spread_tick
-                    self.pathway.spread()
-
         self.tick -= dt
         if self.tick <= 0:
             self.tick = self.max_tick
             self.world.food -= 1
-
-    def make_pathway(self):
-        sides = self.get_sides()
-        tiles = list(filter(lambda
-                                n: n.name == 'grass' and n.rect.topleft != self.rect.topleft,
-                            sides))
-        if tiles:
-            tile = choice(tiles)
-            pathway = Pathway(tile.pos, tile.world, self.groups())
-            tile.kill()
-
-            return pathway
-
-        return 0
 
 
 class Mine(Tile):
@@ -368,6 +357,11 @@ class Mine(Tile):
 
         self.max_tick = 3600
         self.tick = self.max_tick
+
+        self.zone = Rect(*self.rect.topleft,
+                         self.rect.width * 5,
+                         self.rect.height * 5)
+        self.zone.center = self.rect.center
 
     def on_update(self, dt):
         self.tick -= dt
@@ -394,6 +388,11 @@ class Windmill(Tile):
             2: load_image('windmill_2')
         }
 
+        self.zone = Rect(*self.rect.topleft,
+                         self.rect.width * 5,
+                         self.rect.height * 5)
+        self.zone.center = self.rect.center
+
     def on_update(self, dt):
         self.tick -= dt
         if self.tick <= 0:
@@ -416,7 +415,7 @@ class Windmill(Tile):
             tiles = list(filter(lambda n: n.name == 'grass', self.colliding))
             if tiles:
                 tile = choice(tiles)
-                Farmland(tile.pos, tile.world, self.groups())
+                Farmland(tile.pos, tile.world, self.world.grass_g)
                 tile.kill()
 
 
@@ -475,18 +474,3 @@ class Farmland(Tile):
 class Pathway(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('pathway', pos, world, *group)
-
-        self.max_spread_tick = 120
-        self.spread_tick = self.max_spread_tick
-
-        self.spreaded = False
-
-    def spread(self):
-        sides = self.get_sides()
-        tiles = list(filter(lambda n: n.name == 'grass', sides))
-        check = [n.name for n in self.colliding]
-        if tiles and check.count('pathway') < 2:
-            tile = choice(tiles)
-            Pathway(tile.pos, tile.world, self.groups())
-            tile.kill()
-            self.spreaded = True

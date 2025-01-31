@@ -28,15 +28,19 @@ def main():
     screen = pygame.display.set_mode(screen_size, flags, depth=8, vsync=1)
     pygame.display.set_caption('Some Game')
 
+    cursor_g = pygame.sprite.Group()
+    buildings_g = pygame.sprite.Group()
+    grass_g = pygame.sprite.Group()
+    trees_g = pygame.sprite.Group()
+    stones_g = pygame.sprite.Group()
+    pathways_g = pygame.sprite.Group()
+
     sky = Sky(screen)
-    world = World(screen, MAP_SIZE, CENTER, sky)
+    world = World(screen, MAP_SIZE, CENTER, sky, buildings_g, grass_g, trees_g, stones_g, pathways_g)
 
     pygame.display.set_icon(pygame.transform.scale_by(world.images['house'], 8))
 
-    cursor_g = pygame.sprite.Group()
-    tiles_g = pygame.sprite.Group()
-
-    map = Map(world, tiles_g)
+    map = Map(world, grass_g, trees_g, stones_g)
 
     cursor = Cursor(cursor_g)
 
@@ -46,12 +50,16 @@ def main():
     last_time = time()
 
     resources = Text(screen, 10, 'white', (0, 0))
+    build = Text(screen, 10, 'white', (0, 10))
     fps = Text(screen, 10, 'white', (screen_width, 0),
                right_align=True)
 
     et = time()
 
     print(f'Startup time: {et - st}')
+
+    zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
+    zone_surface.set_alpha(40)
 
     while running:
         dt = time() - last_time
@@ -72,6 +80,8 @@ def main():
                     world.current_build = 'mine'
                 if event.key == pygame.K_3:
                     world.current_build = 'windmill'
+                if event.key == pygame.K_4:
+                    world.current_build = 'pathway'
 
                 if event.key == pygame.K_F10:
                     pygame.display.toggle_fullscreen()
@@ -94,12 +104,31 @@ def main():
 
         world.update(dt)
 
-        tiles_g.draw(screen)
-        tiles_g.update(dt)
+        trees_g.draw(screen)
+        trees_g.update(dt)
+
+        stones_g.draw(screen)
+        stones_g.update(dt)
+
+        grass_g.draw(screen)
+        grass_g.update(dt)
+
+        pathways_g.draw(screen)
+        pathways_g.update(dt)
+
+        buildings_g.draw(screen)
+        buildings_g.update(dt)
+
+        zone_surface.fill((0, 0, 0, 0))
+        for b in buildings_g.sprites() + pathways_g.sprites():
+            pygame.draw.rect(zone_surface, 'blue', b.zone)
+
+        screen.blit(zone_surface, (0, 0))
 
         sky.update(dt)
 
         resources.update(f'W:{world.wood} S:{world.stone} F:{world.food}')
+        build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')
 
         cursor_g.draw(screen)
