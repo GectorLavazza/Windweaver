@@ -26,17 +26,13 @@ class World:
         self.dynamic_speed_y = 0
         self.velocity = Vector2(0, 0)
 
-        self.wood = 0
-        self.stone = 0
+        self.wood = 10
+        self.stone = 10
         self.food = 100
 
         self.current_build = 'house'
 
         self.house_placed = False
-
-        self.houses = 0
-        self.mines = 0
-        self.windmills = 0
 
         self.sky = sky
 
@@ -77,7 +73,12 @@ class World:
 
         self.offset = Vector2(self.rect.topleft) - Vector2(mouse.get_pos())
 
-        self.buildings_g, self.grass_g, self.trees_g, self.stones_g, self.pathways_g = groups
+        self.buildings_g, self.grass_g, self.trees_g, self.stones_g, self.pathways_g, self.farmland_g = groups
+        self.groups = groups
+
+        self.houses = 0
+        self.mines = 0
+        self.windmills = 0
 
     def update(self, dt):
         if self.check_moving():
@@ -124,6 +125,11 @@ class World:
         else:
             if self.dx or self.dy:
                 return True
+
+    def count_objects(self):
+        self.houses = len(list(filter(lambda b: 'house' in b.name, self.buildings_g.sprites())))
+        self.mines = len(list(filter(lambda b: 'mine' in b.name, self.buildings_g.sprites())))
+        self.windmills = len(list(filter(lambda b: 'windmill' in b.name, self.buildings_g.sprites())))
 
     def move(self, dt):
         mp = mouse.get_pos()

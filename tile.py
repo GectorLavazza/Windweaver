@@ -87,38 +87,12 @@ class Tile(Sprite):
     def on_kill(self):
         pass
 
-    def get_colliding(self):
-        self.colliding.clear()
-        for other in self.groups()[0]:
-            if self.collision_rect.colliderect(other.rect):
-                if other != self:
-                    self.colliding.append(other)
-
-    def get_in_area(self):
-        self.in_area.clear()
-        for other in self.groups()[0]:
-            if self.area.colliderect(other.rect):
-                if other != self:
-                    self.in_area.append(other)
-
-    def get_sides(self):
-        sides = []
-
-        self.get_colliding()
-        for other in self.colliding:
-            if other.rect.x == self.rect.x or other.rect.y == self.rect.y:
-                sides.append(other)
-
-        return sides
-
     def handle_mouse(self):
         mouse_pos = mouse.get_pos()
 
         if self.in_zone():
             if self.rect.collidepoint(mouse_pos):
                 if not self.colliding_checked:
-                    self.get_colliding()
-                    self.get_in_area()
                     self.colliding_checked = True
 
                     if self.name == 'grass':
@@ -151,7 +125,7 @@ class Tile(Sprite):
 
     def in_zone(self):
         return (any([self.rect.colliderect(p.zone) for p in
-             self.world.pathways_g.sprites() + self.world.buildings_g.sprites()])
+                     self.world.pathways_g.sprites() + self.world.buildings_g.sprites()])
                 or not self.world.house_placed)
 
     def check_build(self):
@@ -175,17 +149,31 @@ class Tile(Sprite):
                     self.available = True
                 else:
                     check_1 = [self.rect.colliderect(p.collision_rect) and
-                           (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
-                           for p in self.world.pathways_g.sprites()]
+                               (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                               for p in self.world.pathways_g.sprites()]
 
                     if any(check_1):
                         self.available = True
 
             elif build == 'mine':
-                self.available = True
-            elif build == 'windmill':
-                self.available = True
+                check_1 = [self.rect.colliderect(p.collision_rect) and
+                           (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                           for p in self.world.pathways_g.sprites()]
+                check_2 = [self.rect.colliderect(p.collision_rect)
+                           for p in self.world.stones_g.sprites()]
+                check_3 = [self.rect.colliderect(p.collision_rect) for p in self.world.buildings_g.sprites()]
 
+                if any(check_1) and check_2.count(True) > 1 and not any(check_3) and self.world.houses // 4 > self.world.mines:
+                    self.available = True
+
+            elif build == 'windmill':
+                check_1 = [self.rect.colliderect(p.collision_rect) and
+                           (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                           for p in self.world.pathways_g.sprites() + self.world.farmland_g.sprites()]
+                check_2 = [self.rect.colliderect(p.collision_rect) for p in self.world.buildings_g.sprites()]
+
+                if any(check_1) and not any(check_2) and self.world.houses // 2 > self.world.windmills:
+                    self.available = True
 
     def buy(self):
         build = self.world.current_build
@@ -198,16 +186,22 @@ class Tile(Sprite):
                 self.world.stone -= stone
                 self.world.wood -= wood
 
-                if build == 'house':
-                    House(self.pos, self.world, self.world.buildings_g)
-                elif build == 'mine':
-                    Mine(self.pos, self.world, self.world.buildings_g)
-                elif build == 'windmill':
-                    Windmill(self.pos, self.world, self.world.buildings_g)
-                elif build == 'pathway':
-                    Pathway(self.pos, self.world, self.world.pathways_g)
+                if self.world.house_placed:
+                    if build == 'house':
+                        House(self.pos, self.world, self.world.buildings_g)
+                    elif build == 'mine':
+                        Mine(self.pos, self.world, self.world.buildings_g)
+                    elif build == 'windmill':
+                        Windmill(self.pos, self.world, self.world.buildings_g)
+                    elif build == 'pathway':
+                        Pathway(self.pos, self.world, self.world.pathways_g)
+                    self.kill()
 
-                self.kill()
+                else:
+                    if build == 'house':
+                        House(self.pos, self.world, self.world.buildings_g)
+
+                        self.kill()
 
 
 class Grass(Tile):
@@ -220,7 +214,7 @@ class Grass(Tile):
         if randint(1, 10) == 1:
 
             if randint(1, 1000) == 1:
-                Tree(self.pos, self.world, 0, self.groups())
+                Tree(self.pos, self.world, 0, self.world.trees_g)
                 self.kill()
             elif randint(1, 500) == 1:
                 self.name = 'flower'
@@ -269,7 +263,7 @@ class Tree(Tile):
                 self.on_kill()
 
     def on_kill(self):
-        Grass('grass', self.pos, self.world, self.groups())
+        Grass('grass', self.pos, self.world, self.world.grass_g)
 
         self.world.wood += self.age + 1
         self.kill()
@@ -307,7 +301,7 @@ class Stone(Tile):
                 self.on_kill()
 
     def on_kill(self):
-        Grass('grass', self.pos, self.world, self.groups())
+        Grass('grass', self.pos, self.world, self.world.grass_g)
         self.world.stone += self.amount
         self.kill()
 
@@ -328,7 +322,7 @@ class House(Tile):
 
         self.spread_count = 1
 
-        self.max_tick = 3600
+        self.max_tick = 600
         self.tick = self.max_tick
 
         self.zone = Rect(*self.rect.topleft,
@@ -355,7 +349,7 @@ class Mine(Tile):
 
         self.around = ['stone' in n.name for n in self.colliding].count(True)
 
-        self.max_tick = 3600
+        self.max_tick = 1800
         self.tick = self.max_tick
 
         self.zone = Rect(*self.rect.topleft,
@@ -374,7 +368,7 @@ class Windmill(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('windmill_1', pos, world, *group)
 
-        self.max_tick = 120
+        self.max_tick = 60
         self.tick = self.max_tick
 
         self.world.windmills += 1
@@ -411,11 +405,11 @@ class Windmill(Tile):
 
     def spread(self):
         if randint(1, 2) == 1:
-            self.get_colliding()
-            tiles = list(filter(lambda n: n.name == 'grass', self.colliding))
+            tiles = [p for p in self.world.grass_g.sprites() + self.world.pathways_g.sprites() if
+                     self.rect.colliderect(p.collision_rect) and p.name in ('grass', 'pathway') and p.in_zone()]
             if tiles:
                 tile = choice(tiles)
-                Farmland(tile.pos, tile.world, self.world.grass_g)
+                Farmland(tile.pos, tile.world, self.world.farmland_g)
                 tile.kill()
 
 
@@ -425,14 +419,14 @@ class Farmland(Tile):
 
         super().__init__(f'farmland_{self.age}', pos, world, *group)
 
-        self.max_tick = randint(1800, 3600)
+        self.max_tick = randint(300, 600)
         self.tick = self.max_tick
 
         self.max_spread_tick = 600
         self.spread_tick = self.max_spread_tick
 
     def grow(self):
-        if randint(1, 5) == 1:
+        if randint(1, 2) == 1:
             self.age += 1
             self.name = f'farmland_{self.age}'
             self.image = load_image(self.name)
@@ -441,27 +435,13 @@ class Farmland(Tile):
         if self.age < 2:
             self.tick -= 1 * dt
             if self.tick <= 0:
-                self.max_tick = randint(1800, 3600)
+                self.max_tick = randint(600, 1200)
                 self.tick = self.max_tick
                 self.grow()
-        else:
-            self.spread_tick -= dt
-            if self.spread_tick <= 0:
-                self.spread_tick = self.max_spread_tick
-                self.spread()
-
-    def spread(self):
-        if randint(1, 2) == 1:
-            self.get_colliding()
-            tiles = list(filter(lambda n: n.name == 'grass', self.colliding))
-            if tiles:
-                tile = choice(tiles)
-                Farmland(tile.pos, tile.world, self.groups())
-                tile.kill()
 
     def on_click(self):
         if self.age == 2:
-            self.max_tick = randint(1800, 3600)
+            self.max_tick = randint(300, 600)
             self.tick = self.max_tick
 
             self.age = 0

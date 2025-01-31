@@ -34,9 +34,10 @@ def main():
     trees_g = pygame.sprite.Group()
     stones_g = pygame.sprite.Group()
     pathways_g = pygame.sprite.Group()
+    farmland_g = pygame.sprite.Group()
 
     sky = Sky(screen)
-    world = World(screen, MAP_SIZE, CENTER, sky, buildings_g, grass_g, trees_g, stones_g, pathways_g)
+    world = World(screen, MAP_SIZE, CENTER, sky, buildings_g, grass_g, trees_g, stones_g, pathways_g, farmland_g)
 
     pygame.display.set_icon(pygame.transform.scale_by(world.images['house'], 8))
 
@@ -50,7 +51,8 @@ def main():
     last_time = time()
 
     resources = Text(screen, 10, 'white', (0, 0))
-    build = Text(screen, 10, 'white', (0, 10))
+    objects = Text(screen, 10, 'white', (0, 10))
+    build = Text(screen, 10, 'white', (0, 20))
     fps = Text(screen, 10, 'white', (screen_width, 0),
                right_align=True)
 
@@ -116,6 +118,9 @@ def main():
         pathways_g.draw(screen)
         pathways_g.update(dt)
 
+        farmland_g.draw(screen)
+        farmland_g.update(dt)
+
         buildings_g.draw(screen)
         buildings_g.update(dt)
 
@@ -128,6 +133,7 @@ def main():
         sky.update(dt)
 
         resources.update(f'W:{world.wood} S:{world.stone} F:{world.food}')
+        objects.update(f'H:{world.houses} M:{world.mines} W:{world.windmills}')
         build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')
 
