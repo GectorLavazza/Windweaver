@@ -52,9 +52,8 @@ def main():
 
     resources = Text(screen, 10, 'white', (0, 0))
     objects = Text(screen, 10, 'white', (WIDTH, 0), right_align=True)
-    build = Text(screen, 10, 'white', (0, HEIGHT - 10))
-    fps = Text(screen, 10, 'white', (screen_width, HEIGHT - 10),
-               right_align=True)
+    build = Text(screen, 10, 'white', (0, HEIGHT - 10 * SCALE))
+    fps = Text(screen, 10, 'white', (screen_width, HEIGHT - 10 * SCALE), right_align=True)
 
     et = time()
 
@@ -149,7 +148,8 @@ def main():
         surface = mask.to_surface()
         surface.fill((0, 0, 0, 0))
         for p in outline:
-            surface.set_at(p, (0, 255, 0, a))
+            pos = p[0] - 1 * SCALE / 2, p[1] - 1 * SCALE / 2
+            pygame.draw.rect(surface, (0, 255, 0, a), pygame.Rect(*pos, SCALE, SCALE))
         surface.set_colorkey((0, 0, 0, 0))
         screen.blit(surface, (0, 0))
 
@@ -170,8 +170,8 @@ def main():
 
         sky.update(dt)
 
-        resources.update(f'W:{world.wood} S:{world.stone} F:{world.food}')
-        objects.update(f'H:{world.houses} M:{world.mines} W:{world.windmills}')
+        resources.update(f'W:{world.wood} S:{world.stone}')
+        objects.update(f'H:{world.houses} M:{world.mines} W:{world.windmills} B:{world.barns}')
         build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')
 

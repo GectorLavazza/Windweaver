@@ -5,7 +5,7 @@ from pygame import Rect, mouse, draw, Surface
 from pygame.sprite import Sprite
 
 from load_image import load_image
-from settings import GROWTH_MIN, GROWTH_MAX, STONE_COST, WOOD_COST
+from settings import GROWTH_MIN, GROWTH_MAX, STONE_COST, WOOD_COST, SCALE
 
 
 class Tile(Sprite):
@@ -341,8 +341,8 @@ class House(Tile):
                          self.rect.height * 5)
         self.zone.center = self.rect.center
 
-        self.food = 10
-        self.max_food = 10
+        self.food = 5
+        self.capacity = 5
 
     def on_update(self, dt):
         if self.world.sky.dark:
@@ -354,12 +354,18 @@ class House(Tile):
         if self.tick <= 0:
             self.tick = self.max_tick
 
+            self.food -= 1
+            d = self.capacity - self.food
             v = [p for p in self.world.buildings_g.sprites() if
-                         self.rect.colliderect(p.usage_zone) and p.name == 'barn' and p.food > 0]
-            print(v)
+                         self.rect.colliderect(p.usage_zone) and p.name == 'barn' and p.food - d >= 0]
             if v:
                 barn = choice(v)
-                barn.food -= 1
+                barn.food -= d
+                self.food += d
+
+        if self.food < 1:
+            self.kill()
+            Grass('grass', self.pos, self.world, self.world.grass_g)
 
 
     def draw_hover(self):
@@ -368,12 +374,12 @@ class House(Tile):
 
     def draw_pressed(self):
         self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
-        # self.draw_stats()
+        self.draw_stats()
 
     def draw_stats(self):
-        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2, self.rect.w, 1))
+        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x, self.rect.y - 2, self.rect.w / self.max_food * self.food, 1))
+                  Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.capacity * self.food, 1 * SCALE))
 
 
 class Mine(Tile):
@@ -417,6 +423,9 @@ class Windmill(Tile):
                          self.rect.height * 5)
         self.zone.center = self.rect.center
 
+        self.food = 0
+        self.capacity = 10
+
     def on_update(self, dt):
         self.tick -= dt
         if self.tick <= 0:
@@ -439,13 +448,40 @@ class Windmill(Tile):
                      self.rect.colliderect(p.collision_rect) and p.name in ('grass', 'pathway') and p.in_zone()]
             if tiles:
                 tile = choice(tiles)
-                Farmland(tile.pos, tile.world, self.world.farmland_g)
+                Farmland(tile.pos, tile.world, self, self.world.farmland_g)
                 tile.kill()
+
+    def draw_hover(self):
+        self.world.screen.blit(self.world.hover_outline, self.rect.topleft)
+        self.draw_stats()
+
+    def draw_pressed(self):
+        self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
+        self.draw_stats()
+
+    def draw_stats(self):
+        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
+        draw.rect(self.world.screen, '#e0dca4',
+                  Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.capacity * self.food, 1 * SCALE))
+
+    def on_click(self):
+        if mouse.get_pressed()[0]:
+            v = [p for p in self.world.buildings_g.sprites() if
+                 self.rect.colliderect(p.usage_zone) and p.name == 'barn' and p.food < p.capacity]
+            if v:
+                barn = choice(v)
+                d = barn.capacity - barn.food
+                if d > self.food:
+                    d = self.food
+                self.food -= d
+                barn.food += d
 
 
 class Farmland(Tile):
-    def __init__(self, pos, world, *group):
+    def __init__(self, pos, world, windmill, *group):
         self.age = 0
+
+        self.windmill = windmill
 
         super().__init__(f'farmland_{self.age}', pos, world, *group)
 
@@ -470,15 +506,16 @@ class Farmland(Tile):
                 self.grow()
 
     def on_click(self):
-        if self.age == 2:
-            self.max_tick = randint(300, 600)
-            self.tick = self.max_tick
+        if self.windmill.food + 2 <= self.windmill.capacity:
+            if self.age == 2:
+                self.max_tick = randint(300, 600)
+                self.tick = self.max_tick
 
-            self.age = 0
-            self.name = f'farmland_{self.age}'
-            self.image = load_image(self.name)
+                self.age = 0
+                self.name = f'farmland_{self.age}'
+                self.image = load_image(self.name)
 
-            self.world.food += 2
+                self.windmill.food += 2
 
 
 class Pathway(Tile):
@@ -498,7 +535,7 @@ class Barn(Tile):
                          self.rect.height * 5)
         self.zone.center = self.rect.center
 
-        self.food = 50
+        self.food = 10
         self.capacity = 50
 
     def draw_hover(self):
@@ -514,7 +551,7 @@ class Barn(Tile):
         surface.set_alpha(40)
         surface.fill('blue')
         self.world.screen.blit(surface, self.usage_zone.topleft)
-        draw.rect(self.world.screen, 'blue', self.usage_zone, 1)
-        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2, self.rect.w, 1))
+        draw.rect(self.world.screen, 'blue', self.usage_zone, 1 * SCALE)
+        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x, self.rect.y - 2, self.rect.w / self.capacity * self.food, 1))
+                  Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.capacity * self.food, 1 * SCALE))

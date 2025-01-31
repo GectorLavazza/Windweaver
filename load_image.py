@@ -11,6 +11,6 @@ def load_image(name, alpha=False):
     image = load(fullname)
     image = image.convert() if alpha else image.convert_alpha()
 
-    # image = transform.scale_by(image, SCALE)
+    image = transform.scale_by(image, SCALE)
 
     return image

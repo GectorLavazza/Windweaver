@@ -29,9 +29,10 @@ class World:
         self.dynamic_speed_y = 0
         self.velocity = Vector2(0, 0)
 
-        self.wood = 10
-        self.stone = 20
-        self.food = 100
+        self.wood = 1000
+        self.stone = 1000
+        self.food = 0
+        self.max_food = 0
 
         self.current_build = 'house'
 
@@ -125,6 +126,11 @@ class World:
         self.mines = len(list(filter(lambda b: 'mine' in b.name, self.buildings_g.sprites())))
         self.windmills = len(list(filter(lambda b: 'windmill' in b.name, self.buildings_g.sprites())))
         self.barns = len(list(filter(lambda b: 'barn' in b.name, self.buildings_g.sprites())))
+
+        self.food = sum([p.food for p in self.buildings_g.sprites() if
+                         self.rect.colliderect(p.usage_zone) and p.name == 'barn' and p.food > 0])
+        self.max_food = sum([p.capacity for p in self.buildings_g.sprites() if
+                         self.rect.colliderect(p.usage_zone) and p.name == 'barn'])
 
     def move(self, dt):
         mp = mouse.get_pos()

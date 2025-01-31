@@ -16,7 +16,7 @@ class Text(Ui):
 
         super().__init__(screen)
         self.font = freetype.Font('assets/fonts/PixelOperator8-Bold.ttf',
-                                     font_size)
+                                     font_size * SCALE)
         self.pos = pos
         self.color = color
         self.center_align = center_align
@@ -49,7 +49,7 @@ class Text(Ui):
                 self.rect.topleft = (self.pos[0] - self.rect.w,
                        self.pos[1])
             else:
-                self.rect.topleft = (self.pos[0],
+                self.rect.topleft = (self.pos[0] * SCALE,
                        self.pos[1])
 
         self.screen.blit(self.shade, self.rect.topleft)
