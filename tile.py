@@ -535,7 +535,7 @@ class Barn(Tile):
                          self.rect.height * 5)
         self.zone.center = self.rect.center
 
-        self.food = 10
+        self.food = 25
         self.capacity = 50
 
     def draw_hover(self):
