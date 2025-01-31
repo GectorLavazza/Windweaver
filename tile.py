@@ -331,6 +331,8 @@ class House(Tile):
                          self.rect.height * 5)
         self.zone.center = self.rect.center
 
+        self.food = 10
+
     def on_update(self, dt):
         if self.world.sky.dark:
             self.image = self.light
@@ -341,6 +343,7 @@ class House(Tile):
         if self.tick <= 0:
             self.tick = self.max_tick
             self.world.food -= 1
+            self.food -= 1
 
 
 class Mine(Tile):

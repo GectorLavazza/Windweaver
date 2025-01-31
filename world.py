@@ -2,7 +2,7 @@ import pygame.surface
 from pygame import Vector2, mouse, Surface, Rect
 
 from load_image import load_image
-from settings import screen_width, screen_height, CENTER
+from settings import screen_width, screen_height, CENTER, TILE_SIZE
 
 from os import listdir
 
@@ -43,10 +43,10 @@ class World:
                                  self.screen.get_height())
         self.visible_rect = self.visible_rect.clip(self.surface.get_rect())
 
-        self.hover_outline = Surface((8, 8), pygame.SRCALPHA)
+        self.hover_outline = Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
         self.hover_outline.fill('white')
         self.hover_outline.set_alpha(60)
-        self.pressed_outline = Surface((8, 8), pygame.SRCALPHA)
+        self.pressed_outline = Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
         self.pressed_outline.fill('white')
         self.pressed_outline.set_alpha(100)
 
