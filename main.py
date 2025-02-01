@@ -2,6 +2,7 @@ from sys import exit
 from time import time
 
 import pygame
+from pygame import Vector2
 
 from cursor import Cursor
 from map import Map
@@ -62,7 +63,7 @@ def main():
     zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
     zone_surface.set_alpha(40)
 
-    show_zone = False
+    show_zone = True
 
     while running:
         dt = time() - last_time
@@ -131,25 +132,8 @@ def main():
         buildings_g.draw(screen)
         buildings_g.update(dt)
 
-        zone_surface.fill((0, 0, 0, 0))
-
-        for z in world.zone:
-            pygame.draw.rect(zone_surface, 'green', z)
-
         if show_zone:
-            screen.blit(zone_surface, (0, 0))
-            a = 255
-        else:
-            a = 128
-        mask = pygame.mask.from_surface(zone_surface)
-        outline = mask.outline()
-        surface = mask.to_surface()
-        surface.fill((0, 0, 0, 0))
-        for p in outline:
-            pos = p[0] - 1 * SCALE / 2, p[1] - 1 * SCALE / 2
-            pygame.draw.rect(surface, (0, 255, 0, a), pygame.Rect(*pos, SCALE, SCALE))
-        surface.set_colorkey((0, 0, 0, 0))
-        screen.blit(surface, (0, 0))
+            screen.blit(world.zone_outline_surface, -world.zone_offset + Vector2(world.rect.topleft))
 
         sky.update(dt)
 

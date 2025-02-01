@@ -347,9 +347,9 @@ class House(Tile):
                 self.food += d
 
         if self.food < 1:
-            # self.kill()
-            # Grass('grass', self.pos, self.world, self.world.grass_g)
-            pass
+            self.kill()
+            Grass('grass', self.pos, self.world, self.world.grass_g)
+            self.world.update_zone()
 
     def draw_stats(self):
         draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))

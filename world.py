@@ -2,7 +2,7 @@ import pygame.surface
 from pygame import Vector2, mouse, Surface, Rect
 
 from load_image import load_image
-from settings import screen_width, screen_height, CENTER, TILE_SIZE
+from settings import screen_width, screen_height, CENTER, TILE_SIZE, screen_size, SCALE
 
 from os import listdir
 
@@ -77,7 +77,12 @@ class World:
         self.windmills = 0
         self.barns = 0
 
-        self.zone = [s.zone for s in self.pathways_g.sprites() + self.buildings_g.sprites()]
+        self.zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
+        self.zone_surface.set_alpha(40)
+        self.zone_pos = Vector2(0, 0)
+        self.zone_offset = Vector2(0, 0)
+
+        self.update_zone()
 
     def update(self, dt):
         if self.check_moving():
@@ -88,6 +93,22 @@ class World:
 
     def update_zone(self):
         self.zone = [s.zone for s in self.pathways_g.sprites() + self.buildings_g.sprites()]
+
+        self.zone_surface.fill((0, 0, 0, 0))
+
+        for z in self.zone:
+            pygame.draw.rect(self.zone_surface, 'green', z)
+
+        mask = pygame.mask.from_surface(self.zone_surface)
+        outline = mask.outline()
+        self.zone_outline_surface = mask.to_surface()
+        self.zone_outline_surface.fill((0, 0, 0, 0))
+        for p in outline:
+            pos = p[0] - 1 * SCALE / 2, p[1] - 1 * SCALE / 2
+            pygame.draw.rect(self.zone_outline_surface, (0, 255, 0, 128), pygame.Rect(*pos, SCALE, SCALE))
+        self.zone_outline_surface.set_colorkey((0, 0, 0, 0))
+        self.zone_pos = self.zone_outline_surface.get_rect().topleft
+        self.zone_offset = Vector2(self.rect.topleft)
 
     def check_moving(self):
         mouse_x, mouse_y = mouse.get_pos()
@@ -147,7 +168,6 @@ class World:
 
         if self.movement_type == 1:
             self.rect.topleft = self.offset + Vector2(mp)
-
         else:
             input_direction = Vector2(self.dx, self.dy)
             if input_direction.length() > 0:
