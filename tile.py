@@ -43,11 +43,6 @@ class Tile(Sprite):
         self.clicked = False
         self.available = False
 
-        self.colliding_checked = False
-
-        self.colliding = []
-        self.in_area = []
-
         self.image_set = False
 
         self.zone = Rect(*self.rect.topleft,
@@ -63,22 +58,21 @@ class Tile(Sprite):
     def update(self, dt):
         if self.world.check_moving():
             self.move()
-        if self.name not in (
-                'house', 'farmland_0', 'farmland_1', 'farmland_2',
-                'windmill_1',
-                'windmill_2', 'mine'):
-            if self.rect.colliderect(self.world.screen_rect):
-                self.handle_mouse()
-                self.on_update(dt)
-        else:
+
+        if self.in_zone():
             self.handle_mouse()
             self.on_update(dt)
 
     def draw_hover(self):
         self.world.screen.blit(self.world.hover_outline, self.rect.topleft)
+        self.draw_stats()
 
     def draw_pressed(self):
         self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
+        self.draw_stats()
+
+    def draw_stats(self):
+        pass
 
     def draw_build(self):
         image = self.world.build_images[self.world.current_build]
@@ -97,31 +91,28 @@ class Tile(Sprite):
     def handle_mouse(self):
         mouse_pos = mouse.get_pos()
 
-        if self.in_zone():
-            if self.rect.collidepoint(mouse_pos):
-                if not self.colliding_checked:
-                    self.colliding_checked = True
+        if self.rect.collidepoint(mouse_pos):
 
-                    if self.name == 'grass':
-                        self.check_build()
+            if self.name == 'grass':
+                self.check_build()
 
-                if mouse.get_pressed()[0] or mouse.get_pressed()[2]:
-                    self.draw_pressed()
+            if mouse.get_pressed()[0] or mouse.get_pressed()[2]:
+                self.draw_pressed()
 
-                    if not self.clicked:
-                        self.on_click()
-                        self.clicked = True
+                if not self.clicked:
+                    self.on_click()
+                    self.clicked = True
 
-                else:
-                    self.draw_hover()
-
-                    if self.available:
-                        self.draw_build()
-
-                    self.clicked = False
             else:
-                self.colliding_checked = False
+                self.draw_hover()
+
+                if self.available:
+                    self.draw_build()
+
                 self.clicked = False
+        else:
+            self.colliding_checked = False
+            self.clicked = False
 
     def move(self):
         self.rect.topleft = (self.pos[0] + self.world.rect.x,
@@ -228,19 +219,6 @@ class Grass(Tile):
         self.max_tick = randint(GROWTH_MIN, GROWTH_MAX)
         self.tick = self.max_tick
 
-    def grow(self):
-        if randint(1, 10) == 1:
-
-            if randint(1, 1000) == 1:
-                Tree(self.pos, self.world, 0, self.world.trees_g)
-                self.kill()
-            elif randint(1, 500) == 1:
-                self.name = 'flower'
-            else:
-                self.name = 'tall_grass'
-
-            self.image = load_image(self.name)
-
     def on_click(self):
         if mouse.get_pressed()[2]:
             if self.available:
@@ -249,18 +227,10 @@ class Grass(Tile):
         elif mouse.get_pressed()[0]:
             self.name = 'grass'
 
-            self.image = load_image(self.name)
+            self.image = self.world.images[self.name]
 
             self.max_tick = randint(GROWTH_MIN, GROWTH_MAX)
             self.tick = self.max_tick
-
-    def on_update(self, dt):
-        if self.name not in ('tall_grass', 'flower'):
-            self.tick -= 1 * dt
-            if self.tick <= 0:
-                self.max_tick = randint(GROWTH_MIN, GROWTH_MAX)
-                self.tick = self.max_tick
-                self.grow()
 
 
 class Tree(Tile):
@@ -293,7 +263,7 @@ class Tree(Tile):
 
         self.name = f'tree_{self.age}'
 
-        self.image = load_image(self.name)
+        self.image = self.world.images[self.name]
 
     def on_update(self, dt):
         if self.age < 2:
@@ -330,8 +300,8 @@ class House(Tile):
         if not self.world.house_placed:
             self.world.house_placed = True
 
-        self.light = load_image('house_light')
-        self.no_light = load_image('house')
+        self.light = self.world.images['house_light']
+        self.no_light = self.world.images['house']
 
         self.max_tick = 600
         self.tick = self.max_tick
@@ -367,15 +337,6 @@ class House(Tile):
             self.kill()
             Grass('grass', self.pos, self.world, self.world.grass_g)
 
-
-    def draw_hover(self):
-        self.world.screen.blit(self.world.hover_outline, self.rect.topleft)
-        self.draw_stats()
-
-    def draw_pressed(self):
-        self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
-        self.draw_stats()
-
     def draw_stats(self):
         draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
@@ -385,7 +346,6 @@ class House(Tile):
 class Mine(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('mine', pos, world, *group)
-        self.around = ['stone' in n.name for n in self.colliding].count(True)
 
         self.max_tick = 1800
         self.tick = self.max_tick
@@ -414,8 +374,8 @@ class Windmill(Tile):
         self.animation_tick = self.max_animation_tick
 
         self.frames = {
-            1: load_image('windmill_1'),
-            2: load_image('windmill_2')
+            1: self.world.images['windmill_1'],
+            2: self.world.images['windmill_2']
         }
 
         self.zone = Rect(*self.rect.topleft,
@@ -450,14 +410,6 @@ class Windmill(Tile):
                 tile = choice(tiles)
                 Farmland(tile.pos, tile.world, self, self.world.farmland_g)
                 tile.kill()
-
-    def draw_hover(self):
-        self.world.screen.blit(self.world.hover_outline, self.rect.topleft)
-        self.draw_stats()
-
-    def draw_pressed(self):
-        self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
-        self.draw_stats()
 
     def draw_stats(self):
         draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
@@ -495,7 +447,7 @@ class Farmland(Tile):
         if randint(1, 2) == 1:
             self.age += 1
             self.name = f'farmland_{self.age}'
-            self.image = load_image(self.name)
+            self.image = self.world.images[self.name]
 
     def on_update(self, dt):
         if self.age < 2:
@@ -513,7 +465,7 @@ class Farmland(Tile):
 
                 self.age = 0
                 self.name = f'farmland_{self.age}'
-                self.image = load_image(self.name)
+                self.image = self.world.images[self.name]
 
                 self.windmill.food += 2
 
@@ -537,14 +489,6 @@ class Barn(Tile):
 
         self.food = 25
         self.capacity = 50
-
-    def draw_hover(self):
-        self.world.screen.blit(self.world.hover_outline, self.rect.topleft)
-        self.draw_stats()
-
-    def draw_pressed(self):
-        self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
-        self.draw_stats()
 
     def draw_stats(self):
         surface = Surface(self.usage_zone.size, pygame.SRCALPHA)

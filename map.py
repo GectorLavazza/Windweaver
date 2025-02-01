@@ -62,8 +62,6 @@ class Map:
                     tile = 'tree'
                 elif randint(1, 100) == 1:
                     tile = 'stone'
-                elif randint(1, 500) == 1:
-                    tile = 'flower'
 
                 pos = (x * TILE_SIZE, y * TILE_SIZE)
 
