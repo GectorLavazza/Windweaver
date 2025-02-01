@@ -106,10 +106,11 @@ class Tile(Sprite):
                     self.draw_build()
                 self.clicked = False
 
-                if self.world.buildings_g in self.groups() or self.world.pathways_g in self.groups():
+                if self.world.buildings_g in self.groups() or self.world.pathways_g in self.groups() or self.world.farmland_g in self.groups():
                     if pygame.key.get_pressed()[pygame.K_e]:
                         if self.world.houses > 1 or 'house' not in self.name:
-                            self.on_kill()
+                            if self.in_zone():
+                                self.on_kill()
         else:
             self.clicked = False
 
@@ -388,7 +389,7 @@ class Mine(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('mine', pos, world, *group)
 
-        self.max_tick = 60
+        self.max_tick = 600
         self.tick = self.max_tick
 
         self.zone = Rect(*self.rect.topleft,
@@ -562,14 +563,20 @@ class Farmland(Tile):
     def on_click(self):
         if self.windmill.food + 2 <= self.windmill.capacity:
             if self.age == 2:
-                self.max_tick = randint(300, 600)
-                self.tick = self.max_tick
+                if self.in_zone():
+                    self.max_tick = randint(300, 600)
+                    self.tick = self.max_tick
 
-                self.age = 0
-                self.name = f'farmland_{self.age}'
-                self.image = self.world.images[self.name]
+                    self.age = 0
+                    self.name = f'farmland_{self.age}'
+                    self.image = self.world.images[self.name]
 
-                self.windmill.food += 2
+                    self.windmill.food += 2
+
+    def on_kill(self):
+        Grass('grass', self.pos, self.world, self.world.grass_g)
+
+        self.kill()
 
 
 class Pathway(Tile):
