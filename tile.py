@@ -137,7 +137,7 @@ class Tile(Sprite):
                        (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
                        for p in self.world.buildings_g.sprites()]
 
-            if any(check_1) or any(check_2):
+            if (any(check_1) or any(check_2)) and self.world.houses > self.world.pathways // 5:
                 self.available = True
 
         elif build == 'house':
@@ -675,7 +675,7 @@ class Storage(Tile):
                        2 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
                   Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 8 * SCALE,
-                       (self.rect.w * 2) / self.world.max_stone * self.world.stone, 2 * SCALE))
+                       (self.rect.w * 2) / self.world.max_wood * self.world.wood, 2 * SCALE))
 
         draw.rect(self.world.screen, '#46474c', Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2, 2 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',

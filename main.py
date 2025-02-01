@@ -1,3 +1,4 @@
+import asyncio
 from sys import exit
 from time import time
 
@@ -12,7 +13,7 @@ from ui import Text
 from world import World
 
 
-def main():
+async def main():
     st = time()
 
     pygame.init()
@@ -160,7 +161,7 @@ def main():
 
             sky.update(dt)
 
-        label.update(f'W:{world.wood}/{world.max_wood} S:{world.stone}/{world.max_stone} Day: {sky.day}')
+        label.update(f'Wood:{world.wood}/{world.max_wood} Stone:{world.stone}/{world.max_stone} Day:{sky.day}')
         build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')
 
@@ -171,12 +172,14 @@ def main():
         cursor_g.draw(screen)
         cursor.update()
 
-        pygame.display.flip()
+        pygame.display.update(pygame.Rect(0, 0, WIDTH, HEIGHT))
         clock.tick()
+
+        await asyncio.sleep(0)
 
     pygame.quit()
     exit()
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

@@ -76,6 +76,7 @@ class World:
         self.mines = 0
         self.windmills = 0
         self.barns = 0
+        self.pathways = 0
 
         self.zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
         # self.zone_surface.set_alpha(40)
@@ -155,6 +156,7 @@ class World:
         self.mines = len(list(filter(lambda b: 'mine' in b.name, self.buildings_g.sprites())))
         self.windmills = len(list(filter(lambda b: 'windmill' in b.name, self.buildings_g.sprites())))
         self.barns = len(list(filter(lambda b: 'barn' in b.name, self.buildings_g.sprites())))
+        self.pathways = len(self.pathways_g.sprites())
 
         self.food = sum([p.food for p in self.buildings_g.sprites() if p.name == 'barn' and p.food > 0])
         self.max_food = 50 + sum([p.capacity for p in self.buildings_g.sprites() if p.name == 'barn'])
