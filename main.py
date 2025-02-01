@@ -37,9 +37,10 @@ async def main():
     stones_g = pygame.sprite.Group()
     pathways_g = pygame.sprite.Group()
     farmland_g = pygame.sprite.Group()
+    light_g = pygame.sprite.Group()
 
     sky = Sky(screen)
-    world = World(screen, MAP_SIZE, CENTER, sky, buildings_g, grass_g, trees_g, stones_g, pathways_g, farmland_g)
+    world = World(screen, MAP_SIZE, CENTER, sky, buildings_g, grass_g, trees_g, stones_g, pathways_g, farmland_g, light_g)
 
     pygame.display.set_icon(pygame.transform.scale_by(world.images['house'], 8))
 
@@ -160,6 +161,9 @@ async def main():
                 screen.blit(world.zone_outline_surface, Vector2(world.rect.topleft) - world.zone_offset)
 
             sky.update(dt)
+
+            # if sky.dark:
+            #     light_g.update(screen)
 
         label.update(f'Wood:{world.wood}/{world.max_wood} Stone:{world.stone}/{world.max_stone} Day:{sky.day}')
         build.update(world.current_build)

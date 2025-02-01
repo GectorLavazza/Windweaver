@@ -29,19 +29,6 @@ STONE_COST = {'house': 5,
               'barn': 10,
               'storage': 20}
 
-# WOOD_COST = {'house': 0,
-#              'mine': 0,
-#              'windmill': 0,
-#              'pathway': 0,
-#              'barn': 0,
-#              'storage': 0}
-# STONE_COST = {'house': 0,
-#              'mine': 0,
-#              'windmill': 0,
-#               'pathway': 0,
-#               'barn': 0,
-#               'storage': 0}
-
 DAY_TIME = 4500
 
 MODES = ['house', 'pathway', 'windmill', 'barn', 'mine', 'storage']

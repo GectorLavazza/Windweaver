@@ -4,6 +4,7 @@ import pygame
 from pygame import Rect, mouse, draw
 from pygame.sprite import Sprite
 
+from light import Light
 from settings import GROWTH_MIN, GROWTH_MAX, STONE_COST, WOOD_COST, SCALE
 
 
@@ -336,6 +337,8 @@ class House(Tile):
 
         self.world.update_zone()
 
+        # self.l = Light(10, self.rect.center, (255, 0, 0), 1, self.world, self.world.light_g)
+
     def on_update(self, dt):
         if self.world.sky.dark:
             self.image = self.light
@@ -498,7 +501,7 @@ class Windmill(Tile):
                      self.rect.colliderect(p.collision_rect) and p.name in ('grass', 'pathway') and p.in_zone()]
             if tiles:
                 tile = choice(tiles)
-                Farmland(tile.pos, tile.world, self, self.world.farmland_g)
+                Farmland(tile.pos, tile.world, self.world.farmland_g)
                 tile.kill()
 
     def draw_stats(self):
@@ -541,10 +544,8 @@ class Windmill(Tile):
 
 
 class Farmland(Tile):
-    def __init__(self, pos, world, windmill, *group):
+    def __init__(self, pos, world, *group):
         self.age = 0
-
-        self.windmill = windmill
 
         super().__init__(f'farmland_{self.age}', pos, world, *group)
 
@@ -569,9 +570,19 @@ class Farmland(Tile):
                 self.grow()
 
     def on_click(self):
-        if self.windmill.food + 2 <= self.windmill.capacity:
-            if self.age == 2:
-                if self.in_zone():
+        if self.age == 2:
+            if self.in_zone():
+                v = [p for p in self.world.buildings_g.sprites() if
+                     self.rect.colliderect(p.collision_rect) and 'windmill' in p.name]
+                if v:
+                    windmill = choice(v)
+
+                    d = windmill.capacity - windmill.food
+                    if d > 2:
+                        d = 2
+
+                    windmill.food += d
+
                     self.max_tick = randint(300, 600)
                     self.tick = self.max_tick
 
@@ -579,7 +590,6 @@ class Farmland(Tile):
                     self.name = f'farmland_{self.age}'
                     self.image = self.world.images[self.name]
 
-                    self.windmill.food += 2
 
     def on_kill(self):
         Grass('grass', self.pos, self.world, self.world.grass_g)
