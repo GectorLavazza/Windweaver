@@ -133,7 +133,7 @@ def main():
         buildings_g.update(dt)
 
         if show_zone:
-            screen.blit(world.zone_outline_surface, -world.zone_offset + Vector2(world.rect.topleft))
+            screen.blit(world.zone_outline_surface, Vector2(world.rect.topleft) - world.zone_offset)
 
         sky.update(dt)
 

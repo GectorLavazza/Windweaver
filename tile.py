@@ -105,6 +105,11 @@ class Tile(Sprite):
                 if self.available:
                     self.draw_build()
                 self.clicked = False
+
+                if self.world.buildings_g in self.groups() or self.world.pathways_g in self.groups():
+                    if pygame.key.get_pressed()[pygame.K_e]:
+                        if self.world.houses > 1 or 'house' not in self.name:
+                            self.on_kill()
         else:
             self.clicked = False
 
@@ -125,61 +130,61 @@ class Tile(Sprite):
         self.available = False
 
         if build == 'pathway':
-            # check_1 = [self.rect.colliderect(p.collision_rect) and
-            #            (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
-            #            for p in self.world.pathways_g.sprites()]
-            # check_2 = [self.rect.colliderect(p.collision_rect) and
-            #            (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
-            #            for p in self.world.buildings_g.sprites()]
-            #
-            # if any(check_1) or any(check_2):
+            check_1 = [self.rect.colliderect(p.collision_rect) and
+                       (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                       for p in self.world.pathways_g.sprites()]
+            check_2 = [self.rect.colliderect(p.collision_rect) and
+                       (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                       for p in self.world.buildings_g.sprites()]
+
+            if any(check_1) or any(check_2):
                 self.available = True
 
         elif build == 'house':
-            # if not self.world.house_placed:
-            #     self.available = True
-            # else:
-            #     check_1 = [self.rect.colliderect(p.collision_rect) and
-            #                (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
-            #                for p in self.world.pathways_g.sprites()]
-            #
-            #     if any(check_1):
+            if not self.world.house_placed:
+                self.available = True
+            else:
+                check_1 = [self.rect.colliderect(p.collision_rect) and
+                           (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                           for p in self.world.pathways_g.sprites()]
+
+                if any(check_1):
                     self.available = True
 
         elif build == 'mine':
-            # check_1 = [self.rect.colliderect(p.collision_rect) and
-            #            (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
-            #            for p in self.world.pathways_g.sprites()]
-            # check_2 = [self.rect.colliderect(p.collision_rect)
-            #            for p in self.world.stones_g.sprites()]
-            # check_3 = [self.rect.colliderect(p.collision_rect) for p in self.world.buildings_g.sprites()]
-            #
-            # if any(check_1) and check_2.count(True) > 1 and not any(check_3) and self.world.houses // 4 > self.world.mines:
+            check_1 = [self.rect.colliderect(p.collision_rect) and
+                       (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                       for p in self.world.pathways_g.sprites()]
+            check_2 = [self.rect.colliderect(p.collision_rect)
+                       for p in self.world.stones_g.sprites()]
+            check_3 = [self.rect.colliderect(p.collision_rect) for p in self.world.buildings_g.sprites()]
+
+            if any(check_1) and check_2.count(True) > 1 and not any(check_3) and self.world.houses // 4 > self.world.mines:
                 self.available = True
 
         elif build == 'windmill':
-            # check_1 = [self.rect.colliderect(p.collision_rect) and
-            #            (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
-            #            for p in self.world.pathways_g.sprites() + self.world.farmland_g.sprites()]
-            # check_2 = [self.rect.colliderect(p.collision_rect) for p in self.world.buildings_g.sprites()]
+            check_1 = [self.rect.colliderect(p.collision_rect) and
+                       (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                       for p in self.world.pathways_g.sprites() + self.world.farmland_g.sprites()]
+            check_2 = [self.rect.colliderect(p.collision_rect) for p in self.world.buildings_g.sprites()]
 
-            # if any(check_1) and not any(check_2) and self.world.houses // 2 > self.world.windmills:
-            self.available = True
+            if any(check_1) and not any(check_2) and self.world.houses // 2 > self.world.windmills:
+                self.available = True
 
         elif build == 'barn':
-            # check_1 = [self.rect.colliderect(p.collision_rect) and
-            #            (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
-            #            for p in self.world.pathways_g.sprites()]
-            #
-            # if any(check_1):
+            check_1 = [self.rect.colliderect(p.collision_rect) and
+                       (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                       for p in self.world.pathways_g.sprites()]
+
+            if any(check_1):
                 self.available = True
 
         elif build == 'storage':
-            # check_1 = [self.rect.colliderect(p.collision_rect) and
-            #            (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
-            #            for p in self.world.pathways_g.sprites()]
-            #
-            # if any(check_1):
+            check_1 = [self.rect.colliderect(p.collision_rect) and
+                       (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                       for p in self.world.pathways_g.sprites()]
+
+            if any(check_1):
                 self.available = True
 
     def buy(self):
@@ -253,17 +258,17 @@ class Tree(Tile):
             if self.in_zone():
                 self.durability -= 1
                 if self.durability <= 0:
-                    if self.world.wood != self.world.max_wood:
-                        self.on_kill()
+                    self.on_kill()
 
     def on_kill(self):
-        Grass('grass', self.pos, self.world, self.world.grass_g)
+        if self.world.max_wood > self.world.wood:
+            amount = self.age + 1
+            d = self.world.max_wood - self.world.wood
+            if d > amount:
+                d = amount
+            self.world.wood += d
 
-        amount = self.age + 1
-        d = self.world.max_wood - self.world.wood
-        if d > amount:
-            d = amount
-        self.world.wood += d
+        Grass('grass', self.pos, self.world, self.world.grass_g)
         self.kill()
 
     def grow(self):
@@ -300,8 +305,12 @@ class Stone(Tile):
                     self.on_kill()
 
     def on_kill(self):
+        if self.world.max_stone > self.world.stone:
+            d = self.world.max_stone - self.world.stone
+            if d > self.amount:
+                d = self.amount
+            self.world.stone += d
         Grass('grass', self.pos, self.world, self.world.grass_g)
-        self.world.stone += self.amount
         self.kill()
 
 
@@ -356,6 +365,24 @@ class House(Tile):
         draw.rect(self.world.screen, '#e0dca4',
                   Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.capacity * self.food, 1 * SCALE))
 
+    def on_kill(self):
+        Grass('grass', self.pos, self.world, self.world.grass_g)
+
+        w, s = randint(1, WOOD_COST['house'] // 2), randint(1, STONE_COST['house'] // 2)
+
+        wd = self.world.max_wood - self.world.wood
+        if wd > w:
+            wd = w
+        self.world.wood += wd
+
+        sd = self.world.max_stone - self.world.stone
+        if sd > s:
+            sd = s
+        self.world.stone += sd
+
+        self.kill()
+        self.world.update_zone()
+
 
 class Mine(Tile):
     def __init__(self, pos, world, *group):
@@ -397,6 +424,24 @@ class Mine(Tile):
         draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
                   Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.capacity * self.stone, 1 * SCALE))
+
+    def on_kill(self):
+        Grass('grass', self.pos, self.world, self.world.grass_g)
+
+        w, s = randint(1, WOOD_COST['mine'] // 2), randint(1, STONE_COST['mine'] // 2)
+
+        wd = self.world.max_wood - self.world.wood
+        if wd > w:
+            wd = w
+        self.world.wood += wd
+
+        sd = self.world.max_stone - self.world.stone
+        if sd > s:
+            sd = s
+        self.world.stone += sd
+
+        self.kill()
+        self.world.update_zone()
 
 
 class Windmill(Tile):
@@ -467,6 +512,24 @@ class Windmill(Tile):
                 self.food -= d
                 barn.food += d
 
+    def on_kill(self):
+        Grass('grass', self.pos, self.world, self.world.grass_g)
+
+        w, s = randint(1, WOOD_COST['windmill'] // 2), randint(1, STONE_COST['windmill'] // 2)
+
+        wd = self.world.max_wood - self.world.wood
+        if wd > w:
+            wd = w
+        self.world.wood += wd
+
+        sd = self.world.max_stone - self.world.stone
+        if sd > s:
+            sd = s
+        self.world.stone += sd
+
+        self.kill()
+        self.world.update_zone()
+
 
 class Farmland(Tile):
     def __init__(self, pos, world, windmill, *group):
@@ -512,6 +575,13 @@ class Farmland(Tile):
 class Pathway(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('pathway', pos, world, *group)
+        self.world.update_zone()
+
+    def on_kill(self):
+        Grass('grass', self.pos, self.world, self.world.grass_g)
+
+        self.kill()
+        self.world.update_zone()
 
 
 class Barn(Tile):
@@ -540,6 +610,24 @@ class Barn(Tile):
         draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
                   Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.capacity * self.food, 1 * SCALE))
+
+    def on_kill(self):
+        Grass('grass', self.pos, self.world, self.world.grass_g)
+
+        w, s = randint(1, WOOD_COST['barn'] // 2), randint(1, STONE_COST['barn'] // 2)
+
+        wd = self.world.max_wood - self.world.wood
+        if wd > w:
+            wd = w
+        self.world.wood += wd
+
+        sd = self.world.max_stone - self.world.stone
+        if sd > s:
+            sd = s
+        self.world.stone += sd
+
+        self.kill()
+        self.world.update_zone()
 
 
 class Storage(Tile):
@@ -582,3 +670,21 @@ class Storage(Tile):
         draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
                   Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.world.max_stone * self.world.stone, 1 * SCALE))
+
+    def on_kill(self):
+        Grass('grass', self.pos, self.world, self.world.grass_g)
+
+        w, s = randint(1, WOOD_COST['storage'] // 2), randint(1, STONE_COST['storage'] // 2)
+
+        wd = self.world.max_wood - self.world.wood
+        if wd > w:
+            wd = w
+        self.world.wood += wd
+
+        sd = self.world.max_stone - self.world.stone
+        if sd > s:
+            sd = s
+        self.world.stone += sd
+
+        self.kill()
+        self.world.update_zone()
