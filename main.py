@@ -50,10 +50,10 @@ def main():
 
     last_time = time()
 
-    resources = Text(screen, 10, 'white', (0, 0))
-    objects = Text(screen, 10, 'white', (WIDTH, 0), right_align=True)
-    build = Text(screen, 10, 'white', (0, HEIGHT - 10 * SCALE))
-    fps = Text(screen, 10, 'white', (screen_width, HEIGHT - 10 * SCALE), right_align=True)
+    resources = Text(screen, 5, 'white', (0, 0))
+    objects = Text(screen, 5, 'white', (WIDTH, 0), right_align=True)
+    build = Text(screen, 5, 'white', (0, HEIGHT), bottom_align=True)
+    fps = Text(screen, 5, 'white', (screen_width, HEIGHT), right_align=True, bottom_align=True)
 
     et = time()
 
@@ -61,11 +61,8 @@ def main():
 
     zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
     zone_surface.set_alpha(40)
-    usage_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
-    usage_surface.set_alpha(40)
 
     show_zone = False
-    show_usage = False
 
     while running:
         dt = time() - last_time
@@ -90,6 +87,8 @@ def main():
                     world.current_build = 'pathway'
                 if event.key == pygame.K_5:
                     world.current_build = 'barn'
+                if event.key == pygame.K_6:
+                    world.current_build = 'storage'
 
                 if event.key == pygame.K_F10:
                     pygame.display.toggle_fullscreen()
@@ -98,8 +97,6 @@ def main():
                     world.movement_type = 1 if world.movement_type == 2 else 2
                 if event.key == pygame.K_F2:
                     show_zone = False if show_zone else True
-                if event.key == pygame.K_F3:
-                    show_usage = False if show_usage else True
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
@@ -135,8 +132,9 @@ def main():
         buildings_g.update(dt)
 
         zone_surface.fill((0, 0, 0, 0))
-        for b in buildings_g.sprites() + pathways_g.sprites():
-            pygame.draw.rect(zone_surface, 'green', b.zone)
+
+        for z in world.zone:
+            pygame.draw.rect(zone_surface, 'green', z)
 
         if show_zone:
             screen.blit(zone_surface, (0, 0))
@@ -153,24 +151,9 @@ def main():
         surface.set_colorkey((0, 0, 0, 0))
         screen.blit(surface, (0, 0))
 
-        # usage_surface.fill((0, 0, 0, 0))
-        # for b in [b for b in buildings_g.sprites() if b.name == 'barn']:
-        #     pygame.draw.rect(usage_surface, 'blue', b.usage_zone)
-        #
-        # if show_usage:
-        #     a = 128
-        #     mask = pygame.mask.from_surface(usage_surface)
-        #     outline = mask.outline()
-        #     surface = mask.to_surface()
-        #     surface.fill((0, 0, 0, 0))
-        #     for p in outline:
-        #         surface.set_at(p, (0, 0, 255, a))
-        #     surface.set_colorkey((0, 0, 0, 0))
-        #     screen.blit(surface, (0, 0))
-
         sky.update(dt)
 
-        resources.update(f'W:{world.wood} S:{world.stone}')
+        resources.update(f'W:{world.wood}/{world.max_wood} S:{world.stone}/{world.max_stone}')
         objects.update(f'H:{world.houses} M:{world.mines} W:{world.windmills} B:{world.barns}')
         build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')

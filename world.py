@@ -29,10 +29,12 @@ class World:
         self.dynamic_speed_y = 0
         self.velocity = Vector2(0, 0)
 
-        self.wood = 1000
-        self.stone = 1000
+        self.wood = 50
+        self.stone = 50
+        self.max_wood = 50
+        self.max_stone = 50
         self.food = 0
-        self.max_food = 0
+        self.max_food = 50
 
         self.current_build = 'house'
 
@@ -56,7 +58,8 @@ class World:
             'mine': load_image('mine'),
             'windmill': load_image('windmill_1'),
             'pathway': load_image('pathway'),
-            'barn': load_image('barn')
+            'barn': load_image('barn'),
+            'storage': load_image('storage')
         }
 
         images = [load_image(s.replace('.png', '')) for s in listdir('assets/sprites')]
@@ -74,12 +77,17 @@ class World:
         self.windmills = 0
         self.barns = 0
 
+        self.zone = [s.zone for s in self.pathways_g.sprites() + self.buildings_g.sprites()]
+
     def update(self, dt):
         if self.check_moving():
             self.move(dt)
 
         self.screen.blit(self.surface, (0, 0), self.visible_rect)
         self.count_objects()
+
+    def update_zone(self):
+        self.zone = [s.zone for s in self.pathways_g.sprites() + self.buildings_g.sprites()]
 
     def check_moving(self):
         mouse_x, mouse_y = mouse.get_pos()
@@ -127,10 +135,12 @@ class World:
         self.windmills = len(list(filter(lambda b: 'windmill' in b.name, self.buildings_g.sprites())))
         self.barns = len(list(filter(lambda b: 'barn' in b.name, self.buildings_g.sprites())))
 
-        self.food = sum([p.food for p in self.buildings_g.sprites() if
-                         self.rect.colliderect(p.usage_zone) and p.name == 'barn' and p.food > 0])
-        self.max_food = sum([p.capacity for p in self.buildings_g.sprites() if
-                         self.rect.colliderect(p.usage_zone) and p.name == 'barn'])
+        self.food = sum([p.food for p in self.buildings_g.sprites() if p.name == 'barn' and p.food > 0])
+        self.max_food = 50 + sum([p.capacity for p in self.buildings_g.sprites() if p.name == 'barn'])
+
+        self.max_wood = 50 + sum([p.wood_capacity for p in self.buildings_g.sprites() if p.name == 'storage'])
+
+        self.max_stone = 50 + sum([p.stone_capacity for p in self.buildings_g.sprites() if p.name == 'storage'])
 
     def move(self, dt):
         mp = mouse.get_pos()

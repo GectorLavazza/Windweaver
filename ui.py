@@ -12,7 +12,7 @@ class Ui:
 
 class Text(Ui):
     def __init__(self, screen, font_size, color='white',
-                 pos=(0, 0), center_align=False, right_align=False):
+                 pos=(0, 0), center_align=False, right_align=False, bottom_align=False):
 
         super().__init__(screen)
         self.font = freetype.Font('assets/fonts/PixelOperator8-Bold.ttf',
@@ -21,6 +21,7 @@ class Text(Ui):
         self.color = color
         self.center_align = center_align
         self.right_align = right_align
+        self.bottom_align = bottom_align
 
         self.rect = self.font.get_rect('')
         self.rect.center = self.screen.get_rect().center
@@ -42,15 +43,15 @@ class Text(Ui):
             self.shade.set_alpha(128)
             self.shade.fill('black')
 
+            x, y = self.pos
             if self.center_align:
-                self.rect.topleft = (self.pos[0] - self.rect.w // 2,
-                       self.pos[1])
-            elif self.right_align:
-                self.rect.topleft = (self.pos[0] - self.rect.w,
-                       self.pos[1])
-            else:
-                self.rect.topleft = (self.pos[0] * SCALE,
-                       self.pos[1])
+                x = self.pos[0] - self.rect.w // 2
+            if self.right_align:
+                x = self.pos[0] - self.rect.w
+            if self.bottom_align:
+                y = self.pos[1] - self.rect.h
+
+            self.rect.topleft = x, y
 
         self.screen.blit(self.shade, self.rect.topleft)
 
