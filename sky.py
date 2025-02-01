@@ -8,6 +8,7 @@ class Sky:
         self.screen = screen
 
         self.dark = False
+        self.day = 0
 
         self.colors = [
             (0, 0, 0),  # Night (black)
@@ -87,6 +88,7 @@ class Sky:
                 self.current_alphas = [self.alphas[0], self.alphas[1],
                                        self.alphas[2]]  # 150 → 100 → 0
             elif self.current_phase == "sunrise":
+                self.day += 1
                 self.current_phase = "day"
                 self.current_colors = [self.colors[2]]  # Static Blue
                 self.current_alphas = [self.alphas[2]]  # Static 0

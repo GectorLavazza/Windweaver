@@ -42,4 +42,6 @@ STONE_COST = {'house': 5,
 #               'barn': 0,
 #               'storage': 0}
 
-DAY_TIME = 9000
+DAY_TIME = 4500
+
+MODES = ['house', 'mine', 'windmill', 'pathway', 'barn', 'storage']

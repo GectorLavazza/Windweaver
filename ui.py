@@ -1,8 +1,6 @@
-from pygame.font import Font
-from pygame.transform import scale
 from pygame import SRCALPHA, Surface, freetype
 
-from settings import screen_height, screen_width, SCALE
+from settings import SCALE
 
 
 class Ui:
@@ -12,7 +10,7 @@ class Ui:
 
 class Text(Ui):
     def __init__(self, screen, font_size, color='white',
-                 pos=(0, 0), center_align=False, right_align=False, bottom_align=False):
+                 pos=(0, 0), center_align=False, right_align=False, bottom_align=False, vertical_center_align=False, shade=True):
 
         super().__init__(screen)
         self.font = freetype.Font('assets/fonts/PixelOperator8-Bold.ttf',
@@ -22,6 +20,7 @@ class Text(Ui):
         self.center_align = center_align
         self.right_align = right_align
         self.bottom_align = bottom_align
+        self.vertical_center_align = vertical_center_align
 
         self.rect = self.font.get_rect('')
         self.rect.center = self.screen.get_rect().center
@@ -32,6 +31,8 @@ class Text(Ui):
         self.shade = Surface(self.rect.size, SRCALPHA)
         self.shade.set_alpha(128)
         self.shade.fill('black')
+
+        self.show_shade = shade
 
     def update(self, message):
 
@@ -46,6 +47,8 @@ class Text(Ui):
             x, y = self.pos
             if self.center_align:
                 x = self.pos[0] - self.rect.w // 2
+            if self.vertical_center_align:
+                y = self.pos[1] - self.rect.h // 2
             if self.right_align:
                 x = self.pos[0] - self.rect.w
             if self.bottom_align:
@@ -53,7 +56,8 @@ class Text(Ui):
 
             self.rect.topleft = x, y
 
-        self.screen.blit(self.shade, self.rect.topleft)
+        if self.show_shade:
+            self.screen.blit(self.shade, self.rect.topleft)
 
         self.font.render_to(self.screen, self.rect.topleft, message, self.color)
 

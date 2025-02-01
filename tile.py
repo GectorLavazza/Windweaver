@@ -1,10 +1,9 @@
 from random import randint, choice
 
 import pygame
-from pygame import Rect, mouse, draw, Surface
+from pygame import Rect, mouse, draw
 from pygame.sprite import Sprite
 
-from load_image import load_image
 from settings import GROWTH_MIN, GROWTH_MAX, STONE_COST, WOOD_COST, SCALE
 
 
@@ -362,9 +361,12 @@ class House(Tile):
             self.world.update_zone()
 
     def draw_stats(self):
-        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
+        draw.rect(self.world.screen, '#46474c',
+                  Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2,
+                       2 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.capacity * self.food, 1 * SCALE))
+                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE,
+                       (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE))
 
     def on_kill(self):
         Grass('grass', self.pos, self.world, self.world.grass_g)
@@ -422,9 +424,12 @@ class Mine(Tile):
                 self.stone -= d
 
     def draw_stats(self):
-        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
+        draw.rect(self.world.screen, '#46474c',
+                  Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2,
+                       2 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.capacity * self.stone, 1 * SCALE))
+                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE,
+                       (self.rect.w * 2) / self.capacity * self.stone, 2 * SCALE))
 
     def on_kill(self):
         Grass('grass', self.pos, self.world, self.world.grass_g)
@@ -497,9 +502,12 @@ class Windmill(Tile):
                 tile.kill()
 
     def draw_stats(self):
-        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
+        draw.rect(self.world.screen, '#46474c',
+                  Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2,
+                       2 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.capacity * self.food, 1 * SCALE))
+                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE,
+                       (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE))
 
     def on_click(self):
         if mouse.get_pressed()[0]:
@@ -609,14 +617,14 @@ class Barn(Tile):
         self.world.update_zone()
 
     def draw_stats(self):
-        surface = Surface(self.usage_zone.size, pygame.SRCALPHA)
-        surface.set_alpha(40)
-        surface.fill('red')
-        self.world.screen.blit(surface, self.usage_zone.topleft)
-        draw.rect(self.world.screen, 'red', self.usage_zone, 1 * SCALE)
-        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
+        draw.rect(self.world.screen, (255, 0, 0, 128), self.usage_zone, 1 * SCALE)
+
+        draw.rect(self.world.screen, '#46474c',
+                  Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2,
+                       2 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.capacity * self.food, 1 * SCALE))
+                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE,
+                       (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE))
 
     def on_kill(self):
         Grass('grass', self.pos, self.world, self.world.grass_g)
@@ -660,23 +668,18 @@ class Storage(Tile):
         self.world.update_zone()
 
     def draw_stats(self):
-        surface = Surface(self.usage_zone.size, pygame.SRCALPHA)
-        surface.set_alpha(40)
-        surface.fill('blue')
-        self.world.screen.blit(surface, self.usage_zone.topleft)
+        draw.rect(self.world.screen, (0, 0, 255, 128), self.usage_zone, 1 * SCALE)
 
-        draw.rect(self.world.screen, 'blue', self.usage_zone, 1 * SCALE)
         draw.rect(self.world.screen, '#46474c',
-                  Rect(self.rect.x, self.rect.y - 4 * SCALE, self.rect.w,
-                       1 * SCALE))
+                  Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 8 * SCALE + SCALE, self.rect.w * 2,
+                       2 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x, self.rect.y - 4 * SCALE,
-                       self.rect.w / self.world.max_wood * self.world.wood, 1 * SCALE))
+                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 8 * SCALE,
+                       (self.rect.w * 2) / self.world.max_stone * self.world.stone, 2 * SCALE))
 
-        draw.rect(self.world.screen, 'blue', self.usage_zone, 1 * SCALE)
-        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w, 1 * SCALE))
+        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2, 2 * SCALE))
         draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x, self.rect.y - 2 * SCALE, self.rect.w / self.world.max_stone * self.world.stone, 1 * SCALE))
+                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE, (self.rect.w * 2) / self.world.max_stone * self.world.stone, 2 * SCALE))
 
     def on_kill(self):
         Grass('grass', self.pos, self.world, self.world.grass_g)

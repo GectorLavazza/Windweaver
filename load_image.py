@@ -1,7 +1,8 @@
 from os import path
 
-from pygame.image import load
 from pygame import transform
+from pygame.image import load
+
 from settings import SCALE
 
 

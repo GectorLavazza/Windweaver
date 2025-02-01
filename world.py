@@ -1,10 +1,10 @@
+from os import listdir
+
 import pygame.surface
 from pygame import Vector2, mouse, Surface, Rect
 
 from load_image import load_image
-from settings import screen_width, screen_height, CENTER, TILE_SIZE, screen_size, SCALE
-
-from os import listdir
+from settings import screen_width, screen_height, TILE_SIZE, screen_size, SCALE
 
 
 class World:
@@ -78,7 +78,7 @@ class World:
         self.barns = 0
 
         self.zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
-        self.zone_surface.set_alpha(40)
+        # self.zone_surface.set_alpha(40)
         self.zone_pos = Vector2(0, 0)
         self.zone_offset = Vector2(0, 0)
 
@@ -88,7 +88,7 @@ class World:
         if self.check_moving():
             self.move(dt)
 
-        self.screen.blit(self.surface, (0, 0), self.visible_rect)
+        # self.screen.blit(self.surface, (0, 0), self.visible_rect)
         self.count_objects()
 
     def update_zone(self):

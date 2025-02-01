@@ -51,12 +51,14 @@ def main():
 
     last_time = time()
 
-    resources = Text(screen, 5, 'white', (0, 0))
-    objects = Text(screen, 5, 'white', (WIDTH, 0), right_align=True)
+    label = Text(screen, 5, 'white', (0, 0))
     build = Text(screen, 5, 'white', (0, HEIGHT), bottom_align=True)
     fps = Text(screen, 5, 'white', (screen_width, HEIGHT), right_align=True, bottom_align=True)
 
+    pause = Text(screen, 20, 'white', CENTER, center_align=True, vertical_center_align=True, shade=False)
+
     et = time()
+    playing = 1
 
     print(f'Startup time: {et - st}')
 
@@ -65,10 +67,21 @@ def main():
 
     show_zone = True
 
+    overlay = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
+    overlay.set_alpha(128)
+    overlay.fill('black')
+
+    max_mw_tick = 5
+    mw_tick = max_mw_tick
+
+    mode = 0
+
     while running:
         dt = time() - last_time
         dt *= 60
         last_time = time()
+
+        mw_tick -= dt
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -78,18 +91,22 @@ def main():
                 if event.key == pygame.K_q:
                     running = 0
 
+                if event.key == pygame.K_ESCAPE:
+                    playing = False if playing else True
+
                 if event.key == pygame.K_1:
-                    world.current_build = 'house'
+                    mode = 0
                 if event.key == pygame.K_2:
-                    world.current_build = 'mine'
+                    mode = 1
                 if event.key == pygame.K_3:
-                    world.current_build = 'windmill'
+                    mode = 2
                 if event.key == pygame.K_4:
-                    world.current_build = 'pathway'
+                    mode = 3
                 if event.key == pygame.K_5:
-                    world.current_build = 'barn'
+                    mode = 4
                 if event.key == pygame.K_6:
-                    world.current_build = 'storage'
+                    mode = 5
+
 
                 if event.key == pygame.K_F10:
                     pygame.display.toggle_fullscreen()
@@ -110,37 +127,46 @@ def main():
                 if event.button in (1, 3):
                     cursor.pressed = False
 
+            if event.type == pygame.MOUSEWHEEL:
+                if mw_tick <= 0:
+                    mw_tick = max_mw_tick
+                    if event.y == -1:
+                        mode = mode + 1 if mode < len(MODES) - 1 else 0
+                    elif event.y == 1:
+                        mode = mode - 1 if mode > 0 else len(MODES) - 1
+
+        world.current_build = MODES[mode]
+
         screen.fill('black')
 
-        world.update(dt)
-
         trees_g.draw(screen)
-        trees_g.update(dt)
-
         stones_g.draw(screen)
-        stones_g.update(dt)
-
         grass_g.draw(screen)
-        grass_g.update(dt)
-
         pathways_g.draw(screen)
-        pathways_g.update(dt)
-
         farmland_g.draw(screen)
-        farmland_g.update(dt)
-
         buildings_g.draw(screen)
-        buildings_g.update(dt)
 
-        if show_zone:
-            screen.blit(world.zone_outline_surface, Vector2(world.rect.topleft) - world.zone_offset)
+        if playing:
+            world.update(dt)
+            trees_g.update(dt)
+            stones_g.update(dt)
+            grass_g.update(dt)
+            pathways_g.update(dt)
+            farmland_g.update(dt)
+            buildings_g.update(dt)
 
-        sky.update(dt)
+            if show_zone:
+                screen.blit(world.zone_outline_surface, Vector2(world.rect.topleft) - world.zone_offset)
 
-        resources.update(f'W:{world.wood}/{world.max_wood} S:{world.stone}/{world.max_stone}')
-        objects.update(f'H:{world.houses} M:{world.mines} W:{world.windmills} B:{world.barns}')
+            sky.update(dt)
+
+        label.update(f'W:{world.wood}/{world.max_wood} S:{world.stone}/{world.max_stone} Day: {sky.day}')
         build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')
+
+        if not playing:
+            screen.blit(overlay, (0, 0))
+            pause.update('Paused')
 
         cursor_g.draw(screen)
         cursor.update()
