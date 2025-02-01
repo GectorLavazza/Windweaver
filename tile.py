@@ -65,10 +65,12 @@ class Tile(Sprite):
     def draw_hover(self):
         self.world.screen.blit(self.world.hover_outline, self.rect.topleft)
         self.draw_stats()
+        self.draw_usage_zone()
 
     def draw_pressed(self):
         self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
         self.draw_stats()
+        self.draw_usage_zone()
 
     def draw_stats(self):
         pass
@@ -220,6 +222,9 @@ class Tile(Sprite):
 
                         self.kill()
 
+    def draw_usage_zone(self):
+        pass
+
 
 class Grass(Tile):
     def __init__(self, name, pos, world, *group):
@@ -324,7 +329,7 @@ class House(Tile):
         self.light = self.world.images['house_light']
         self.no_light = self.world.images['house']
 
-        self.max_tick = 600
+        self.max_tick = 1200
         self.tick = self.max_tick
 
         self.zone = Rect(*self.rect.topleft,
@@ -408,6 +413,8 @@ class Mine(Tile):
         self.world.update_zone()
 
     def on_update(self, dt):
+        self.draw_stats()
+
         self.tick -= dt
         if self.tick <= 0:
             self.tick = self.max_tick
@@ -484,6 +491,8 @@ class Windmill(Tile):
         if self.tick <= 0:
             self.tick = self.max_tick
             self.spread()
+
+        self.draw_stats()
 
         self.animation_tick -= dt
         if self.animation_tick <= 0:
@@ -626,9 +635,10 @@ class Barn(Tile):
 
         self.world.update_zone()
 
-    def draw_stats(self):
+    def draw_usage_zone(self):
         draw.rect(self.world.screen, (255, 0, 0, 128), self.usage_zone, 1 * SCALE)
 
+    def draw_stats(self):
         draw.rect(self.world.screen, '#46474c',
                   Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2,
                        2 * SCALE))
@@ -654,6 +664,9 @@ class Barn(Tile):
         self.kill()
         self.world.update_zone()
 
+    def on_update(self, dt):
+        self.draw_stats()
+
 
 class Storage(Tile):
     def __init__(self, pos, world, *group):
@@ -678,8 +691,6 @@ class Storage(Tile):
         self.world.update_zone()
 
     def draw_stats(self):
-        draw.rect(self.world.screen, (0, 0, 255, 128), self.usage_zone, 1 * SCALE)
-
         draw.rect(self.world.screen, '#46474c',
                   Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 8 * SCALE + SCALE, self.rect.w * 2,
                        2 * SCALE))
@@ -708,3 +719,6 @@ class Storage(Tile):
 
         self.kill()
         self.world.update_zone()
+
+    def draw_usage_zone(self):
+        draw.rect(self.world.screen, (0, 0, 255, 128), self.usage_zone, 1 * SCALE)
