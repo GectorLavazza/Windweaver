@@ -74,7 +74,7 @@ class Tile(Sprite):
         self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
         self.draw_usage_zone()
 
-    def draw_stats(self):
+    def draw_stats(self, dt):
         pass
 
     def draw_build(self):
@@ -94,7 +94,7 @@ class Tile(Sprite):
     def handle_mouse(self, dt):
         mouse_pos = mouse.get_pos()
         if self.stats_alpha > 0:
-            self.draw_stats()
+            self.draw_stats(dt)
 
         if self.rect.collidepoint(mouse_pos):
 
@@ -364,6 +364,7 @@ class House(Tile):
         self.capacity = 5
 
         self.world.update_zone()
+        self.food_w = (self.rect.w * 2) / self.capacity * self.food
 
         # self.l = Light(10, self.rect.center, (255, 0, 0), 1, self.world, self.world.light_g)
 
@@ -391,15 +392,17 @@ class House(Tile):
             Grass('grass', self.pos, self.world, self.world.grass_g)
             self.world.update_zone()
 
-    def draw_stats(self):
+    def draw_stats(self, dt):
         b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset, self.rect.w * 2,
                        2 * SCALE)
         sb = Surface(b.size, pygame.SRCALPHA)
         sb.fill((70, 71, 76, self.stats_alpha))
         self.world.screen.blit(sb, b.topleft)
 
+        self.food_w = max(self.food_w - dt * STATS_BAR_SPEED,
+                          min(self.food_w + dt * STATS_BAR_SPEED, (self.rect.w * 2) / self.capacity * self.food))
         f = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE - self.stats_offset,
-                       (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE)
+                       self.food_w, 2 * SCALE)
         sf = Surface(f.size, pygame.SRCALPHA)
         sf.fill((224, 220, 164, self.stats_alpha))
         self.world.screen.blit(sf, f.topleft)
@@ -447,9 +450,10 @@ class Mine(Tile):
         self.collected = 0
 
         self.world.update_zone()
+        self.stone_w = (self.rect.w * 2) / self.capacity * self.stone
 
     def on_update(self, dt):
-        self.draw_stats()
+        self.draw_stats(dt)
         self.capacity = self.max_capacity - self.collected // 10
         self.capacity = max(1, self.capacity)
 
@@ -472,7 +476,7 @@ class Mine(Tile):
                 self.stone -= d
                 self.collected += d
 
-    def draw_stats(self):
+    def draw_stats(self, dt):
         b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset,
                  self.rect.w * 2,
                  2 * SCALE)
@@ -480,8 +484,10 @@ class Mine(Tile):
         sb.fill((70, 71, 76, self.stats_alpha))
         self.world.screen.blit(sb, b.topleft)
 
+        self.stone_w = max(self.stone_w - dt * STATS_BAR_SPEED,
+                          min(self.stone_w + dt * STATS_BAR_SPEED, (self.rect.w * 2) / self.capacity * self.stone))
         f = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE - self.stats_offset,
-                 (self.rect.w * 2) / self.capacity * self.stone, 2 * SCALE)
+                 self.stone_w, 2 * SCALE)
         sf = Surface(f.size, pygame.SRCALPHA)
         sf.fill((224, 220, 164, self.stats_alpha))
         self.world.screen.blit(sf, f.topleft)
@@ -536,13 +542,15 @@ class Windmill(Tile):
 
         self.world.update_zone()
 
+        self.food_w = (self.rect.w * 2) / self.capacity * self.food
+
     def on_update(self, dt):
         self.tick -= dt
         if self.tick <= 0:
             self.tick = self.max_tick
             self.spread()
 
-        self.draw_stats()
+        self.draw_stats(dt)
 
         self.animation_tick -= dt
         if self.animation_tick <= 0:
@@ -563,7 +571,7 @@ class Windmill(Tile):
                 Farmland(tile.pos, tile.world, self.world.farmland_g)
                 tile.kill()
 
-    def draw_stats(self):
+    def draw_stats(self, dt):
         b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset,
                  self.rect.w * 2,
                  2 * SCALE)
@@ -571,8 +579,9 @@ class Windmill(Tile):
         sb.fill((70, 71, 76, self.stats_alpha))
         self.world.screen.blit(sb, b.topleft)
 
+        self.food_w = max(self.food_w - dt * STATS_BAR_SPEED, min(self.food_w + dt * STATS_BAR_SPEED, (self.rect.w * 2) / self.capacity * self.food))
         f = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE - self.stats_offset,
-                 (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE)
+                 self.food_w, 2 * SCALE)
         sf = Surface(f.size, pygame.SRCALPHA)
         sf.fill((224, 220, 164, self.stats_alpha))
         self.world.screen.blit(sf, f.topleft)
@@ -702,11 +711,12 @@ class Barn(Tile):
         self.capacity = 50
 
         self.world.update_zone()
+        self.food_w = (self.rect.w * 2) / self.capacity * self.food
 
     def draw_usage_zone(self):
         draw.rect(self.world.screen, (255, 0, 0, 128), self.usage_zone, 1 * SCALE)
 
-    def draw_stats(self):
+    def draw_stats(self, dt):
         b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset,
                  self.rect.w * 2,
                  2 * SCALE)
@@ -714,8 +724,10 @@ class Barn(Tile):
         sb.fill((70, 71, 76, self.stats_alpha))
         self.world.screen.blit(sb, b.topleft)
 
+        self.food_w = max(self.food_w - dt * STATS_BAR_SPEED,
+                          min(self.food_w + dt * STATS_BAR_SPEED, (self.rect.w * 2) / self.capacity * self.food))
         f = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE - self.stats_offset,
-                 (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE)
+                 self.food_w, 2 * SCALE)
         sf = Surface(f.size, pygame.SRCALPHA)
         sf.fill((224, 220, 164, self.stats_alpha))
         self.world.screen.blit(sf, f.topleft)
@@ -744,7 +756,7 @@ class Barn(Tile):
             self.world.update_zone()
 
     def on_update(self, dt):
-        self.draw_stats()
+        self.draw_stats(dt)
 
 
 class Storage(Tile):
@@ -768,8 +780,10 @@ class Storage(Tile):
         self.wood_capacity = 50
 
         self.world.update_zone()
+        self.wood_w = (self.rect.w * 2) / self.world.max_wood * self.world.wood
+        self.stone_w = (self.rect.w * 2) / self.world.max_stone * self.world.stone
 
-    def draw_stats(self):
+    def draw_stats(self, dt):
         b1 = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 8 * SCALE + SCALE - self.stats_offset,
                  self.rect.w * 2,
                  2 * SCALE)
@@ -777,8 +791,11 @@ class Storage(Tile):
         sb1.fill((70, 71, 76, self.stats_alpha))
         self.world.screen.blit(sb1, b1.topleft)
 
+        self.wood_w = max(self.wood_w - dt * STATS_BAR_SPEED,
+                           min(self.wood_w + dt * STATS_BAR_SPEED,
+                               (self.rect.w * 2) / self.world.max_wood * self.world.wood))
         f1 = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 8 * SCALE - self.stats_offset,
-                 (self.rect.w * 2) / self.world.max_wood * self.world.wood, 2 * SCALE)
+                 self.wood_w, 2 * SCALE)
         sf1 = Surface(f1.size, pygame.SRCALPHA)
         sf1.fill((224, 220, 164, self.stats_alpha))
         self.world.screen.blit(sf1, f1.topleft)
@@ -790,8 +807,10 @@ class Storage(Tile):
         sb2.fill((70, 71, 76, self.stats_alpha))
         self.world.screen.blit(sb2, b2.topleft)
 
+        self.stone_w = max(self.stone_w - dt * STATS_BAR_SPEED,
+                          min(self.stone_w + dt * STATS_BAR_SPEED, (self.rect.w * 2) / self.world.max_stone * self.world.stone))
         f2 = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE - self.stats_offset,
-                 (self.rect.w * 2) / self.world.max_stone * self.world.stone, 2 * SCALE)
+                 self.stone_w, 2 * SCALE)
         sf2 = Surface(f2.size, pygame.SRCALPHA)
         sf2.fill((224, 220, 164, self.stats_alpha))
         self.world.screen.blit(sf2, f2.topleft)
