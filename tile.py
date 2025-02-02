@@ -58,6 +58,9 @@ class Tile(Sprite):
         self.stats_offset = 0
         self.alpha = 0
         self.stats_alpha = 0
+        self.usage_zone_alpha = 0
+        self.flash_d = 1
+        self.building_alpha = 80
 
     def update(self, dt):
         if self.world.check_moving():
@@ -68,18 +71,21 @@ class Tile(Sprite):
 
     def draw_hover(self):
         self.world.screen.blit(self.world.hover_outline, self.rect.topleft)
-        self.draw_usage_zone()
 
     def draw_pressed(self):
         self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
-        self.draw_usage_zone()
 
     def draw_stats(self, dt):
         pass
 
-    def draw_build(self):
+    def draw_build(self, dt):
         image = self.world.build_images[self.world.current_build]
-        image.set_alpha(128)
+        self.building_alpha += self.flash_d * dt * 2
+        if self.building_alpha > 160:
+            self.flash_d = -1
+        if self.building_alpha < 80:
+            self.flash_d = 1
+        image.set_alpha(self.building_alpha)
         self.world.screen.blit(image, self.rect.topleft)
 
     def on_update(self, dt):
@@ -96,13 +102,17 @@ class Tile(Sprite):
         if self.stats_alpha > 0:
             self.draw_stats(dt)
 
+        if self.usage_zone_alpha > 0:
+            self.draw_usage_zone()
+
         if self.rect.collidepoint(mouse_pos):
             if self.available:
-                self.draw_build()
+                self.draw_build(dt)
 
             self.stats_offset = min(4 * SCALE, self.stats_offset + dt * STATS_OFFSET_SPEED)
             self.stats_alpha = min(int(self.stats_alpha + dt * STATS_ALPHA_SPEED), 255) \
                 if self.name not in ('barn', 'mine') and 'windmill' not in self.name else 255
+            self.usage_zone_alpha = min(int(self.usage_zone_alpha + dt * STATS_ALPHA_SPEED), 255)
             if self.name == 'grass':
                 self.check_build()
 
@@ -133,6 +143,7 @@ class Tile(Sprite):
             self.stats_offset = max(0, self.stats_offset - dt * STATS_OFFSET_SPEED)
             self.stats_alpha = max(int(self.stats_alpha - dt * STATS_ALPHA_SPEED), 0) \
                 if self.name not in ('barn', 'mine') and 'windmill' not in self.name else 255
+            self.usage_zone_alpha = max(int(self.usage_zone_alpha - dt * STATS_ALPHA_SPEED), 0)
             self.alpha = 0
 
     def move(self):
@@ -716,7 +727,10 @@ class Barn(Tile):
         self.food_w = (self.rect.w * 2) / self.capacity * self.food
 
     def draw_usage_zone(self):
-        draw.rect(self.world.screen, (255, 0, 0, 128), self.usage_zone, 1 * SCALE)
+        s = Surface(self.usage_zone.size, pygame.SRCALPHA)
+        s.set_alpha(self.usage_zone_alpha)
+        draw.rect(s, (255, 0, 0), (0, 0, *self.usage_zone.size), 1 * SCALE)
+        self.world.screen.blit(s, self.usage_zone.topleft)
 
     def draw_stats(self, dt):
         b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset,
@@ -841,4 +855,7 @@ class Storage(Tile):
             self.world.update_zone()
 
     def draw_usage_zone(self):
-        draw.rect(self.world.screen, (0, 0, 255, 128), self.usage_zone, 1 * SCALE)
+        s = Surface(self.usage_zone.size, pygame.SRCALPHA)
+        s.set_alpha(self.usage_zone_alpha)
+        draw.rect(s, (0, 0, 255), (0, 0, *self.usage_zone.size), 1 * SCALE)
+        self.world.screen.blit(s, self.usage_zone.topleft)

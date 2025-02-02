@@ -80,9 +80,11 @@ class World:
         self.pathways = 0
 
         self.zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
-        # self.zone_surface.set_alpha(40)
         self.zone_pos = Vector2(0, 0)
         self.zone_offset = Vector2(0, 0)
+
+        self.zone_outline_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
+        self.zone_alpha = 128
 
         self.update_zone()
 
@@ -92,6 +94,8 @@ class World:
 
         # self.screen.blit(self.surface, (0, 0), self.visible_rect)
         self.count_objects()
+        self.zone_alpha = max(128, min(int(self.zone_alpha - dt), 255))
+        self.zone_outline_surface.set_alpha(self.zone_alpha)
 
     def update_zone(self):
         self.zone = [s.zone for s in self.pathways_g.sprites() + self.buildings_g.sprites()]
@@ -104,10 +108,12 @@ class World:
         mask = pygame.mask.from_surface(self.zone_surface)
         outline = mask.outline()
         self.zone_outline_surface = mask.to_surface()
+        self.zone_alpha = 255
+        self.zone_outline_surface.set_alpha(self.zone_alpha)
         self.zone_outline_surface.fill((0, 0, 0, 0))
         for p in outline:
             pos = p[0] - 1 * SCALE / 2, p[1] - 1 * SCALE / 2
-            pygame.draw.rect(self.zone_outline_surface, (0, 255, 0, 128), pygame.Rect(*pos, SCALE, SCALE))
+            pygame.draw.rect(self.zone_outline_surface, (0, 255, 0), pygame.Rect(*pos, SCALE, SCALE))
         self.zone_outline_surface.set_colorkey((0, 0, 0, 0))
         self.zone_pos = self.zone_outline_surface.get_rect().topleft
         self.zone_offset = Vector2(self.rect.topleft)
