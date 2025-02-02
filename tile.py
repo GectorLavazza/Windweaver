@@ -97,6 +97,8 @@ class Tile(Sprite):
             self.draw_stats(dt)
 
         if self.rect.collidepoint(mouse_pos):
+            if self.available:
+                self.draw_build()
 
             self.stats_offset = min(4 * SCALE, self.stats_offset + dt * STATS_OFFSET_SPEED)
             self.stats_alpha = min(int(self.stats_alpha + dt * STATS_ALPHA_SPEED), 255) \
@@ -116,9 +118,9 @@ class Tile(Sprite):
                 self.alpha = max(int(self.alpha - dt * OUTLINE_ALPHA_SPEED), min(int(self.alpha + dt * OUTLINE_ALPHA_SPEED), 60))
 
                 self.world.hover_outline.set_alpha(self.alpha)
+
                 self.draw_hover()
-                if self.available:
-                    self.draw_build()
+
                 self.clicked = False
 
                 if self.world.buildings_g in self.groups() or self.world.pathways_g in self.groups():
