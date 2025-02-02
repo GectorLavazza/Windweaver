@@ -155,12 +155,13 @@ async def main():
             grass_g.update(dt)
             pathways_g.update(dt)
             farmland_g.update(dt)
+
+            sky.update(dt)
+
             buildings_g.update(dt)
 
             if show_zone:
                 screen.blit(world.zone_outline_surface, Vector2(world.rect.topleft) - world.zone_offset)
-
-            sky.update(dt)
 
             # if sky.dark:
             #     light_g.update(screen)

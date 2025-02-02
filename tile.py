@@ -399,7 +399,7 @@ class Mine(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('mine', pos, world, *group)
 
-        self.max_tick = 600
+        self.max_tick = 300
         self.tick = self.max_tick
 
         self.zone = Rect(*self.rect.topleft,
