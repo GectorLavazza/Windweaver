@@ -1,4 +1,4 @@
-from pygame import SRCALPHA, Surface, freetype
+from pygame import SRCALPHA, Surface, font
 
 from settings import SCALE
 
@@ -13,7 +13,7 @@ class Text(Ui):
                  pos=(0, 0), center_align=False, right_align=False, bottom_align=False, vertical_center_align=False, shade=True):
 
         super().__init__(screen)
-        self.font = freetype.Font('assets/fonts/PixelOperator8-Bold.ttf',
+        self.font = font.Font('assets/fonts/PixelOperator8-Bold.ttf',
                                      font_size * SCALE)
         self.pos = pos
         self.color = color
@@ -22,9 +22,10 @@ class Text(Ui):
         self.bottom_align = bottom_align
         self.vertical_center_align = vertical_center_align
 
-        self.rect = self.font.get_rect('')
+        self.render = self.font.render('', True, self.color)
+
+        self.rect = self.render.get_rect()
         self.rect.center = self.screen.get_rect().center
-        self.font.render_to(self.screen, self.rect.topleft, '', self.color)
 
         self.prev = ''
 
@@ -37,7 +38,9 @@ class Text(Ui):
     def update(self, message):
 
         if message != self.prev:
-            self.rect = self.font.get_rect(message)
+            self.render = self.font.render(str(message), True,
+                                           self.color)
+            self.rect = self.render.get_rect()
             self.rect.center = self.screen.get_rect().center
 
             self.shade = Surface(self.rect.size, SRCALPHA)
@@ -59,6 +62,6 @@ class Text(Ui):
         if self.show_shade:
             self.screen.blit(self.shade, self.rect.topleft)
 
-        self.font.render_to(self.screen, self.rect.topleft, message, self.color)
+        self.screen.blit(self.render, self.rect.topleft)
 
         self.prev = message

@@ -11,13 +11,11 @@ from settings import *
 from sky import Sky
 from ui import Text
 from world import World
-from particles import create_particles
 
 
 # /// script
 # dependencies = [
 # "pygame",
-# "cffi",
 # "noise",
 # ]
 # ///
