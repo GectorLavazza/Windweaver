@@ -70,7 +70,10 @@ class World:
 
         self.offset = Vector2(self.rect.topleft) - Vector2(mouse.get_pos())
 
-        self.buildings_g, self.grass_g, self.trees_g, self.stones_g, self.pathways_g, self.farmland_g, self.light_g = groups
+        (self.buildings_g, self.grass_g,
+         self.trees_g, self.stones_g,
+         self.pathways_g, self.farmland_g,
+         self.light_g, self.particles_g) = groups
         self.groups = groups
 
         self.houses = 0

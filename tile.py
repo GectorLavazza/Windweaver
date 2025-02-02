@@ -6,6 +6,7 @@ from pygame.sprite import Sprite
 
 from light import Light
 from settings import *
+from particles import create_particles
 
 
 class Tile(Sprite):
@@ -276,6 +277,9 @@ class Grass(Tile):
 
         elif mouse.get_pressed()[0]:
             if self.in_zone():
+                if self.name == 'tall_grass':
+                    create_particles(GREEN, self.rect.center, 5, 15, self.world.particles_g)
+
                 self.name = 'grass'
 
                 self.image = self.world.images[self.name]
@@ -311,6 +315,7 @@ class Tree(Tile):
             self.world.wood += d
 
         Grass('grass', self.pos, self.world, self.world.grass_g)
+        create_particles(GREEN, self.rect.center, 5 * (self.age + 1), 15, self.world.particles_g)
         self.kill()
 
     def grow(self):
@@ -353,6 +358,7 @@ class Stone(Tile):
                 d = self.amount
             self.world.stone += d
         Grass('grass', self.pos, self.world, self.world.grass_g)
+        create_particles(GREY, self.rect.center, self.amount * 2, 15, self.world.particles_g)
         self.kill()
 
 
@@ -403,6 +409,7 @@ class House(Tile):
         if self.food < 1:
             self.kill()
             Grass('grass', self.pos, self.world, self.world.grass_g)
+            create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
             self.world.update_zone()
 
     def draw_stats(self, dt):
@@ -439,7 +446,7 @@ class House(Tile):
             if sd > s:
                 sd = s
             self.world.stone += sd
-
+            create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
             self.kill()
             self.world.update_zone()
 
@@ -488,6 +495,7 @@ class Mine(Tile):
                 self.world.stone += d
                 self.stone -= d
                 self.collected += d
+                create_particles(GREY, self.rect.center, d, 15, self.world.particles_g)
 
     def draw_stats(self, dt):
         b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset,
@@ -524,7 +532,7 @@ class Mine(Tile):
             if sd > s:
                 sd = s
             self.world.stone += sd
-
+            create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
             self.kill()
             self.world.update_zone()
 
@@ -610,6 +618,7 @@ class Windmill(Tile):
                     d = self.food
                 self.food -= d
                 barn.food += d
+                create_particles(LIGHT_GREEN, self.rect.center, d, 15, self.world.particles_g)
 
     def on_kill(self):
         check = [self.rect.colliderect(p.collision_rect) and
@@ -630,7 +639,7 @@ class Windmill(Tile):
             if sd > s:
                 sd = s
             self.world.stone += sd
-
+            create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
             self.kill()
             self.world.update_zone()
 
@@ -682,6 +691,7 @@ class Farmland(Tile):
                 self.age = 0
                 self.name = f'farmland_{self.age}'
                 self.image = self.world.images[self.name]
+                create_particles(BROWN, self.rect.center, 10, 15, self.world.particles_g)
 
 
     def on_kill(self):
@@ -703,7 +713,7 @@ class Pathway(Tile):
 
         if check_1.count(True) < 2:
             Grass('grass', self.pos, self.world, self.world.grass_g)
-
+            create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
             self.kill()
             self.world.update_zone()
 
@@ -767,7 +777,7 @@ class Barn(Tile):
             if sd > s:
                 sd = s
             self.world.stone += sd
-
+            create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
             self.kill()
             self.world.update_zone()
 
@@ -850,7 +860,7 @@ class Storage(Tile):
             if sd > s:
                 sd = s
             self.world.stone += sd
-
+            create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
             self.kill()
             self.world.update_zone()
 

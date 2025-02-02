@@ -11,6 +11,7 @@ from settings import *
 from sky import Sky
 from ui import Text
 from world import World
+from particles import create_particles
 
 
 # /// script
@@ -46,10 +47,11 @@ async def main():
     pathways_g = pygame.sprite.Group()
     farmland_g = pygame.sprite.Group()
     light_g = pygame.sprite.Group()
+    particles_g = pygame.sprite.Group()
 
     sky = Sky(screen)
     world = World(screen, MAP_SIZE, CENTER, sky, buildings_g, grass_g, trees_g, stones_g, pathways_g, farmland_g,
-                  light_g)
+                  light_g, particles_g)
 
     pygame.display.set_icon(pygame.transform.scale_by(world.images['house'], 8))
 
@@ -155,6 +157,7 @@ async def main():
         pathways_g.draw(screen)
         farmland_g.draw(screen)
         buildings_g.draw(screen)
+        particles_g.draw(screen)
 
         if playing:
             world.update(dt)
@@ -163,13 +166,14 @@ async def main():
             grass_g.update(dt)
             pathways_g.update(dt)
             farmland_g.update(dt)
+            particles_g.update(dt)
 
             sky.update(dt)
 
-            buildings_g.update(dt)
-
             if show_zone:
                 screen.blit(world.zone_outline_surface, Vector2(world.rect.topleft) - world.zone_offset)
+
+            buildings_g.update(dt)
 
             # if sky.dark:
             #     light_g.update(screen)
