@@ -13,6 +13,14 @@ from ui import Text
 from world import World
 
 
+# /// script
+# dependencies = [
+# "pygame",
+# "cffi",
+# "noise",
+# ]
+# ///
+
 async def main():
     st = time()
 
@@ -40,7 +48,8 @@ async def main():
     light_g = pygame.sprite.Group()
 
     sky = Sky(screen)
-    world = World(screen, MAP_SIZE, CENTER, sky, buildings_g, grass_g, trees_g, stones_g, pathways_g, farmland_g, light_g)
+    world = World(screen, MAP_SIZE, CENTER, sky, buildings_g, grass_g, trees_g, stones_g, pathways_g, farmland_g,
+                  light_g)
 
     pygame.display.set_icon(pygame.transform.scale_by(world.images['house'], 8))
 
@@ -108,7 +117,6 @@ async def main():
                     mode = 4
                 if event.key == pygame.K_6:
                     mode = 5
-
 
                 if event.key == pygame.K_F10:
                     pygame.display.toggle_fullscreen()
