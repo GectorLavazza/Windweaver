@@ -32,6 +32,7 @@ class Particle(Sprite):
         if self.elapsed_time >= self.time:
             self.kill()
 
+
         if not (-20 <= self.rect.centerx <= WIDTH + 20 and
                 -20 <= self.rect.centery <= HEIGHT + 20):
             self.kill()
@@ -45,7 +46,7 @@ def create_particles(color, position, amount, time, *group):
         particles.append(pygame.transform.scale_by(particles[0], scale))
 
     for _ in range(amount):
-        dx = random.randint(-20, 20) / 100
-        dy = random.randint(-50, 0) / 100
+        dx = random.randint(-50, 50) / 100
+        dy = random.randint(-50, 50) / 100
         t = random.randint(max(1, time // 4 * 3), max(2, time // 4 * 5))
         Particle(position, dx, dy, particles, t, *group)

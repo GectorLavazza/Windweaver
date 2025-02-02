@@ -303,6 +303,7 @@ class Tree(Tile):
         if mouse.get_pressed()[0]:
             if self.in_zone():
                 self.durability -= 1
+                create_particles(GREEN, self.rect.center, 5 * (self.age + 1), 15, self.world.particles_g)
                 if self.durability <= 0:
                     self.on_kill()
 
@@ -315,7 +316,6 @@ class Tree(Tile):
             self.world.wood += d
 
         Grass('grass', self.pos, self.world, self.world.grass_g)
-        create_particles(GREEN, self.rect.center, 5 * (self.age + 1), 15, self.world.particles_g)
         self.kill()
 
     def grow(self):
@@ -348,6 +348,7 @@ class Stone(Tile):
         if mouse.get_pressed()[0]:
             if self.in_zone():
                 self.durability -= 1
+                create_particles(GREY, self.rect.center, self.amount * 2, 15, self.world.particles_g)
                 if self.durability <= 0:
                     self.on_kill()
 
@@ -358,7 +359,6 @@ class Stone(Tile):
                 d = self.amount
             self.world.stone += d
         Grass('grass', self.pos, self.world, self.world.grass_g)
-        create_particles(GREY, self.rect.center, self.amount * 2, 15, self.world.particles_g)
         self.kill()
 
 
