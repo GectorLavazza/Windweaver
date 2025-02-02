@@ -1,5 +1,5 @@
 from os import listdir
-from random import randint
+from random import randint, random
 
 import pygame.surface
 from pygame import Vector2, mouse, Surface, Rect
@@ -197,3 +197,7 @@ class World:
     def get_offset(self):
         self.offset = Vector2(self.rect.topleft) - Vector2(mouse.get_pos())
 
+    def play_sound(self, filename, volume=0.5):
+        sfx = pygame.mixer.Sound(f'assets/sfx/{filename}.wav')
+        sfx.set_volume(randint(int(volume * 100 - 5), int(volume * 100 + 5)) / 100)
+        sfx.play()
