@@ -32,3 +32,7 @@ STONE_COST = {'house': 5,
 DAY_TIME = 4500
 
 MODES = ['house', 'pathway', 'windmill', 'barn', 'mine', 'storage']
+
+STATS_ALPHA_SPEED = 40
+STATS_OFFSET_SPEED = 3
+OUTLINE_ALPHA_SPEED = 7

@@ -1,4 +1,5 @@
 from os import listdir
+from random import randint
 
 import pygame.surface
 from pygame import Vector2, mouse, Surface, Rect

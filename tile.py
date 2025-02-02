@@ -1,11 +1,11 @@
 from random import randint, choice
 
 import pygame
-from pygame import Rect, mouse, draw
+from pygame import Rect, mouse, draw, Surface
 from pygame.sprite import Sprite
 
 from light import Light
-from settings import GROWTH_MIN, GROWTH_MAX, STONE_COST, WOOD_COST, SCALE
+from settings import *
 
 
 class Tile(Sprite):
@@ -55,21 +55,23 @@ class Tile(Sprite):
                                self.rect.height * 7)
         self.usage_zone.center = self.rect.center
 
+        self.stats_offset = 0
+        self.alpha = 0
+        self.stats_alpha = 0
+
     def update(self, dt):
         if self.world.check_moving():
             self.move()
 
-        self.handle_mouse()
+        self.handle_mouse(dt)
         self.on_update(dt)
 
     def draw_hover(self):
         self.world.screen.blit(self.world.hover_outline, self.rect.topleft)
-        self.draw_stats()
         self.draw_usage_zone()
 
     def draw_pressed(self):
         self.world.screen.blit(self.world.pressed_outline, self.rect.topleft)
-        self.draw_stats()
         self.draw_usage_zone()
 
     def draw_stats(self):
@@ -89,20 +91,31 @@ class Tile(Sprite):
     def on_kill(self):
         pass
 
-    def handle_mouse(self):
+    def handle_mouse(self, dt):
         mouse_pos = mouse.get_pos()
+        if self.stats_alpha > 0:
+            self.draw_stats()
 
         if self.rect.collidepoint(mouse_pos):
 
+            self.stats_offset = min(4 * SCALE, self.stats_offset + dt * STATS_OFFSET_SPEED)
+            self.stats_alpha = min(int(self.stats_alpha + dt * STATS_ALPHA_SPEED), 255) \
+                if self.name not in ('barn', 'mine') and 'windmill' not in self.name else 255
             if self.name == 'grass':
                 self.check_build()
 
             if mouse.get_pressed()[0] or mouse.get_pressed()[2]:
-                self.draw_pressed()
                 if not self.clicked:
                     self.on_click()
                     self.clicked = True
+                self.alpha = min(int(self.alpha + dt * OUTLINE_ALPHA_SPEED), 100)
+                self.world.pressed_outline.set_alpha(self.alpha)
+                self.draw_pressed()
+
             else:
+                self.alpha = max(int(self.alpha - dt * OUTLINE_ALPHA_SPEED), min(int(self.alpha + dt * OUTLINE_ALPHA_SPEED), 60))
+
+                self.world.hover_outline.set_alpha(self.alpha)
                 self.draw_hover()
                 if self.available:
                     self.draw_build()
@@ -115,6 +128,10 @@ class Tile(Sprite):
                                 self.on_kill()
         else:
             self.clicked = False
+            self.stats_offset = max(0, self.stats_offset - dt * STATS_OFFSET_SPEED)
+            self.stats_alpha = max(int(self.stats_alpha - dt * STATS_ALPHA_SPEED), 0) \
+                if self.name not in ('barn', 'mine') and 'windmill' not in self.name else 255
+            self.alpha = 0
 
     def move(self):
         self.rect.topleft = (self.pos[0] + self.world.rect.x,
@@ -164,7 +181,7 @@ class Tile(Sprite):
             check_3 = [self.rect.colliderect(p.collision_rect) for p in self.world.buildings_g.sprites()]
 
             #  and check_2.count(True) > 1
-            if any(check_1) and not any(check_3) and self.world.houses // 4 > self.world.mines:
+            if any(check_1) and check_2.count(True) > 1 and not any(check_3) and self.world.houses // 4 > self.world.mines:
                 self.available = True
 
         elif build == 'windmill':
@@ -375,12 +392,17 @@ class House(Tile):
             self.world.update_zone()
 
     def draw_stats(self):
-        draw.rect(self.world.screen, '#46474c',
-                  Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2,
-                       2 * SCALE))
-        draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE,
-                       (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE))
+        b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset, self.rect.w * 2,
+                       2 * SCALE)
+        sb = Surface(b.size, pygame.SRCALPHA)
+        sb.fill((70, 71, 76, self.stats_alpha))
+        self.world.screen.blit(sb, b.topleft)
+
+        f = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE - self.stats_offset,
+                       (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE)
+        sf = Surface(f.size, pygame.SRCALPHA)
+        sf.fill((224, 220, 164, self.stats_alpha))
+        self.world.screen.blit(sf, f.topleft)
 
     def on_kill(self):
         check = [self.rect.colliderect(p.collision_rect) and
@@ -451,12 +473,18 @@ class Mine(Tile):
                 self.collected += d
 
     def draw_stats(self):
-        draw.rect(self.world.screen, '#46474c',
-                  Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2,
-                       2 * SCALE))
-        draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE,
-                       (self.rect.w * 2) / self.capacity * self.stone, 2 * SCALE))
+        b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset,
+                 self.rect.w * 2,
+                 2 * SCALE)
+        sb = Surface(b.size, pygame.SRCALPHA)
+        sb.fill((70, 71, 76, self.stats_alpha))
+        self.world.screen.blit(sb, b.topleft)
+
+        f = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE - self.stats_offset,
+                 (self.rect.w * 2) / self.capacity * self.stone, 2 * SCALE)
+        sf = Surface(f.size, pygame.SRCALPHA)
+        sf.fill((224, 220, 164, self.stats_alpha))
+        self.world.screen.blit(sf, f.topleft)
 
     def on_kill(self):
         check = [self.rect.colliderect(p.collision_rect) and
@@ -536,12 +564,18 @@ class Windmill(Tile):
                 tile.kill()
 
     def draw_stats(self):
-        draw.rect(self.world.screen, '#46474c',
-                  Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2,
-                       2 * SCALE))
-        draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE,
-                       (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE))
+        b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset,
+                 self.rect.w * 2,
+                 2 * SCALE)
+        sb = Surface(b.size, pygame.SRCALPHA)
+        sb.fill((70, 71, 76, self.stats_alpha))
+        self.world.screen.blit(sb, b.topleft)
+
+        f = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE - self.stats_offset,
+                 (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE)
+        sf = Surface(f.size, pygame.SRCALPHA)
+        sf.fill((224, 220, 164, self.stats_alpha))
+        self.world.screen.blit(sf, f.topleft)
 
     def on_click(self):
         if mouse.get_pressed()[0]:
@@ -673,12 +707,18 @@ class Barn(Tile):
         draw.rect(self.world.screen, (255, 0, 0, 128), self.usage_zone, 1 * SCALE)
 
     def draw_stats(self):
-        draw.rect(self.world.screen, '#46474c',
-                  Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2,
-                       2 * SCALE))
-        draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE,
-                       (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE))
+        b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset,
+                 self.rect.w * 2,
+                 2 * SCALE)
+        sb = Surface(b.size, pygame.SRCALPHA)
+        sb.fill((70, 71, 76, self.stats_alpha))
+        self.world.screen.blit(sb, b.topleft)
+
+        f = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE - self.stats_offset,
+                 (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE)
+        sf = Surface(f.size, pygame.SRCALPHA)
+        sf.fill((224, 220, 164, self.stats_alpha))
+        self.world.screen.blit(sf, f.topleft)
 
     def on_kill(self):
         check = [self.rect.colliderect(p.collision_rect) and
@@ -730,16 +770,31 @@ class Storage(Tile):
         self.world.update_zone()
 
     def draw_stats(self):
-        draw.rect(self.world.screen, '#46474c',
-                  Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 8 * SCALE + SCALE, self.rect.w * 2,
-                       2 * SCALE))
-        draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 8 * SCALE,
-                       (self.rect.w * 2) / self.world.max_wood * self.world.wood, 2 * SCALE))
+        b1 = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 8 * SCALE + SCALE - self.stats_offset,
+                 self.rect.w * 2,
+                 2 * SCALE)
+        sb1 = Surface(b1.size, pygame.SRCALPHA)
+        sb1.fill((70, 71, 76, self.stats_alpha))
+        self.world.screen.blit(sb1, b1.topleft)
 
-        draw.rect(self.world.screen, '#46474c', Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE, self.rect.w * 2, 2 * SCALE))
-        draw.rect(self.world.screen, '#e0dca4',
-                  Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE, (self.rect.w * 2) / self.world.max_stone * self.world.stone, 2 * SCALE))
+        f1 = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 8 * SCALE - self.stats_offset,
+                 (self.rect.w * 2) / self.world.max_wood * self.world.wood, 2 * SCALE)
+        sf1 = Surface(f1.size, pygame.SRCALPHA)
+        sf1.fill((224, 220, 164, self.stats_alpha))
+        self.world.screen.blit(sf1, f1.topleft)
+
+        b2 = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset,
+                 self.rect.w * 2,
+                 2 * SCALE)
+        sb2 = Surface(b2.size, pygame.SRCALPHA)
+        sb2.fill((70, 71, 76, self.stats_alpha))
+        self.world.screen.blit(sb2, b2.topleft)
+
+        f2 = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE - self.stats_offset,
+                 (self.rect.w * 2) / self.world.max_stone * self.world.stone, 2 * SCALE)
+        sf2 = Surface(f2.size, pygame.SRCALPHA)
+        sf2.fill((224, 220, 164, self.stats_alpha))
+        self.world.screen.blit(sf2, f2.topleft)
 
     def on_kill(self):
         check = [self.rect.colliderect(p.collision_rect) and
