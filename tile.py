@@ -163,7 +163,8 @@ class Tile(Sprite):
                        for p in self.world.stones_g.sprites()]
             check_3 = [self.rect.colliderect(p.collision_rect) for p in self.world.buildings_g.sprites()]
 
-            if any(check_1) and check_2.count(True) > 1 and not any(check_3) and self.world.houses // 4 > self.world.mines:
+            #  and check_2.count(True) > 1
+            if any(check_1) and not any(check_3) and self.world.houses // 4 > self.world.mines:
                 self.available = True
 
         elif build == 'windmill':
@@ -419,11 +420,16 @@ class Mine(Tile):
 
         self.stone = 0
         self.capacity = 10
+        self.max_capacity = 10
+
+        self.collected = 0
 
         self.world.update_zone()
 
     def on_update(self, dt):
         self.draw_stats()
+        self.capacity = self.max_capacity - self.collected // 10
+        self.capacity = max(1, self.capacity)
 
         self.tick -= dt
         if self.tick <= 0:
@@ -442,6 +448,7 @@ class Mine(Tile):
                     d = self.stone
                 self.world.stone += d
                 self.stone -= d
+                self.collected += d
 
     def draw_stats(self):
         draw.rect(self.world.screen, '#46474c',
