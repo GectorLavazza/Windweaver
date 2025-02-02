@@ -29,8 +29,8 @@ class World:
         self.dynamic_speed_y = 0
         self.velocity = Vector2(0, 0)
 
-        self.wood = 1000
-        self.stone = 1000
+        self.wood = 50
+        self.stone = 50
         self.max_wood = 50
         self.max_stone = 50
         self.food = 0

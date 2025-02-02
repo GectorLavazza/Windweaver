@@ -163,7 +163,7 @@ class Tile(Sprite):
                        for p in self.world.stones_g.sprites()]
             check_3 = [self.rect.colliderect(p.collision_rect) for p in self.world.buildings_g.sprites()]
 
-            if any(check_1) and not any(check_3) and self.world.houses // 4 > self.world.mines:
+            if any(check_1) and check_2.count(True) > 1 and not any(check_3) and self.world.houses // 4 > self.world.mines:
                 self.available = True
 
         elif build == 'windmill':
@@ -382,22 +382,27 @@ class House(Tile):
                        (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE))
 
     def on_kill(self):
-        Grass('grass', self.pos, self.world, self.world.grass_g)
+        check = [self.rect.colliderect(p.collision_rect) and
+         (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+         for p in self.world.pathways_g.sprites()]
 
-        w, s = randint(1, WOOD_COST['house'] // 2), randint(1, STONE_COST['house'] // 2)
+        if check.count(True) < 2:
+            Grass('grass', self.pos, self.world, self.world.grass_g)
 
-        wd = self.world.max_wood - self.world.wood
-        if wd > w:
-            wd = w
-        self.world.wood += wd
+            w, s = randint(1, WOOD_COST['house'] // 2), randint(1, STONE_COST['house'] // 2)
 
-        sd = self.world.max_stone - self.world.stone
-        if sd > s:
-            sd = s
-        self.world.stone += sd
+            wd = self.world.max_wood - self.world.wood
+            if wd > w:
+                wd = w
+            self.world.wood += wd
 
-        self.kill()
-        self.world.update_zone()
+            sd = self.world.max_stone - self.world.stone
+            if sd > s:
+                sd = s
+            self.world.stone += sd
+
+            self.kill()
+            self.world.update_zone()
 
 
 class Mine(Tile):
@@ -447,22 +452,27 @@ class Mine(Tile):
                        (self.rect.w * 2) / self.capacity * self.stone, 2 * SCALE))
 
     def on_kill(self):
-        Grass('grass', self.pos, self.world, self.world.grass_g)
+        check = [self.rect.colliderect(p.collision_rect) and
+                 (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                 for p in self.world.pathways_g.sprites()]
 
-        w, s = randint(1, WOOD_COST['mine'] // 2), randint(1, STONE_COST['mine'] // 2)
+        if check.count(True) < 2:
+            Grass('grass', self.pos, self.world, self.world.grass_g)
 
-        wd = self.world.max_wood - self.world.wood
-        if wd > w:
-            wd = w
-        self.world.wood += wd
+            w, s = randint(1, WOOD_COST['mine'] // 2), randint(1, STONE_COST['mine'] // 2)
 
-        sd = self.world.max_stone - self.world.stone
-        if sd > s:
-            sd = s
-        self.world.stone += sd
+            wd = self.world.max_wood - self.world.wood
+            if wd > w:
+                wd = w
+            self.world.wood += wd
 
-        self.kill()
-        self.world.update_zone()
+            sd = self.world.max_stone - self.world.stone
+            if sd > s:
+                sd = s
+            self.world.stone += sd
+
+            self.kill()
+            self.world.update_zone()
 
 
 class Windmill(Tile):
@@ -539,22 +549,27 @@ class Windmill(Tile):
                 barn.food += d
 
     def on_kill(self):
-        Grass('grass', self.pos, self.world, self.world.grass_g)
+        check = [self.rect.colliderect(p.collision_rect) and
+                 (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                 for p in self.world.pathways_g.sprites()]
 
-        w, s = randint(1, WOOD_COST['windmill'] // 2), randint(1, STONE_COST['windmill'] // 2)
+        if check.count(True) < 2:
+            Grass('grass', self.pos, self.world, self.world.grass_g)
 
-        wd = self.world.max_wood - self.world.wood
-        if wd > w:
-            wd = w
-        self.world.wood += wd
+            w, s = randint(1, WOOD_COST['windmill'] // 2), randint(1, STONE_COST['windmill'] // 2)
 
-        sd = self.world.max_stone - self.world.stone
-        if sd > s:
-            sd = s
-        self.world.stone += sd
+            wd = self.world.max_wood - self.world.wood
+            if wd > w:
+                wd = w
+            self.world.wood += wd
 
-        self.kill()
-        self.world.update_zone()
+            sd = self.world.max_stone - self.world.stone
+            if sd > s:
+                sd = s
+            self.world.stone += sd
+
+            self.kill()
+            self.world.update_zone()
 
 
 class Farmland(Tile):
@@ -563,7 +578,7 @@ class Farmland(Tile):
 
         super().__init__(f'farmland_{self.age}', pos, world, *group)
 
-        self.max_tick = randint(300, 600)
+        self.max_tick = randint(120, 300)
         self.tick = self.max_tick
 
     def grow(self):
@@ -579,7 +594,7 @@ class Farmland(Tile):
                 if self.age == 1:
                     self.max_tick = randint(1800, 3600)
                 else:
-                    self.max_tick = randint(600, 1200)
+                    self.max_tick = randint(300, 600)
                 self.tick = self.max_tick
                 self.grow()
 
@@ -659,22 +674,27 @@ class Barn(Tile):
                        (self.rect.w * 2) / self.capacity * self.food, 2 * SCALE))
 
     def on_kill(self):
-        Grass('grass', self.pos, self.world, self.world.grass_g)
+        check = [self.rect.colliderect(p.collision_rect) and
+                 (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                 for p in self.world.pathways_g.sprites()]
 
-        w, s = randint(1, WOOD_COST['barn'] // 2), randint(1, STONE_COST['barn'] // 2)
+        if check.count(True) < 2:
+            Grass('grass', self.pos, self.world, self.world.grass_g)
 
-        wd = self.world.max_wood - self.world.wood
-        if wd > w:
-            wd = w
-        self.world.wood += wd
+            w, s = randint(1, WOOD_COST['barn'] // 2), randint(1, STONE_COST['barn'] // 2)
 
-        sd = self.world.max_stone - self.world.stone
-        if sd > s:
-            sd = s
-        self.world.stone += sd
+            wd = self.world.max_wood - self.world.wood
+            if wd > w:
+                wd = w
+            self.world.wood += wd
 
-        self.kill()
-        self.world.update_zone()
+            sd = self.world.max_stone - self.world.stone
+            if sd > s:
+                sd = s
+            self.world.stone += sd
+
+            self.kill()
+            self.world.update_zone()
 
     def on_update(self, dt):
         self.draw_stats()
@@ -715,22 +735,27 @@ class Storage(Tile):
                   Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE, (self.rect.w * 2) / self.world.max_stone * self.world.stone, 2 * SCALE))
 
     def on_kill(self):
-        Grass('grass', self.pos, self.world, self.world.grass_g)
+        check = [self.rect.colliderect(p.collision_rect) and
+                 (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                 for p in self.world.pathways_g.sprites()]
 
-        w, s = randint(1, WOOD_COST['storage'] // 2), randint(1, STONE_COST['storage'] // 2)
+        if check.count(True) < 2:
+            Grass('grass', self.pos, self.world, self.world.grass_g)
 
-        wd = self.world.max_wood - self.world.wood
-        if wd > w:
-            wd = w
-        self.world.wood += wd
+            w, s = randint(1, WOOD_COST['storage'] // 2), randint(1, STONE_COST['storage'] // 2)
 
-        sd = self.world.max_stone - self.world.stone
-        if sd > s:
-            sd = s
-        self.world.stone += sd
+            wd = self.world.max_wood - self.world.wood
+            if wd > w:
+                wd = w
+            self.world.wood += wd
 
-        self.kill()
-        self.world.update_zone()
+            sd = self.world.max_stone - self.world.stone
+            if sd > s:
+                sd = s
+            self.world.stone += sd
+
+            self.kill()
+            self.world.update_zone()
 
     def draw_usage_zone(self):
         draw.rect(self.world.screen, (0, 0, 255, 128), self.usage_zone, 1 * SCALE)

@@ -21,13 +21,13 @@ WOOD_COST = {'house': 5,
              'windmill': 10,
              'pathway': 1,
              'barn': 10,
-             'storage': 20}
+             'storage': 15}
 STONE_COST = {'house': 5,
              'mine': 10,
              'windmill': 5,
               'pathway': 1,
               'barn': 10,
-              'storage': 20}
+              'storage': 15}
 
 DAY_TIME = 4500
 

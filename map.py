@@ -65,16 +65,16 @@ class Map:
 
                 pos = (x * TILE_SIZE, y * TILE_SIZE)
 
-                # if tile == 'tree':
-                #     age = randint(0, 2)
-                #     Tree(pos, self.world, age, self.trees_g)
+                if tile == 'tree':
+                    age = randint(0, 2)
+                    Tree(pos, self.world, age, self.trees_g)
 
-                # elif 'grass' in tile or 'flower' in tile:
-                Grass('grass', pos, self.world, self.grass_g)
+                elif 'grass' in tile or 'flower' in tile:
+                    Grass(tile, pos, self.world, self.grass_g)
 
-                # elif tile == 'stone':
-                #     amount = randint(1, 3)
-                #     Stone(pos, self.world, amount, self.stones_g)
+                elif tile == 'stone':
+                    amount = randint(1, 3)
+                    Stone(pos, self.world, amount, self.stones_g)
 
             print(f'Loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
 
