@@ -12,6 +12,8 @@ from sky import Sky
 from ui import Text
 from world import World
 
+from particles import create_particles
+
 
 # /// script
 # dependencies = [
@@ -186,6 +188,8 @@ async def main():
 
         cursor_g.draw(screen)
         cursor.update()
+
+        # create_particles(BLACK, pygame.mouse.get_pos(), 10, 120, particles_g)
 
         pygame.display.update(pygame.Rect(0, 0, WIDTH, HEIGHT))
         clock.tick()

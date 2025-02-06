@@ -15,7 +15,7 @@ class Particle(Sprite):
         self.image = random.choice(self.particles)
         self.rect = self.image.get_rect()
 
-        self.velocity = [dx, dy]
+        self.velocity = Vector2(dx, dy)
         self.rect.center = pos
 
         self.elapsed_time = 0
@@ -24,14 +24,18 @@ class Particle(Sprite):
         self.base_pos = Vector2(pos)
 
     def update(self, dt):
-        self.rect.x += self.velocity[0] * dt * SCALE
-        self.rect.y += self.velocity[1] * dt * SCALE
+        self.velocity.x += random.randint(-100, 100) / 1000
+        self.velocity.y += random.randint(-100, 100) / 1000
+
+        self.rect.x += self.velocity.x * dt * SCALE
+        self.rect.y += self.velocity.y * dt * SCALE
 
         self.elapsed_time += dt
 
+        self.image.set_alpha(int(255 * (1 - self.elapsed_time / 1.5 / self.time)))
+
         if self.elapsed_time >= self.time:
             self.kill()
-
 
         if not (-20 <= self.rect.centerx <= WIDTH + 20 and
                 -20 <= self.rect.centery <= HEIGHT + 20):
@@ -46,7 +50,7 @@ def create_particles(color, position, amount, time, *group):
         particles.append(pygame.transform.scale_by(particles[0], scale))
 
     for _ in range(amount):
-        dx = random.randint(-50, 50) / 100
-        dy = random.randint(-50, 50) / 100
+        dx = random.randint(-500, 500) / 1000
+        dy = random.randint(-500, 500) / 1000
         t = random.randint(max(1, time // 4 * 3), max(2, time // 4 * 5))
         Particle(position, dx, dy, particles, t, *group)
