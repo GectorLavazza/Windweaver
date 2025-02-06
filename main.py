@@ -9,7 +9,7 @@ from cursor import Cursor
 from map import Map
 from settings import *
 from sky import Sky
-from ui import Text
+from ui import Text, Clock
 from world import World
 
 from particles import create_particles
@@ -57,6 +57,7 @@ async def main():
     map = Map(world, grass_g, trees_g, stones_g)
 
     cursor = Cursor(cursor_g)
+    sky_clock = Clock(screen, 20, sky)
 
     running = 1
     clock = pygame.time.Clock()
@@ -177,7 +178,7 @@ async def main():
             # if sky.dark:
             #     light_g.update(screen)
 
-        label.update(f'Wood:{world.wood}/{world.max_wood} Stone:{world.stone}/{world.max_stone} Day:{sky.day} Time: {sky.time}')
+        label.update(f'Wood:{world.wood}/{world.max_wood} Stone:{world.stone}/{world.max_stone}')
         build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')
 
@@ -185,6 +186,7 @@ async def main():
             screen.blit(overlay, (0, 0))
             pause.update('Paused')
 
+        sky_clock.update(dt)
         cursor_g.draw(screen)
         cursor.update()
 

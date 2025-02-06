@@ -10,6 +10,8 @@ class Sky:
         self.dark = False
         self.day = 0
         self.time = ''
+        self.hour = 0
+        self.minute = 0
 
         self.colors = [
             (0, 0, 0),  # Night (black)
@@ -111,8 +113,9 @@ class Sky:
             # Reset tick for the new phase
             self.tick = self.phase_durations[self.current_phase]
 
-        hour = (DAY_TIME * self.phases.index(self.current_phase) + DAY_TIME - self.tick) / HOUR
-        minute = (hour - round(hour) + 0.5) * 60
-        f = 'AM' if 0 <= round(hour) < 13 else 'PM'
-        self.time = (f'{str(round(hour)).rjust(2, "0")}:'
-                     f'{str(round(minute)).rjust(2, "0")} {f}')
+        self.hour = (DAY_TIME * self.phases.index(self.current_phase) + DAY_TIME - self.tick) / HOUR
+        self.minute = (self.hour - round(self.hour) + 0.5) * 60
+        f = 'AM' if 0 <= round(self.hour) < 13 else 'PM'
+        h = round(self.hour) if f == 'AM' else round(self.hour) - 12
+        self.time = (f'{str(round(h)).rjust(2, "0")}:'
+                     f'{str(round(self.minute)).rjust(2, "0")} {f}')
