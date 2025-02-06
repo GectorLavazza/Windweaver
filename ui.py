@@ -97,7 +97,6 @@ class Clock:
                                center_align=True, shade=True)
 
     def update(self, dt):
-        ratio = 1 - abs((round(self.sky.hour) * 60 + round(self.sky.minute) - 12 * 60) / (12 * 60))
         self.angle = (round(self.sky.hour) * 60 + round(self.sky.minute) - 12 * 60) / (24 * 60) * 360 - 90
 
         self.update_sun_pos()
@@ -106,7 +105,7 @@ class Clock:
         self.surface.fill((0, 0, 0, 128))
 
         pygame.draw.circle(self.surface, WHITE, self.center, self.r, 2)
-        pygame.draw.circle(self.surface, (255, min(255, int(255 * abs(ratio))), 0), self.sun_pos, 12)
+        pygame.draw.circle(self.surface, 'yellow', self.sun_pos, 12)
         pygame.draw.circle(self.surface, 'white', self.moon_pos, 7)
 
         self.screen.blit(self.surface, self.rect.topleft)
