@@ -14,7 +14,6 @@ from world import World
 
 from particles import create_particles
 
-
 # /// script
 # dependencies = [
 # "pygame",
@@ -178,7 +177,7 @@ async def main():
             # if sky.dark:
             #     light_g.update(screen)
 
-        label.update(f'Wood:{world.wood}/{world.max_wood} Stone:{world.stone}/{world.max_stone} Day:{sky.day}')
+        label.update(f'Wood:{world.wood}/{world.max_wood} Stone:{world.stone}/{world.max_stone} Day:{sky.day} Time: {sky.time}')
         build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')
 

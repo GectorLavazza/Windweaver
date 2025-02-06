@@ -1,6 +1,6 @@
 from pygame import Surface
 
-from settings import screen_size, DAY_TIME
+from settings import screen_size, DAY_TIME, HOUR, MINUTE
 
 
 class Sky:
@@ -9,6 +9,7 @@ class Sky:
 
         self.dark = False
         self.day = 0
+        self.time = ''
 
         self.colors = [
             (0, 0, 0),  # Night (black)
@@ -26,6 +27,8 @@ class Sky:
             "sunset": DAY_TIME
             # Transition: day → night (blue → orange → black)
         }
+
+        self.phases = ['night', 'sunrise', 'day', 'sunset']
 
         self.current_phase = "day"
         self.tick = self.phase_durations[self.current_phase]
@@ -46,6 +49,7 @@ class Sky:
         )
 
     def update(self, dt):
+
         if self.current_phase == 'night' or self.current_phase == 'sunset' and self.tick <= \
                 self.phase_durations[
                     'sunset'] // 4 or self.current_phase == 'sunrise' and self.tick >= \
@@ -88,7 +92,6 @@ class Sky:
                 self.current_alphas = [self.alphas[0], self.alphas[1],
                                        self.alphas[2]]  # 150 → 100 → 0
             elif self.current_phase == "sunrise":
-                self.day += 1
                 self.current_phase = "day"
                 self.current_colors = [self.colors[2]]  # Static Blue
                 self.current_alphas = [self.alphas[2]]  # Static 0
@@ -99,9 +102,17 @@ class Sky:
                 self.current_alphas = [self.alphas[2], self.alphas[1],
                                        self.alphas[0]]  # 0 → 100 → 150
             elif self.current_phase == "sunset":
+                self.time = 0
+                self.day += 1
                 self.current_phase = "night"
                 self.current_colors = [self.colors[0]]  # Static Black
                 self.current_alphas = [self.alphas[0]]  # Static 150
 
             # Reset tick for the new phase
             self.tick = self.phase_durations[self.current_phase]
+
+        hour = (DAY_TIME * self.phases.index(self.current_phase) + DAY_TIME - self.tick) / HOUR
+        minute = (hour - round(hour) + 0.5) * 60
+        f = 'AM' if 0 <= round(hour) < 13 else 'PM'
+        self.time = (f'{str(round(hour)).rjust(2, "0")}:'
+                     f'{str(round(minute)).rjust(2, "0")} {f}')

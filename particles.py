@@ -32,7 +32,7 @@ class Particle(Sprite):
 
         self.elapsed_time += dt
 
-        self.image.set_alpha(int(255 * (1 - self.elapsed_time / 1.5 / self.time)))
+        self.image.set_alpha(int(255 * (1 - self.elapsed_time / 1.25 / self.time)))
 
         if self.elapsed_time >= self.time:
             self.kill()
