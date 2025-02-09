@@ -63,6 +63,8 @@ class Tile(Sprite):
         self.flash_d = 1
         self.building_alpha = 80
 
+        self.food = -1
+
     def update(self, dt):
         if self.world.check_moving():
             self.move()
@@ -106,7 +108,13 @@ class Tile(Sprite):
         if self.usage_zone_alpha > 0:
             self.draw_usage_zone()
 
-        if self.rect.collidepoint(mouse_pos):
+        if self.name == 'house' and self.food < 3:
+            self.stats_offset = min(4 * SCALE, self.stats_offset + dt * STATS_OFFSET_SPEED)
+            self.stats_alpha = min(int(self.stats_alpha + dt * STATS_ALPHA_SPEED), 255) \
+                if self.name not in ('barn', 'mine') and 'windmill' not in self.name else 255
+            self.usage_zone_alpha = min(int(self.usage_zone_alpha + dt * STATS_ALPHA_SPEED), 255)
+
+        elif self.rect.collidepoint(mouse_pos):
             if self.available:
                 self.draw_build(dt)
 
