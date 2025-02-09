@@ -45,5 +45,6 @@ BLACK = '#26171b'
 WHITE = '#e0dca4'
 LIGHT_GREEN = '#b5bd3d'
 GREY = '#7a7070'
+DARK_GREY = (70, 71, 76)
 ORANGE = '#c0552a'
 BROWN = '#6d3e0f'

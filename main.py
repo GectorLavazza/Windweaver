@@ -9,7 +9,7 @@ from cursor import Cursor
 from map import Map
 from settings import *
 from sky import Sky
-from ui import Text, Clock
+from ui import Text, Clock, Resources
 from world import World
 
 from particles import create_particles
@@ -59,6 +59,10 @@ async def main():
     cursor = Cursor(cursor_g)
     sky_clock = Clock(screen, 20, sky, world)
 
+    top_bg = pygame.Surface((WIDTH, 20 * SCALE), pygame.SRCALPHA)
+    for i in range(top_bg.height, -1, -1):
+        pygame.draw.line(top_bg, (0, 0, 0, max(0, min(i * 2, 255))), (0, top_bg.height - i), (WIDTH, top_bg.height - i))
+
     running = 1
     clock = pygame.time.Clock()
 
@@ -88,6 +92,8 @@ async def main():
     mw_tick = max_mw_tick
 
     mode = 0
+
+    resources = Resources(screen, world)
 
     while running:
         dt = time() - last_time
@@ -178,15 +184,20 @@ async def main():
             # if sky.dark:
             #     light_g.update(screen)
 
-        label.update(f'Wood:{world.wood}/{world.max_wood} Stone:{world.stone}/{world.max_stone}')
+        screen.blit(top_bg, (0, 0))
+
+        # label.update(f'Wood:{world.wood}/{world.max_wood} Stone:{world.stone}/{world.max_stone}')
         build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')
+
+        resources.update(dt)
+
+        sky_clock.update(dt)
 
         if not playing:
             screen.blit(overlay, (0, 0))
             pause.update('Paused')
 
-        sky_clock.update(dt)
         cursor_g.draw(screen)
         cursor.update()
 
