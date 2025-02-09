@@ -3,6 +3,7 @@ from pygame import SRCALPHA, Surface, font, Vector2
 import math
 
 from settings import *
+from light import Light
 
 
 class Ui:
@@ -89,11 +90,17 @@ class Clock:
         self.surface = Surface((self.w, self.h / 2), pygame.SRCALPHA)
         self.surface.fill((0, 0, 0, 0))
 
+        self.light = Surface((self.w, self.h / 2), pygame.SRCALPHA)
+        self.light.fill((0, 0, 0, 0))
+
         self.rect = self.surface.get_rect()
         self.rect.topleft = (WIDTH - self.w, 0)
         self.center = self.r + self.add_width / 2, self.r + self.add_width / 2
 
         self.angle = 180
+
+        self.sun_light = Light(self.light, 7, (10, 10, 10), 5)
+        self.moon_light = Light(self.light, 6, (5, 5, 5), 5)
 
         pos = (self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h - 5 * SCALE)
         self.day_label = Text(screen, 4, 'white', pos, center_align=True, shade=False)
@@ -107,12 +114,20 @@ class Clock:
         self.update_moon_pos()
 
         self.surface.fill((0, 0, 0, 0))
+        self.light.fill((0, 0, 0, 0))
 
         pygame.draw.circle(self.surface, WHITE, self.center, self.r, 1 + SCALE // 2)
+
+        self.sun_light.rect.center = self.sun_rect.center
+        self.sun_light.update()
         self.surface.blit(self.sun, self.sun_rect.topleft)
+
+        self.moon_light.rect.center = self.moon_rect.center
+        self.moon_light.update()
         self.surface.blit(self.moon, self.moon_rect.topleft)
 
         self.screen.blit(self.surface, self.rect.topleft)
+        self.screen.blit(self.light, self.rect.topleft, special_flags=pygame.BLEND_RGB_ADD)
         pygame.draw.line(self.screen, WHITE, (WIDTH - self.rect.w + SCALE, self.rect.y + self.rect.h),
                                               (WIDTH - SCALE, self.rect.y + self.rect.h), 1 + SCALE // 2)
 
@@ -188,3 +203,38 @@ class Resources:
             self.wood_count.update(f'{self.world.wood}/{self.world.max_wood}')
             self.stone_count.update(f'{self.world.stone}/{self.world.max_stone}')
             self.screen.blit(self.text, self.pos)
+
+
+class Hotbar:
+    def __init__(self, screen, world):
+        self.screen = screen
+        self.world = world
+
+        self.cw = 12 * SCALE
+        self.ch = self.cw
+
+        self.surface = Surface((self.cw * len(MODES) + self.cw / 2 + self.cw, self.ch), pygame.SRCALPHA)
+        self.surface.fill((0, 0, 0, 0))
+        self.pos = WIDTH / 2 - self.cw * len(MODES) / 2, HEIGHT - 6 * SCALE - self.surface.height
+
+        self.cells = [pygame.Rect(self.cw * i, 0, self.cw, self.ch) for i in range(len(MODES))]
+
+        self.deletion_cell = Surface((self.cw, self.ch), pygame.SRCALPHA)
+        self.deletion_cell.fill((*DARK_GREY, 64))
+        pygame.draw.rect(self.deletion_cell, GREY, pygame.Rect(0, 0, self.cw, self.ch), SCALE)
+
+        self.cells_bg = Surface((self.cw * len(MODES), self.ch), pygame.SRCALPHA)
+        self.cells_bg.fill((*DARK_GREY, 64))
+        for c in self.cells:
+            pygame.draw.rect(self.cells_bg, GREY, c, SCALE)
+
+    def update(self, dt):
+        self.surface.fill((0, 0, 0, 0))
+        self.surface.blit(self.cells_bg)
+        mode = MODES.index(self.world.current_build)
+        cell = self.cells[mode]
+
+        pygame.draw.rect(self.surface, WHITE, cell, SCALE)
+
+        self.surface.blit(self.deletion_cell, (self.cw * len(MODES) + self.cw / 2, 0, self.cw, self.ch))
+        self.screen.blit(self.surface, self.pos)

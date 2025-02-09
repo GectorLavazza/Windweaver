@@ -368,8 +368,8 @@ class House(Tile):
         if not self.world.house_placed:
             self.world.house_placed = True
 
-        self.light = self.world.images['house_light']
-        self.no_light = self.world.images['house']
+        # self.light = Light(self.world.screen, 6, (30, 30, 10), 1)
+        # self.light.rect.center = self.rect.center
 
         self.max_tick = 1200
         self.tick = self.max_tick
@@ -388,10 +388,9 @@ class House(Tile):
         # self.l = Light(10, self.rect.center, (255, 0, 0), 1, self.world, self.world.light_g)
 
     def on_update(self, dt):
-        if self.world.sky.dark:
-            self.image = self.light
-        else:
-            self.image = self.no_light
+        # if self.world.sky.dark:
+        #     self.light.rect.center = self.rect.center
+        #     # self.light.update()
 
         self.tick -= dt
         if self.tick <= 0:

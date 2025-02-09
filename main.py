@@ -9,8 +9,10 @@ from cursor import Cursor
 from map import Map
 from settings import *
 from sky import Sky
-from ui import Text, Clock, Resources
+from ui import Text, Clock, Resources, Hotbar
 from world import World
+
+from light import Light
 
 from particles import create_particles
 
@@ -61,7 +63,11 @@ async def main():
 
     top_bg = pygame.Surface((WIDTH, 20 * SCALE), pygame.SRCALPHA)
     for i in range(top_bg.height, -1, -1):
-        pygame.draw.line(top_bg, (0, 0, 0, max(0, min(i * 2, 255))), (0, top_bg.height - i), (WIDTH, top_bg.height - i))
+        pygame.draw.line(top_bg, (0, 0, 0, max(0, min(i, 255))), (0, top_bg.height - i), (WIDTH, top_bg.height - i))
+
+    bottom_bg = pygame.Surface((WIDTH, 20 * SCALE), pygame.SRCALPHA)
+    for i in range(bottom_bg.height, -1, -1):
+        pygame.draw.line(bottom_bg, (0, 0, 0, max(0, min(i, 255))), (0, i), (WIDTH, i))
 
     running = 1
     clock = pygame.time.Clock()
@@ -94,6 +100,10 @@ async def main():
     mode = 0
 
     resources = Resources(screen, world)
+    hotbar = Hotbar(screen, world)
+
+    light = Light(screen, 100, (3, 3, 1), 5)
+    light_on = False
 
     while running:
         dt = time() - last_time
@@ -133,6 +143,8 @@ async def main():
                     world.movement_type = 1 if world.movement_type == 2 else 2
                 if event.key == pygame.K_F2:
                     show_zone = False if show_zone else True
+                if event.key == pygame.K_F3:
+                    light_on = False if light_on else True
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
@@ -181,18 +193,20 @@ async def main():
 
             buildings_g.update(dt)
 
-            # if sky.dark:
-            #     light_g.update(screen)
+            if light_on:
+                light.rect.center = pygame.mouse.get_pos()
+                light.update()
 
         screen.blit(top_bg, (0, 0))
+        screen.blit(bottom_bg, (0, HEIGHT - bottom_bg.height))
 
         # label.update(f'Wood:{world.wood}/{world.max_wood} Stone:{world.stone}/{world.max_stone}')
         build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')
 
         resources.update(dt)
-
         sky_clock.update(dt)
+        hotbar.update(dt)
 
         if not playing:
             screen.blit(overlay, (0, 0))
