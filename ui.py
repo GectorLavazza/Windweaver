@@ -90,6 +90,9 @@ class Clock:
         self.surface = Surface((self.w, self.h / 2), pygame.SRCALPHA)
         self.surface.fill((0, 0, 0, 0))
 
+        self.text = Surface((self.w, self.h - 8 * SCALE), pygame.SRCALPHA)
+        self.text.fill((0, 0, 0, 0))
+
         self.light = Surface((self.w, self.h / 2), pygame.SRCALPHA)
         self.light.fill((0, 0, 0, 0))
 
@@ -104,8 +107,10 @@ class Clock:
 
         pos = (self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h - 5 * SCALE)
         self.day_label = Text(screen, 4, 'white', pos, center_align=True, shade=False)
-        # self.time_label = Text(screen, 4, 'white', (pos[0], pos[1] + 20),
-        #                        center_align=True, shade=True)
+        self.time_label = Text(self.text, 4, 'white', (self.text.width / 2, self.text.height),
+                               center_align=True, bottom_align=True, shade=True)
+
+        self.text_alpha = 0
 
     def update(self, dt):
         self.angle = (round(self.sky.hour) * 60 + round(self.sky.minute) - 12 * 60) / (24 * 60) * 360 - 90
@@ -115,6 +120,8 @@ class Clock:
 
         self.surface.fill((0, 0, 0, 0))
         self.light.fill((0, 0, 0, 0))
+        self.text.fill((0, 0, 0, 0))
+        self.text.set_alpha(self.text_alpha)
 
         pygame.draw.circle(self.surface, WHITE, self.center, self.r, 1 + SCALE // 2)
 
@@ -132,7 +139,15 @@ class Clock:
                                               (WIDTH - SCALE, self.rect.y + self.rect.h), 1 + SCALE // 2)
 
         self.day_label.update(f'{self.sky.day}')
-        # self.time_label.update(self.sky.time)
+
+        if self.rect.collidepoint(pygame.mouse.get_pos()):
+            self.text_alpha = min(int(self.text_alpha + dt * STATS_ALPHA_SPEED), 255)
+        else:
+            self.text_alpha = max(int(self.text_alpha - dt * STATS_ALPHA_SPEED), 0)
+
+        if self.text_alpha >= 0:
+            self.time_label.update(self.sky.time)
+            self.screen.blit(self.text, self.rect.topleft)
 
     def update_sun_pos(self):
         self.sun_rect.centerx = self.r * math.cos(math.radians(self.angle)) + self.center[0]
@@ -215,26 +230,85 @@ class Hotbar:
 
         self.surface = Surface((self.cw * len(MODES) + self.cw / 2 + self.cw, self.ch), pygame.SRCALPHA)
         self.surface.fill((0, 0, 0, 0))
-        self.pos = WIDTH / 2 - self.cw * len(MODES) / 2, HEIGHT - 6 * SCALE - self.surface.height
+        self.pos = WIDTH / 2 - self.surface.width / 2, HEIGHT - 6 * SCALE - self.surface.height
 
         self.cells = [pygame.Rect(self.cw * i, 0, self.cw, self.ch) for i in range(len(MODES))]
 
         self.deletion_cell = Surface((self.cw, self.ch), pygame.SRCALPHA)
-        self.deletion_cell.fill((*DARK_GREY, 64))
-        pygame.draw.rect(self.deletion_cell, GREY, pygame.Rect(0, 0, self.cw, self.ch), SCALE)
+        self.deletion_cell.fill((*DARK_GREY, HOTBAR_BG_ALPHA))
+
+        pygame.draw.rect(self.deletion_cell, DARK_GREY, pygame.Rect(0, 0, self.cw, self.ch), SCALE)
+        image = self.world.images['trashcan']
+        r = image.get_rect()
+        r.center = self.deletion_cell.get_rect().center
+        self.deletion_cell.blit(image, r.topleft)
+
+        image = self.world.images['e_icon']
+        r = image.get_rect()
+        r.center = self.deletion_cell.get_rect().centerx, self.deletion_cell.get_rect().centery
+        self.surface.blit(image, (0, 0))
 
         self.cells_bg = Surface((self.cw * len(MODES), self.ch), pygame.SRCALPHA)
-        self.cells_bg.fill((*DARK_GREY, 64))
-        for c in self.cells:
-            pygame.draw.rect(self.cells_bg, GREY, c, SCALE)
+        self.cells_bg.fill((*DARK_GREY, HOTBAR_BG_ALPHA))
+
+        self.icons = Surface((self.cw * len(MODES), self.ch), pygame.SRCALPHA)
+        self.icons.fill((0, 0, 0, 0))
+
+        for i in range(len(self.cells)):
+            cell = self.cells[i]
+            pygame.draw.rect(self.cells_bg, DARK_GREY, cell, SCALE)
+            image = self.world.images[MODES[i]]
+            r = image.get_rect()
+            r.center = cell.center
+            self.icons.blit(image, r.topleft)
+
+        self.text = Surface((self.cw * len(MODES) + self.cw / 2 + self.cw, self.ch * 3), pygame.SRCALPHA)
+        self.text.fill((0, 0, 0, 0))
+        self.name = Text(self.text, 5, 'white', (self.text.width / 2, self.ch - SCALE), center_align=True, shade=True)
+
+        self.prev_mode = 0
+        self.before_change = 0
+        self.mode_changed = False
+        self.text_alpha = 255
+
+        self.selection_pos = [0, 0]
 
     def update(self, dt):
         self.surface.fill((0, 0, 0, 0))
         self.surface.blit(self.cells_bg)
         mode = MODES.index(self.world.current_build)
-        cell = self.cells[mode]
+        self.mode_changed = True if mode != self.prev_mode else False
+        if self.mode_changed:
+            self.before_change = self.prev_mode
+            self.text_alpha = 255
 
-        pygame.draw.rect(self.surface, WHITE, cell, SCALE)
+        self.text_alpha = max(int(self.text_alpha - dt), 0)
+
+        cell = self.cells[mode]
+        if mode > self.before_change:
+            self.selection_pos[0] = min(cell.topleft[0], self.selection_pos[0] + dt * HOTBAR_SELECTION_SPEED)
+        elif mode < self.before_change:
+            self.selection_pos[0] = max(cell.topleft[0], self.selection_pos[0] - dt * HOTBAR_SELECTION_SPEED)
+
+        pygame.draw.rect(self.surface, (*WHITE, HOTBAR_BG_ALPHA), (*self.selection_pos, self.cw, self.ch))
+        self.surface.blit(self.icons)
+        pygame.draw.rect(self.surface, WHITE, (*self.selection_pos, self.cw, self.ch), SCALE)
+
+        if self.world.removing:
+            pygame.draw.rect(self.surface, (*RED, HOTBAR_BG_ALPHA), (self.cw * len(MODES) + self.cw / 2, 0, self.cw, self.ch))
 
         self.surface.blit(self.deletion_cell, (self.cw * len(MODES) + self.cw / 2, 0, self.cw, self.ch))
+
+        if self.world.removing:
+            pygame.draw.rect(self.surface, RED, (self.cw * len(MODES) + self.cw / 2, 0, self.cw, self.ch), SCALE)
+
         self.screen.blit(self.surface, self.pos)
+
+        self.text.fill((0, 0, 0, 0))
+
+        if self.text_alpha >= 0:
+            self.text.set_alpha(self.text_alpha)
+            self.name.update(MODES[mode].capitalize())
+            self.screen.blit(self.text, (self.pos[0], self.pos[1] - self.ch - SCALE * 8))
+
+        self.prev_mode = mode

@@ -89,6 +89,9 @@ class World:
         self.zone_outline_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
         self.zone_alpha = 128
 
+        self.removing = False
+        self.mouse_d = -1
+
         self.update_zone()
 
     def update(self, dt):
@@ -99,6 +102,9 @@ class World:
         self.count_objects()
         self.zone_alpha = max(128, min(int(self.zone_alpha - dt), 255))
         self.zone_outline_surface.set_alpha(self.zone_alpha)
+
+        self.hover_outline.fill('white' if not self.removing else 'red')
+        self.pressed_outline.fill('white' if not self.removing else 'red')
 
     def update_zone(self):
         self.zone = [s.zone for s in self.pathways_g.sprites() + self.buildings_g.sprites()]

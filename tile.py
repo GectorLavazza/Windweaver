@@ -119,11 +119,18 @@ class Tile(Sprite):
 
             if mouse.get_pressed()[0] or mouse.get_pressed()[2]:
                 if not self.clicked:
-                    self.on_click()
+                    if not self.world.removing:
+                        self.on_click()
                     self.clicked = True
                 self.alpha = min(int(self.alpha + dt * OUTLINE_ALPHA_SPEED), 100)
                 self.world.pressed_outline.set_alpha(self.alpha)
                 self.draw_pressed()
+
+                if self.world.removing:
+                    if self.world.buildings_g in self.groups() or self.world.pathways_g in self.groups():
+                            if self.world.houses > 1 or 'house' not in self.name:
+                                if self.in_zone():
+                                    self.on_kill()
 
             else:
                 self.alpha = max(int(self.alpha - dt * OUTLINE_ALPHA_SPEED), min(int(self.alpha + dt * OUTLINE_ALPHA_SPEED), 60))
@@ -133,12 +140,6 @@ class Tile(Sprite):
                 self.draw_hover()
 
                 self.clicked = False
-
-                if self.world.buildings_g in self.groups() or self.world.pathways_g in self.groups():
-                    if pygame.key.get_pressed()[pygame.K_e]:
-                        if self.world.houses > 1 or 'house' not in self.name:
-                            if self.in_zone():
-                                self.on_kill()
         else:
             self.clicked = False
             self.stats_offset = max(0, self.stats_offset - dt * STATS_OFFSET_SPEED)

@@ -63,11 +63,11 @@ async def main():
 
     top_bg = pygame.Surface((WIDTH, 20 * SCALE), pygame.SRCALPHA)
     for i in range(top_bg.height, -1, -1):
-        pygame.draw.line(top_bg, (0, 0, 0, max(0, min(i, 255))), (0, top_bg.height - i), (WIDTH, top_bg.height - i))
+        pygame.draw.line(top_bg, (0, 0, 0, max(0, min(i * (20 * SCALE / 80) ** -1, 255))), (0, top_bg.height - i), (WIDTH, top_bg.height - i))
 
     bottom_bg = pygame.Surface((WIDTH, 20 * SCALE), pygame.SRCALPHA)
     for i in range(bottom_bg.height, -1, -1):
-        pygame.draw.line(bottom_bg, (0, 0, 0, max(0, min(i, 255))), (0, i), (WIDTH, i))
+        pygame.draw.line(bottom_bg, (0, 0, 0, max(0, min(i * (20 * SCALE / 80) ** -1, 255))), (0, i), (WIDTH, i))
 
     running = 1
     clock = pygame.time.Clock()
@@ -121,7 +121,7 @@ async def main():
                     running = 0
 
                 if event.key == pygame.K_ESCAPE:
-                    playing = False if playing else True
+                    playing = not playing
 
                 if event.key == pygame.K_1:
                     mode = 0
@@ -136,15 +136,18 @@ async def main():
                 if event.key == pygame.K_6:
                     mode = 5
 
+                if event.key == pygame.K_e:
+                    world.removing = not world.removing
+
                 if event.key == pygame.K_F10:
                     pygame.display.toggle_fullscreen()
 
                 if event.key == pygame.K_F1:
                     world.movement_type = 1 if world.movement_type == 2 else 2
                 if event.key == pygame.K_F2:
-                    show_zone = False if show_zone else True
+                    show_zone = not show_zone
                 if event.key == pygame.K_F3:
-                    light_on = False if light_on else True
+                    light_on = not light_on
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
@@ -161,8 +164,10 @@ async def main():
                 if mw_tick <= 0:
                     mw_tick = max_mw_tick
                     if event.y == -1:
+                        world.mouse_d = -1
                         mode = mode + 1 if mode < len(MODES) - 1 else 0
                     elif event.y == 1:
+                        world.mouse_d = 1
                         mode = mode - 1 if mode > 0 else len(MODES) - 1
 
         world.current_build = MODES[mode]
@@ -201,7 +206,7 @@ async def main():
         screen.blit(bottom_bg, (0, HEIGHT - bottom_bg.height))
 
         # label.update(f'Wood:{world.wood}/{world.max_wood} Stone:{world.stone}/{world.max_stone}')
-        build.update(world.current_build)
+        # build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')
 
         resources.update(dt)
