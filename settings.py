@@ -29,7 +29,7 @@ STONE_COST = {'house': 5,
               'barn': 10,
               'storage': 15}
 
-DAY_TIME = 4500
+DAY_TIME = 120
 HOUR = DAY_TIME * 4 / 24
 MINUTE = HOUR / 60
 
@@ -50,5 +50,5 @@ RED = (174, 70, 70)
 ORANGE = '#c0552a'
 BROWN = '#6d3e0f'
 
-HOTBAR_BG_ALPHA = 64
+HOTBAR_BG_ALPHA = 128
 HOTBAR_SELECTION_SPEED = 10

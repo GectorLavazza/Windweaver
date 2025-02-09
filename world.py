@@ -94,6 +94,14 @@ class World:
 
         self.update_zone()
 
+        self.houses_left = 'inf'
+        self.pathways_left = self.houses * 5 - self.pathways
+        self.mines_left = self.houses // 4 - self.mines
+        self.windmills_left = self.houses // 2 - self.windmills
+        self.barns_left = 'inf'
+        self.storages_left = 'inf'
+        self.left = [self.houses_left, self.pathways_left, self.windmills_left, self.barns_left, self.mines_left, self.storages_left]
+
     def update(self, dt):
         if self.check_moving():
             self.move(dt)
@@ -105,6 +113,14 @@ class World:
 
         self.hover_outline.fill('white' if not self.removing else 'red')
         self.pressed_outline.fill('white' if not self.removing else 'red')
+
+        self.houses_left = 'inf'
+        self.pathways_left = self.houses * 5 - self.pathways
+        self.mines_left = self.houses // 4 - self.mines
+        self.windmills_left = self.houses // 2 - self.windmills
+        self.barns_left = 'inf'
+        self.storages_left = 'inf'
+        self.left = [self.houses_left, self.pathways_left, self.windmills_left, self.barns_left, self.mines_left, self.storages_left]
 
     def update_zone(self):
         self.zone = [s.zone for s in self.pathways_g.sprites() + self.buildings_g.sprites()]

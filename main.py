@@ -102,7 +102,7 @@ async def main():
     resources = Resources(screen, world)
     hotbar = Hotbar(screen, world)
 
-    light = Light(screen, 100, (3, 3, 1), 5)
+    light = Light(screen, 100, (6, 6, 1), 5)
     light_on = False
 
     while running:

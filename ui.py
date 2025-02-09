@@ -63,7 +63,7 @@ class Text(Ui):
             self.rect.topleft = x, y
 
         if self.show_shade:
-            self.screen.blit(self.shade, self.rect.topleft)
+            self.screen.blit(self.shade, (self.rect.topleft[0], self.rect.topleft[1] - SCALE / 2))
 
         self.screen.blit(self.render, self.rect.topleft)
 
@@ -182,8 +182,11 @@ class Resources:
         pygame.draw.rect(self.back, DARK_GREY, pygame.Rect(8 * SCALE - SCALE, 3 * SCALE + SCALE, self.rw, self.rh))
         pygame.draw.rect(self.back, DARK_GREY, pygame.Rect(8 * SCALE - SCALE, 3 * SCALE + self.rh * 0.5 * SCALE + SCALE, self.rw, self.rh))
 
-        self.wood_count = Text(self.text, 4, BLACK, (8 * SCALE + self.rw / 2, 3.5 * SCALE + self.rh / 2), center_align=True, vertical_center_align=True)
-        self.stone_count = Text(self.text, 4, BLACK, (8 * SCALE + self.rw / 2, 3.5 * SCALE + self.rh / 2 + self.rh * 0.5 * SCALE), center_align=True, vertical_center_align=True)
+        self.wood_count = Text(self.text, 4, 'white', (8 * SCALE + self.rw / 2, 3.5 * SCALE + self.rh / 2),
+                               center_align=True, vertical_center_align=True, shade=True)
+        self.stone_count = Text(self.text, 4, 'white',
+                                (8 * SCALE + self.rw / 2, 3.5 * SCALE + self.rh / 2 + self.rh * 0.5 * SCALE),
+                                center_align=True, vertical_center_align=True, shade=True)
 
         self.stone = self.world.images['stone_icon']
         self.wood = self.world.images['wood_icon']
@@ -272,6 +275,7 @@ class Hotbar:
         self.text_alpha = 255
 
         self.selection_pos = [0, 0]
+        self.rect = self.surface.get_rect()
 
     def update(self, dt):
         self.surface.fill((0, 0, 0, 0))
@@ -308,7 +312,7 @@ class Hotbar:
 
         if self.text_alpha >= 0:
             self.text.set_alpha(self.text_alpha)
-            self.name.update(MODES[mode].capitalize())
+            self.name.update(f'{MODES[mode].capitalize()}: {self.world.left[mode]}')
             self.screen.blit(self.text, (self.pos[0], self.pos[1] - self.ch - SCALE * 8))
 
         self.prev_mode = mode
