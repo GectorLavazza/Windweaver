@@ -57,7 +57,7 @@ async def main():
     map = Map(world, grass_g, trees_g, stones_g)
 
     cursor = Cursor(cursor_g)
-    sky_clock = Clock(screen, 20, sky)
+    sky_clock = Clock(screen, 20, sky, world)
 
     running = 1
     clock = pygame.time.Clock()

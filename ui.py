@@ -70,15 +70,20 @@ class Text(Ui):
 
 
 class Clock:
-    def __init__(self, screen, font_size, sky):
+    def __init__(self, screen, font_size, sky, world):
 
         self.font = font.Font('assets/fonts/PixelOperator8-Bold.ttf',
                                      font_size * SCALE)
         self.screen = screen
         self.sky = sky
 
-        self.r = 50
-        self.add_width = 50
+        self.sun = world.images['sun']
+        self.moon = world.images['moon']
+        self.sun_rect = self.sun.get_rect()
+        self.moon_rect = self.moon.get_rect()
+
+        self.r = 10 * SCALE
+        self.add_width = 10 * SCALE
         self.w, self.h = self.r * 2 + self.add_width, self.r * 2 + self.add_width
         self.surface = Surface((self.w, self.h / 2), pygame.SRCALPHA)
         self.surface.fill((0, 0, 0, 128))
@@ -86,13 +91,10 @@ class Clock:
         self.rect.topleft = (WIDTH - self.w, 0)
         self.center = self.r + self.add_width / 2, self.r + self.add_width / 2
 
-        self.sun_pos = Vector2(self.center) - Vector2(0, self.r)
-        self.moon_pos = Vector2(self.center) + Vector2(0, self.r)
-
         self.angle = 180
 
-        pos = (self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h + 10)
-        self.day_label = Text(screen, 4, 'white', pos, center_align=True, shade=True)
+        pos = (self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h - 20)
+        self.day_label = Text(screen, 4, 'white', pos, center_align=True, shade=False)
         self.time_label = Text(screen, 4, 'white', (pos[0], pos[1] + 20),
                                center_align=True, shade=True)
 
@@ -105,20 +107,20 @@ class Clock:
         self.surface.fill((0, 0, 0, 128))
 
         pygame.draw.circle(self.surface, WHITE, self.center, self.r, 2)
-        pygame.draw.circle(self.surface, 'yellow', self.sun_pos, 12)
-        pygame.draw.circle(self.surface, 'white', self.moon_pos, 7)
+        self.surface.blit(self.sun, self.sun_rect.topleft)
+        self.surface.blit(self.moon, self.moon_rect.topleft)
 
         self.screen.blit(self.surface, self.rect.topleft)
-        pygame.draw.line(self.screen, WHITE, (WIDTH - self.rect.w + 5, self.rect.y + self.rect.h - 2),
-                                              (WIDTH - 5, self.rect.y + self.rect.h - 2), 2)
+        pygame.draw.line(self.screen, WHITE, (WIDTH - self.rect.w + SCALE, self.rect.y + self.rect.h - 2),
+                                              (WIDTH - SCALE, self.rect.y + self.rect.h - 2), 2)
 
-        self.day_label.update(f'Day {self.sky.day}')
+        self.day_label.update(f'{self.sky.day}')
         # self.time_label.update(self.sky.time)
 
     def update_sun_pos(self):
-        self.sun_pos.x = self.r * math.cos(math.radians(self.angle)) + self.center[0]
-        self.sun_pos.y = self.r * math.sin(math.radians(self.angle)) + self.center[1]
+        self.sun_rect.centerx = self.r * math.cos(math.radians(self.angle)) + self.center[0]
+        self.sun_rect.centery = self.r * math.sin(math.radians(self.angle)) + self.center[1]
 
     def update_moon_pos(self):
-        self.moon_pos.x = -self.r * math.cos(math.radians(self.angle)) + self.center[0]
-        self.moon_pos.y = -self.r * math.sin(math.radians(self.angle)) + self.center[1]
+        self.moon_rect.centerx = -self.r * math.cos(math.radians(self.angle)) + self.center[0]
+        self.moon_rect.centery = -self.r * math.sin(math.radians(self.angle)) + self.center[1]
