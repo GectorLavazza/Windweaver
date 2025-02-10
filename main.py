@@ -1,4 +1,5 @@
 import asyncio
+import os.path
 from sys import exit
 from time import time
 
@@ -16,13 +17,6 @@ from light import Light
 
 from particles import create_particles
 
-# /// script
-# dependencies = [
-# "pygame",
-# "noise",
-# ]
-# ///
-
 async def main():
     st = time()
 
@@ -33,7 +27,7 @@ async def main():
          pygame.MOUSEBUTTONUP])
 
     pygame.mixer.music.set_volume(0.5)
-    pygame.mixer.music.load('assets/music/windweaver.wav')
+    pygame.mixer.music.load(os.path.join(PATH, 'assets/music/windweaver.wav'))
     pygame.mixer.music.play(-1)
 
     flags = pygame.DOUBLEBUF | pygame.SCALED

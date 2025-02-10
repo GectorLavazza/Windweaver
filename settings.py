@@ -54,3 +54,6 @@ HOTBAR_BG_ALPHA = 128
 HOTBAR_SELECTION_SPEED = 10
 
 VIGNETTE_WIDTH = 20
+
+from os import path
+PATH = path.dirname(__file__) + '/'
