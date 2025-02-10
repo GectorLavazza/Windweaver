@@ -331,3 +331,30 @@ class Hotbar:
             self.screen.blit(self.text, (self.pos[0], self.pos[1] - self.ch - SCALE * 8))
 
         self.prev_mode = mode
+
+class Health:
+    def __init__(self, screen, world):
+        self.screen = screen
+        self.world = world
+
+        self.surface = Surface((8 * SCALE * self.world.max_health + (self.world.max_health - 1) * SCALE, 8 * SCALE), pygame.SRCALPHA)
+        self.surface.fill((0, 0, 0, 0))
+
+        self.bg = self.world.images['heart_bg']
+        self.fg = self.world.images['heart_fg']
+
+        self.bg_surface = Surface((8 * SCALE * self.world.max_health + (self.world.max_health - 1) * SCALE, 8 * SCALE), pygame.SRCALPHA)
+        for i in range(self.world.max_health):
+            self.bg_surface.blit(self.bg, (i * 8 * SCALE + i * SCALE, 0))
+
+        self.rect = self.surface.get_rect()
+        self.rect.center = (WIDTH / 2, 5 * SCALE)
+
+    def update(self, dt):
+        self.surface.fill((0, 0, 0, 0))
+
+        self.surface.blit(self.bg_surface, (0, 0))
+        for i in range(self.world.health):
+            self.surface.blit(self.fg, (i * 8 * SCALE + i * SCALE, 0))
+
+        self.screen.blit(self.surface, self.rect.topleft)

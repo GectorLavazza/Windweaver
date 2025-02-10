@@ -9,7 +9,7 @@ from cursor import Cursor
 from map import Map
 from settings import *
 from sky import Sky
-from ui import Text, Clock, Resources, Hotbar
+from ui import Text, Clock, Resources, Hotbar, Health
 from world import World
 
 from light import Light
@@ -79,7 +79,7 @@ async def main():
     fps = Text(screen, 5, 'white', (screen_width, HEIGHT), right_align=True, bottom_align=True)
 
     pause = Text(screen, 20, 'white', CENTER, center_align=True, vertical_center_align=True, shade=False)
-    score = Text(screen, 10, 'white', (CENTER[0], 10), center_align=True, shade=False)
+    score = Text(screen, 10, 'white', (CENTER[0], 40), center_align=True, shade=False)
 
     et = time()
     playing = 1
@@ -107,6 +107,8 @@ async def main():
     light_on = False
 
     vignette_on = True
+
+    health = Health(screen, world)
 
     while running:
         dt = time() - last_time
@@ -153,6 +155,8 @@ async def main():
                     light_on = not light_on
                 if event.key == pygame.K_F4:
                     vignette_on = not vignette_on
+                if event.key == pygame.K_F5:
+                    world.health -= 1
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
@@ -217,6 +221,7 @@ async def main():
         sky_clock.update(dt)
         hotbar.update(dt)
         score.update(world.overall_score)
+        health.update(dt)
 
         if not playing:
             screen.blit(overlay, (0, 0))

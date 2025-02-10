@@ -107,7 +107,12 @@ class World:
         self.buildings_score = 0
         self.overall_score = self.score + self.buildings_score
 
+        self.max_health = 3
+        self.health = self.max_health
+
     def update(self, dt):
+        self.health = max(0, self.health)
+
         if self.check_moving():
             self.move(dt)
 

@@ -418,6 +418,7 @@ class House(Tile):
 
         if self.food < 1:
             self.world.score -= 10
+            self.world.health -= 1
             self.kill()
             Grass('grass', self.pos, self.world, self.world.grass_g)
             create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
