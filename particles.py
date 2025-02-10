@@ -2,10 +2,9 @@ import random
 
 import pygame
 from pygame import Vector2
-
-from load_image import load_image
-from settings import SCALE, WIDTH, HEIGHT
 from pygame.sprite import Sprite
+
+from settings import SCALE, WIDTH, HEIGHT
 
 
 class Particle(Sprite):

@@ -7,15 +7,13 @@ import pygame
 from pygame import Vector2
 
 from cursor import Cursor
+from light import Light
 from map import Map
 from settings import *
 from sky import Sky
 from ui import Text, Clock, Resources, Hotbar, Health
 from world import World
 
-from light import Light
-
-from particles import create_particles
 
 async def main():
     st = time()

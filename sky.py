@@ -1,6 +1,6 @@
 from pygame import Surface
 
-from settings import screen_size, DAY_TIME, HOUR, MINUTE
+from settings import screen_size, DAY_TIME, HOUR
 
 
 class Sky:

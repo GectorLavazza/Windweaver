@@ -4,9 +4,8 @@ import pygame
 from pygame import Rect, mouse, draw, Surface
 from pygame.sprite import Sprite
 
-from light import Light
-from settings import *
 from particles import create_particles
+from settings import *
 
 
 class Tile(Sprite):

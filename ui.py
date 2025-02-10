@@ -1,9 +1,10 @@
-import pygame
-from pygame import SRCALPHA, Surface, font, Vector2
 import math
 
-from settings import *
+import pygame
+from pygame import SRCALPHA, Surface, font
+
 from light import Light
+from settings import *
 
 
 class Ui:

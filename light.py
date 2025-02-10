@@ -1,6 +1,6 @@
 import pygame
-from pygame.sprite import Sprite
-from settings import SCALE, WIDTH, HEIGHT, screen_size
+
+from settings import SCALE
 
 
 class Light:
