@@ -102,19 +102,17 @@ class Tile(Sprite):
 
     def handle_mouse(self, dt):
         mouse_pos = mouse.get_pos()
-        if self.stats_alpha > 0:
+        if self.stats_alpha > 0 or self.name == 'house' and self.food < 3:
             self.draw_stats(dt)
 
         if self.usage_zone_alpha > 0:
             self.draw_usage_zone()
 
         if self.name == 'house' and self.food < 3:
-            self.stats_offset = min(4 * SCALE, self.stats_offset + dt * STATS_OFFSET_SPEED)
             self.stats_alpha = min(int(self.stats_alpha + dt * STATS_ALPHA_SPEED), 255) \
                 if self.name not in ('barn', 'mine') and 'windmill' not in self.name else 255
-            self.usage_zone_alpha = min(int(self.usage_zone_alpha + dt * STATS_ALPHA_SPEED), 255)
 
-        elif self.rect.collidepoint(mouse_pos):
+        if self.rect.collidepoint(mouse_pos):
             if self.available:
                 if not self.world.removing:
                     self.draw_build(dt)
@@ -152,8 +150,9 @@ class Tile(Sprite):
         else:
             self.clicked = False
             self.stats_offset = max(0, self.stats_offset - dt * STATS_OFFSET_SPEED)
-            self.stats_alpha = max(int(self.stats_alpha - dt * STATS_ALPHA_SPEED), 0) \
-                if self.name not in ('barn', 'mine') and 'windmill' not in self.name else 255
+            if not (self.name == 'house' and self.food < 3):
+                self.stats_alpha = max(int(self.stats_alpha - dt * STATS_ALPHA_SPEED), 0) \
+                    if self.name not in ('barn', 'mine') and 'windmill' not in self.name else 255
             self.usage_zone_alpha = max(int(self.usage_zone_alpha - dt * STATS_ALPHA_SPEED), 0)
             self.alpha = 0
 
@@ -381,7 +380,7 @@ class House(Tile):
         # self.light = Light(self.world.screen, 6, (30, 30, 10), 1)
         # self.light.rect.center = self.rect.center
 
-        self.max_tick = 1200
+        self.max_tick = 60
         self.tick = self.max_tick
 
         self.zone = Rect(*self.rect.topleft,
