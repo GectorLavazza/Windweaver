@@ -239,7 +239,7 @@ class Hotbar:
         self.cells = [pygame.Rect(self.cw * i, 0, self.cw, self.ch) for i in range(len(MODES))]
 
         self.deletion_cell = Surface((self.cw, self.ch), pygame.SRCALPHA)
-        self.deletion_cell.fill((*GREY, HOTBAR_BG_ALPHA))
+        self.deletion_cell.fill((*DARK_GREY, HOTBAR_BG_ALPHA))
 
         self.deletion_cell_outline = Surface((self.cw, self.ch), pygame.SRCALPHA)
         pygame.draw.rect(self.deletion_cell_outline, RED, (0, 0, self.cw, self.ch), SCALE)
@@ -256,7 +256,7 @@ class Hotbar:
         self.surface.blit(image, (0, 0))
 
         self.cells_bg = Surface((self.cw * len(MODES), self.ch), pygame.SRCALPHA)
-        self.cells_bg.fill((*GREY, HOTBAR_BG_ALPHA))
+        self.cells_bg.fill((*DARK_GREY, HOTBAR_BG_ALPHA))
 
         self.icons = Surface((self.cw * len(MODES), self.ch), pygame.SRCALPHA)
         self.icons.fill((0, 0, 0, 0))
