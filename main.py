@@ -79,6 +79,7 @@ async def main():
     fps = Text(screen, 5, 'white', (screen_width, HEIGHT), right_align=True, bottom_align=True)
 
     pause = Text(screen, 20, 'white', CENTER, center_align=True, vertical_center_align=True, shade=False)
+    score = Text(screen, 10, 'white', (CENTER[0], 10), center_align=True, shade=False)
 
     et = time()
     playing = 1
@@ -215,6 +216,7 @@ async def main():
         resources.update(dt)
         sky_clock.update(dt)
         hotbar.update(dt)
+        score.update(world.overall_score)
 
         if not playing:
             screen.blit(overlay, (0, 0))

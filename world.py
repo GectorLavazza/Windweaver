@@ -81,6 +81,7 @@ class World:
         self.windmills = 0
         self.barns = 0
         self.pathways = 0
+        self.storages = 0
 
         self.zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
         self.zone_pos = Vector2(0, 0)
@@ -102,6 +103,10 @@ class World:
         self.storages_left = 'inf'
         self.left = [self.houses_left, self.pathways_left, self.windmills_left, self.barns_left, self.mines_left, self.storages_left]
 
+        self.score = 0
+        self.buildings_score = 0
+        self.overall_score = self.score + self.buildings_score
+
     def update(self, dt):
         if self.check_moving():
             self.move(dt)
@@ -121,6 +126,10 @@ class World:
         self.barns_left = 'inf'
         self.storages_left = 'inf'
         self.left = [self.houses_left, self.pathways_left, self.windmills_left, self.barns_left, self.mines_left, self.storages_left]
+
+        self.buildings_score = self.houses * 5 + self.windmills * 10 + self.mines * 10 + self.barns * 15 + self.storages * 20
+        self.overall_score = self.score + self.buildings_score
+
 
     def update_zone(self):
         self.zone = [s.zone for s in self.pathways_g.sprites() + self.buildings_g.sprites()]
@@ -188,6 +197,7 @@ class World:
         self.mines = len(list(filter(lambda b: 'mine' in b.name, self.buildings_g.sprites())))
         self.windmills = len(list(filter(lambda b: 'windmill' in b.name, self.buildings_g.sprites())))
         self.barns = len(list(filter(lambda b: 'barn' in b.name, self.buildings_g.sprites())))
+        self.storages = len(list(filter(lambda b: 'storage' in b.name, self.buildings_g.sprites())))
         self.pathways = len(self.pathways_g.sprites())
 
         self.food = sum([p.food for p in self.buildings_g.sprites() if p.name == 'barn' and p.food > 0])

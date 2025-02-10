@@ -322,6 +322,7 @@ class Tree(Tile):
             d = self.world.max_wood - self.world.wood
             if d > amount:
                 d = amount
+            self.world.score += d
             self.world.wood += d
 
         Grass('grass', self.pos, self.world, self.world.grass_g)
@@ -367,6 +368,7 @@ class Stone(Tile):
             if d > self.amount:
                 d = self.amount
             self.world.stone += d
+            self.world.score += d
         Grass('grass', self.pos, self.world, self.world.grass_g)
         self.kill()
 
@@ -380,7 +382,7 @@ class House(Tile):
         # self.light = Light(self.world.screen, 6, (30, 30, 10), 1)
         # self.light.rect.center = self.rect.center
 
-        self.max_tick = 60
+        self.max_tick = 1200
         self.tick = self.max_tick
 
         self.zone = Rect(*self.rect.topleft,
@@ -415,6 +417,7 @@ class House(Tile):
                 self.food += d
 
         if self.food < 1:
+            self.world.score -= 10
             self.kill()
             Grass('grass', self.pos, self.world, self.world.grass_g)
             create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
@@ -503,6 +506,7 @@ class Mine(Tile):
                 self.world.stone += d
                 self.stone -= d
                 self.collected += d
+                self.world.score += d
                 create_particles(GREY, self.rect.center, d, 15, self.world.particles_g)
 
     def draw_stats(self, dt):
@@ -626,6 +630,7 @@ class Windmill(Tile):
                     d = self.food
                 self.food -= d
                 barn.food += d
+                self.world.score += d
                 create_particles(LIGHT_GREEN, self.rect.center, d, 15, self.world.particles_g)
 
     def on_kill(self):
@@ -692,6 +697,9 @@ class Farmland(Tile):
                             d = 2
 
                         windmill.food += d
+                        self.world.score += 2
+                else:
+                    self.world.score -= 4
 
                 self.max_tick = randint(300, 600)
                 self.tick = self.max_tick
