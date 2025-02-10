@@ -61,13 +61,21 @@ async def main():
     cursor = Cursor(cursor_g)
     sky_clock = Clock(screen, 20, sky, world)
 
-    top_bg = pygame.Surface((WIDTH, 20 * SCALE), pygame.SRCALPHA)
+    top_bg = pygame.Surface((WIDTH, VIGNETTE_WIDTH * SCALE), pygame.SRCALPHA)
     for i in range(top_bg.height, -1, -1):
-        pygame.draw.line(top_bg, (0, 0, 0, max(0, min(i * (20 * SCALE / 80) ** -1, 255))), (0, top_bg.height - i), (WIDTH, top_bg.height - i))
+        pygame.draw.line(top_bg, (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))), (0, top_bg.height - i), (WIDTH, top_bg.height - i))
 
-    bottom_bg = pygame.Surface((WIDTH, 20 * SCALE), pygame.SRCALPHA)
+    bottom_bg = pygame.Surface((WIDTH, VIGNETTE_WIDTH * SCALE), pygame.SRCALPHA)
     for i in range(bottom_bg.height, -1, -1):
-        pygame.draw.line(bottom_bg, (0, 0, 0, max(0, min(i * (20 * SCALE / 80) ** -1, 255))), (0, i), (WIDTH, i))
+        pygame.draw.line(bottom_bg, (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))), (0, i), (WIDTH, i))
+
+    right_bg = pygame.Surface((VIGNETTE_WIDTH * SCALE, HEIGHT), pygame.SRCALPHA)
+    for i in range(right_bg.width, -1, -1):
+        pygame.draw.line(right_bg, (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))), (i, 0), (i, HEIGHT))
+
+    left_bg = pygame.Surface((VIGNETTE_WIDTH * SCALE, HEIGHT), pygame.SRCALPHA)
+    for i in range(left_bg.width, -1, -1):
+        pygame.draw.line(left_bg, (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))), (left_bg.width - i, 0), (left_bg.width - i, HEIGHT))
 
     running = 1
     clock = pygame.time.Clock()
@@ -214,6 +222,8 @@ async def main():
         if vignette_on:
             screen.blit(top_bg, (0, 0))
             screen.blit(bottom_bg, (0, HEIGHT - bottom_bg.height))
+            screen.blit(right_bg, (WIDTH - right_bg.width, 0))
+            screen.blit(left_bg, (0, 0))
 
         fps.update(f'FPS:{round(clock.get_fps())}')
 

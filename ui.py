@@ -233,7 +233,7 @@ class Hotbar:
 
         self.surface = Surface((self.cw * len(MODES) + self.cw / 2 + self.cw, self.ch), pygame.SRCALPHA)
         self.surface.fill((0, 0, 0, 0))
-        self.pos = WIDTH / 2 - self.surface.width / 2, HEIGHT - 6 * SCALE - self.surface.height
+        self.pos = WIDTH / 2 - self.surface.width / 2, HEIGHT - 1 * SCALE - self.surface.height
 
         self.cells = [pygame.Rect(self.cw * i, 0, self.cw, self.ch) for i in range(len(MODES))]
 
