@@ -238,7 +238,10 @@ class Hotbar:
         self.cells = [pygame.Rect(self.cw * i, 0, self.cw, self.ch) for i in range(len(MODES))]
 
         self.deletion_cell = Surface((self.cw, self.ch), pygame.SRCALPHA)
-        self.deletion_cell.fill((*DARK_GREY, HOTBAR_BG_ALPHA))
+        self.deletion_cell.fill((*GREY, HOTBAR_BG_ALPHA))
+
+        self.deletion_cell_outline = Surface((self.cw, self.ch), pygame.SRCALPHA)
+        pygame.draw.rect(self.deletion_cell_outline, RED, (0, 0, self.cw, self.ch), SCALE)
 
         pygame.draw.rect(self.deletion_cell, DARK_GREY, pygame.Rect(0, 0, self.cw, self.ch), SCALE)
         image = self.world.images['trashcan']
@@ -252,7 +255,7 @@ class Hotbar:
         self.surface.blit(image, (0, 0))
 
         self.cells_bg = Surface((self.cw * len(MODES), self.ch), pygame.SRCALPHA)
-        self.cells_bg.fill((*DARK_GREY, HOTBAR_BG_ALPHA))
+        self.cells_bg.fill((*GREY, HOTBAR_BG_ALPHA))
 
         self.icons = Surface((self.cw * len(MODES), self.ch), pygame.SRCALPHA)
         self.icons.fill((0, 0, 0, 0))
@@ -277,6 +280,12 @@ class Hotbar:
         self.selection_pos = [0, 0]
         self.rect = self.surface.get_rect()
 
+        self.removing_alpha = 0
+
+        self.light = Light(self.surface, self.cw / SCALE / 2, (10, 10, 10), 2)
+        self.removing_light = Light(self.surface, self.cw / SCALE / 2, (10, 0, 0), 2)
+        self.removing_light.rect.topleft = (self.cw * len(MODES) + self.cw / 2, 0)
+
     def update(self, dt):
         self.surface.fill((0, 0, 0, 0))
         self.surface.blit(self.cells_bg)
@@ -294,17 +303,23 @@ class Hotbar:
         elif mode < self.before_change:
             self.selection_pos[0] = max(cell.topleft[0], self.selection_pos[0] - dt * HOTBAR_SELECTION_SPEED)
 
-        pygame.draw.rect(self.surface, (*WHITE, HOTBAR_BG_ALPHA), (*self.selection_pos, self.cw, self.ch))
         self.surface.blit(self.icons)
         pygame.draw.rect(self.surface, WHITE, (*self.selection_pos, self.cw, self.ch), SCALE)
+        self.light.rect.topleft = self.selection_pos
+        self.light.update()
+
+        self.surface.blit(self.deletion_cell, (self.cw * len(MODES) + self.cw / 2, 0))
 
         if self.world.removing:
-            pygame.draw.rect(self.surface, (*RED, HOTBAR_BG_ALPHA), (self.cw * len(MODES) + self.cw / 2, 0, self.cw, self.ch))
+            self.removing_alpha = min(int(self.removing_alpha + dt * STATS_ALPHA_SPEED), 255)
+            self.removing_light.update()
+        else:
+            self.removing_alpha = max(int(self.removing_alpha - dt * STATS_ALPHA_SPEED), 0)
 
-        self.surface.blit(self.deletion_cell, (self.cw * len(MODES) + self.cw / 2, 0, self.cw, self.ch))
+        self.deletion_cell_outline.set_alpha(self.removing_alpha)
 
-        if self.world.removing:
-            pygame.draw.rect(self.surface, RED, (self.cw * len(MODES) + self.cw / 2, 0, self.cw, self.ch), SCALE)
+        if self.removing_alpha >= 0:
+            self.surface.blit(self.deletion_cell_outline, (self.cw * len(MODES) + self.cw / 2, 0))
 
         self.screen.blit(self.surface, self.pos)
 

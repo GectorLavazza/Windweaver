@@ -116,7 +116,8 @@ class Tile(Sprite):
 
         elif self.rect.collidepoint(mouse_pos):
             if self.available:
-                self.draw_build(dt)
+                if not self.world.removing:
+                    self.draw_build(dt)
 
             self.stats_offset = min(4 * SCALE, self.stats_offset + dt * STATS_OFFSET_SPEED)
             self.stats_alpha = min(int(self.stats_alpha + dt * STATS_ALPHA_SPEED), 255) \

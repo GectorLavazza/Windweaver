@@ -105,6 +105,8 @@ async def main():
     light = Light(screen, 100, (6, 6, 1), 5)
     light_on = False
 
+    vignette_on = True
+
     while running:
         dt = time() - last_time
         dt *= 60
@@ -148,6 +150,8 @@ async def main():
                     show_zone = not show_zone
                 if event.key == pygame.K_F3:
                     light_on = not light_on
+                if event.key == pygame.K_F4:
+                    vignette_on = not vignette_on
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
@@ -202,11 +206,10 @@ async def main():
                 light.rect.center = pygame.mouse.get_pos()
                 light.update()
 
-        screen.blit(top_bg, (0, 0))
-        screen.blit(bottom_bg, (0, HEIGHT - bottom_bg.height))
+        if vignette_on:
+            screen.blit(top_bg, (0, 0))
+            screen.blit(bottom_bg, (0, HEIGHT - bottom_bg.height))
 
-        # label.update(f'Wood:{world.wood}/{world.max_wood} Stone:{world.stone}/{world.max_stone}')
-        # build.update(world.current_build)
         fps.update(f'FPS:{round(clock.get_fps())}')
 
         resources.update(dt)
