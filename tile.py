@@ -203,7 +203,8 @@ class Tile(Sprite):
             check_3 = [self.rect.colliderect(p.collision_rect) for p in self.world.buildings_g.sprites()]
 
             #  and check_2.count(True) > 1
-            if any(check_1) and check_2.count(True) > 1 and not any(check_3) and self.world.houses // 4 > self.world.mines:
+            if any(check_1) and check_2.count(True) > 1 and not any(check_3) and \
+                    (self.world.houses // 4 > self.world.mines or self.world.mines == 0 and self.world.houses // 2 > self.world.mines):
                 self.available = True
 
         elif build == 'windmill':
@@ -222,7 +223,7 @@ class Tile(Sprite):
             check_2 = [self.rect.colliderect(p.collision_rect) and (p.name == 'mine' or 'windmill' in p.name) for p in
                        self.world.buildings_g.sprites()]
 
-            if any(check_1) and not any(check_2):
+            if any(check_1) and not any(check_2) and (self.world.houses // 3 > self.world.barns or self.world.barns == 0):
                 self.available = True
 
         elif build == 'storage':
@@ -232,7 +233,8 @@ class Tile(Sprite):
             check_2 = [self.rect.colliderect(p.collision_rect) and (p.name == 'mine' or 'windmill' in p.name) for p in
                        self.world.buildings_g.sprites()]
 
-            if any(check_1) and not any(check_2):
+            if any(check_1) and not any(check_2) and \
+                    (self.world.houses // 5 > self.world.storages or self.world.storages == 0 and self.world.houses // 2 > self.world.storages):
                 self.available = True
 
     def buy(self):
@@ -466,7 +468,7 @@ class Mine(Tile):
     def __init__(self, pos, world, *group):
         super().__init__('mine', pos, world, *group)
 
-        self.max_tick = 300
+        self.max_tick = 60
         self.tick = self.max_tick
 
         self.zone = Rect(*self.rect.topleft,
@@ -490,6 +492,7 @@ class Mine(Tile):
 
         self.tick -= dt
         if self.tick <= 0:
+            self.max_tick = 60 + 30 * self.collected // 10
             self.tick = self.max_tick
 
             if self.stone + 1 <= self.capacity:
@@ -666,6 +669,8 @@ class Farmland(Tile):
         self.max_tick = randint(120, 300)
         self.tick = self.max_tick
 
+        self.collected = 0
+
     def grow(self):
         if randint(1, 2) == 1:
             self.age += 1
@@ -698,6 +703,7 @@ class Farmland(Tile):
 
                         windmill.food += d
                         self.world.score += 2
+                        self.collected += 1
                 else:
                     self.world.score -= 4
 
