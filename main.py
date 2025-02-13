@@ -122,7 +122,7 @@ async def main():
                 running = 0
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
+                if event.key == pygame.K_q and event.key == pygame.KMOD_CTRL:
                     running = 0
 
                 if event.key == pygame.K_ESCAPE:
