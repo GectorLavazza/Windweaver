@@ -15,8 +15,8 @@ class Map:
         self.world = world
         self.screen_rect = world.rect
 
-        self.seed = randint(0, 100)
-        print(f'seed: {self.seed}')
+        self.seed = randint(0, 100000)
+        print(f'Seed: {self.seed}')
 
         self.grass_g, self.trees_g, self.stones_g = groups
 
@@ -76,9 +76,9 @@ class Map:
                     amount = randint(1, 3)
                     Stone(pos, self.world, amount, self.stones_g)
 
-            print(f'Loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
+            # print(f'Loading: {round((y + 1) / MAP_HEIGHT * 100, 2)}%')
 
         et = time.time()
 
-        print('MAP LOADED')
-        print(f'World loading time: {et - st}')
+        # print('MAP LOADED')
+        print(f'World loading time: {round(et - st, 4)}')

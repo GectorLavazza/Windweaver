@@ -319,7 +319,7 @@ class Tree(Tile):
 
     def on_kill(self):
         if self.world.max_wood > self.world.wood:
-            amount = self.age + 1
+            amount = (self.age + 1 * randint(1, 2))
             d = self.world.max_wood - self.world.wood
             if d > amount:
                 d = amount
@@ -351,7 +351,7 @@ class Tree(Tile):
 class Stone(Tile):
     def __init__(self, pos, world, amount, *group):
         super().__init__(f'stone_{amount}', pos, world, *group)
-        self.amount = amount
+        self.amount = amount * randint(1, 2)
         self.durability = self.amount + 1
         self.max_durability = self.durability
 
@@ -380,9 +380,6 @@ class House(Tile):
         if not self.world.house_placed:
             self.world.house_placed = True
 
-        # self.light = Light(self.world.screen, 6, (30, 30, 10), 1)
-        # self.light.rect.center = self.rect.center
-
         self.max_tick = 1200
         self.tick = self.max_tick
 
@@ -397,18 +394,12 @@ class House(Tile):
         self.world.update_zone()
         self.food_w = (self.rect.w * 2) / self.capacity * self.food
 
-        # self.l = Light(10, self.rect.center, (255, 0, 0), 1, self.world, self.world.light_g)
-
     def on_update(self, dt):
-        # if self.world.sky.dark:
-        #     self.light.rect.center = self.rect.center
-        #     # self.light.update()
-
         self.tick -= dt
         if self.tick <= 0:
             self.tick = self.max_tick
 
-            self.food -= 1
+            self.food -= randint(0, 2)
             d = self.capacity - self.food
             v = [p for p in self.world.buildings_g.sprites() if
                          self.rect.colliderect(p.usage_zone) and p.name == 'barn' and p.food - d >= 0]
@@ -495,8 +486,8 @@ class Mine(Tile):
             self.max_tick = 60 + 30 * self.collected // 10
             self.tick = self.max_tick
 
-            if self.stone + 1 <= self.capacity:
-                self.stone += 1
+            amount = randint(0, 2)
+            self.stone += min(amount, self.capacity - self.stone)
 
     def on_click(self):
         if mouse.get_pressed()[0]:
@@ -696,13 +687,12 @@ class Farmland(Tile):
                          self.rect.colliderect(p.collision_rect) and 'windmill' in p.name]
                     if v:
                         windmill = choice(v)
-
                         d = windmill.capacity - windmill.food
-                        if d > 2:
-                            d = 2
-
+                        if d > 3:
+                            d = 3
+                        d = min(d, randint(1, 3))
                         windmill.food += d
-                        self.world.score += 2
+                        self.world.score += d
                         self.collected += 1
                 else:
                     self.world.score -= 4

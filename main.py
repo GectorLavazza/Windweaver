@@ -84,7 +84,7 @@ async def main():
     et = time()
     playing = 1
 
-    print(f'Startup time: {et - st}')
+    print(f'Startup time: {round(et - st, 4)}')
 
     zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
     zone_surface.set_alpha(40)
@@ -109,6 +109,7 @@ async def main():
     vignette_on = True
 
     health = Health(screen, world)
+    # mode = 'start'
 
     while running:
         dt = time() - last_time
