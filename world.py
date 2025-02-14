@@ -5,7 +5,7 @@ import pygame.surface
 from pygame import Vector2, mouse, Surface, Rect
 
 from load_image import load_image
-from settings import screen_width, screen_height, TILE_SIZE, screen_size, SCALE
+from settings import screen_width, screen_height, TILE_SIZE, screen_size, SCALE, MAP_WIDTH, MAP_HEIGHT
 
 
 class World:
@@ -235,9 +235,13 @@ class World:
             self.rect.x += self.velocity.x
             self.rect.y += self.velocity.y
 
-        self.rect.x = max(screen_width - self.rect.width, min(self.rect.x, 0))
-        self.rect.y = max(screen_height - self.rect.height,
-                          min(self.rect.y, 0))
+        if MAP_WIDTH > 40 and MAP_HEIGHT > 23:
+            self.rect.x = max(screen_width - self.rect.width, min(self.rect.x, 0))
+            self.rect.y = max(screen_height - self.rect.height,
+                              min(self.rect.y, 0))
+        else:
+            self.rect.centerx = min(screen_width, max(self.rect.centerx, 0))
+            self.rect.centery = min(screen_height, max(self.rect.centery, 0))
 
         self.visible_rect.topleft = -Vector2(self.rect.topleft)
 
