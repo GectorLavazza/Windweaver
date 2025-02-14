@@ -159,6 +159,25 @@ async def main():
                 if event.key == pygame.K_F5:
                     world.health -= 1
 
+            #     if event.key == pygame.K_w:
+            #         world.dy = -1
+            #     if event.key == pygame.K_s:
+            #         world.dy = 1
+            #     if event.key == pygame.K_a:
+            #         world.dx = -1
+            #     if event.key == pygame.K_d:
+            #         world.dx = 1
+            #
+            # if event.type == pygame.KEYUP:
+            #     if event.key == pygame.K_w:
+            #         world.dy = 0
+            #     if event.key == pygame.K_s:
+            #         world.dy = 0
+            #     if event.key == pygame.K_a:
+            #         world.dx = 0
+            #     if event.key == pygame.K_d:
+            #         world.dx = 0
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
                     cursor.pressed = True

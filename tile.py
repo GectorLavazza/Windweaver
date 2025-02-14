@@ -476,6 +476,9 @@ class Mine(Tile):
         self.world.update_zone()
         self.stone_w = (self.rect.w * 2) / self.capacity * self.stone
 
+        self.max_gather_tick = 60
+        self.gather_tick = self.max_gather_tick
+
     def on_update(self, dt):
         self.draw_stats(dt)
         self.capacity = self.max_capacity - self.collected // 10
@@ -489,19 +492,25 @@ class Mine(Tile):
             amount = randint(0, 2)
             self.stone += min(amount, self.capacity - self.stone)
 
+        if self.collected > 150:
+            self.gather_tick -= dt
+            if self.gather_tick <= 0:
+                self.gather_tick = self.max_gather_tick
+                if self.stone == self.capacity:
+                    self.on_click()
+
     def on_click(self):
-        if mouse.get_pressed()[0]:
-            v = [p for p in self.world.buildings_g.sprites() if
-                 self.rect.colliderect(p.usage_zone) and p.name == 'storage']
-            if v:
-                d = self.world.max_stone - self.world.stone
-                if d > self.stone:
-                    d = self.stone
-                self.world.stone += d
-                self.stone -= d
-                self.collected += d
-                self.world.score += d
-                create_particles(GREY, self.rect.center, d, 15, self.world.particles_g)
+        v = [p for p in self.world.buildings_g.sprites() if
+             self.rect.colliderect(p.usage_zone) and p.name == 'storage']
+        if v:
+            d = self.world.max_stone - self.world.stone
+            if d > self.stone:
+                d = self.stone
+            self.world.stone += d
+            self.stone -= d
+            self.collected += d
+            self.world.score += d
+            create_particles(GREY, self.rect.center, d, 15, self.world.particles_g)
 
     def draw_stats(self, dt):
         b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset,
@@ -566,10 +575,16 @@ class Windmill(Tile):
 
         self.food = 0
         self.capacity = 10
+        self.collected = 0
 
         self.world.update_zone()
 
         self.food_w = (self.rect.w * 2) / self.capacity * self.food
+
+        self.farmland = []
+
+        self.max_gather_tick = 60
+        self.gather_tick = self.max_gather_tick
 
     def on_update(self, dt):
         self.tick -= dt
@@ -577,12 +592,26 @@ class Windmill(Tile):
             self.tick = self.max_tick
             self.spread()
 
+        if self.collected > 50:
+            self.gather_tick -= dt
+            if self.gather_tick <= 0:
+                self.gather_tick = self.max_gather_tick
+                self.gather()
+
+                if self.collected > 100:
+                    if self.food == self.capacity:
+                        self.on_click()
+
         self.draw_stats(dt)
 
         self.animation_tick -= dt
         if self.animation_tick <= 0:
             self.animation_tick = self.max_animation_tick
             self.change_frame()
+
+    def gather(self):
+        f = choice(self.farmland)
+        f.on_click()
 
     def change_frame(self):
         self.frame = 2 if self.frame == 1 else 1
@@ -595,7 +624,8 @@ class Windmill(Tile):
                      self.rect.colliderect(p.collision_rect) and p.name in 'grass' and p.in_zone()]
             if tiles:
                 tile = choice(tiles)
-                Farmland(tile.pos, tile.world, self.world.farmland_g)
+                f = Farmland(tile.pos, tile.world, self.world.farmland_g)
+                self.farmland.append(f)
                 tile.kill()
 
     def draw_stats(self, dt):
@@ -614,18 +644,18 @@ class Windmill(Tile):
         self.world.screen.blit(sf, f.topleft)
 
     def on_click(self):
-        if mouse.get_pressed()[0]:
-            v = [p for p in self.world.buildings_g.sprites() if
-                 self.rect.colliderect(p.usage_zone) and p.name == 'barn' and p.food < p.capacity]
-            if v:
-                barn = choice(v)
-                d = barn.capacity - barn.food
-                if d > self.food:
-                    d = self.food
-                self.food -= d
-                barn.food += d
-                self.world.score += d
-                create_particles(LIGHT_GREEN, self.rect.center, d, 15, self.world.particles_g)
+        v = [p for p in self.world.buildings_g.sprites() if
+             self.rect.colliderect(p.usage_zone) and p.name == 'barn' and p.food < p.capacity]
+        if v:
+            barn = choice(v)
+            d = barn.capacity - barn.food
+            if d > self.food:
+                d = self.food
+            self.food -= d
+            self.collected += d
+            barn.food += d
+            self.world.score += d
+            create_particles(LIGHT_GREEN, self.rect.center, d, 15, self.world.particles_g)
 
     def on_kill(self):
         check = [self.rect.colliderect(p.collision_rect) and
@@ -657,7 +687,7 @@ class Farmland(Tile):
 
         super().__init__(f'farmland_{self.age}', pos, world, *group)
 
-        self.max_tick = randint(120, 300)
+        self.max_tick = randint(120, 300)  # 120 300
         self.tick = self.max_tick
 
         self.collected = 0
@@ -673,9 +703,9 @@ class Farmland(Tile):
             self.tick -= 1 * dt
             if self.tick <= 0:
                 if self.age == 1:
-                    self.max_tick = randint(1800, 3600)
+                    self.max_tick = randint(1800, 3600)  # 1800 3600
                 else:
-                    self.max_tick = randint(300, 600)
+                    self.max_tick = randint(300, 600)  # 300 600
                 self.tick = self.max_tick
                 self.grow()
 
@@ -693,7 +723,6 @@ class Farmland(Tile):
                         d = min(d, randint(1, 3))
                         windmill.food += d
                         self.world.score += d
-                        self.collected += 1
                 else:
                     self.world.score -= 4
 
