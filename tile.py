@@ -112,6 +112,8 @@ class Tile(Sprite):
                 if self.name not in ('barn', 'mine') and 'windmill' not in self.name else 255
 
         if self.rect.collidepoint(mouse_pos):
+            self.world.focus = self
+
             if self.available:
                 if not self.world.removing:
                     self.draw_build(dt)

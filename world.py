@@ -110,6 +110,8 @@ class World:
         self.max_health = 3
         self.health = self.max_health
 
+        self.focus = None
+
     def update(self, dt):
         self.health = max(0, self.health)
 

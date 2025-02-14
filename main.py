@@ -74,8 +74,7 @@ async def main():
 
     last_time = time()
 
-    label = Text(screen, 5, 'white', (0, 0))
-    build = Text(screen, 5, 'white', (0, HEIGHT), bottom_align=True)
+    label = Text(screen, 5, 'white', (0, 150), bottom_align=True, shade=True)
     fps = Text(screen, 5, 'white', (screen_width, HEIGHT), right_align=True, bottom_align=True)
 
     pause = Text(screen, 20, 'white', CENTER, center_align=True, vertical_center_align=True, shade=False)
@@ -107,6 +106,7 @@ async def main():
     light_on = False
 
     vignette_on = True
+    debug_on = False
 
     health = Health(screen, world)
     # mode = 'start'
@@ -157,7 +157,7 @@ async def main():
                 if event.key == pygame.K_F4:
                     vignette_on = not vignette_on
                 if event.key == pygame.K_F5:
-                    world.health -= 1
+                    debug_on = not debug_on
 
             #     if event.key == pygame.K_w:
             #         world.dy = -1
@@ -238,6 +238,13 @@ async def main():
             screen.blit(left_bg, (0, 0))
 
         fps.update(f'FPS:{round(clock.get_fps())}')
+
+        if debug_on:
+            data = [world.focus.name]
+            if 'windmill' in world.focus.name or 'mine' in world.focus.name:
+                data.append(f'coll: {world.focus.collected}')
+            msg = ' '.join(data)
+            label.update(msg)
 
         resources.update(dt)
         sky_clock.update(dt)
