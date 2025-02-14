@@ -21,19 +21,21 @@ WOOD_COST = {'house': 5,
              'windmill': 10,
              'pathway': 1,
              'barn': 10,
-             'storage': 15}
+             'storage': 15,
+             'lumberjack': 1}
 STONE_COST = {'house': 5,
              'mine': 10,
              'windmill': 5,
               'pathway': 1,
               'barn': 10,
-              'storage': 15}
+              'storage': 15,
+              'lumberjack': 1}
 
 DAY_TIME = 4500
 HOUR = DAY_TIME * 4 / 24
 MINUTE = HOUR / 60
 
-MODES = ['house', 'pathway', 'windmill', 'barn', 'mine', 'storage']
+MODES = ['house', 'pathway', 'windmill', 'barn', 'mine', 'storage', 'lumberjack']
 
 STATS_ALPHA_SPEED = 40
 STATS_OFFSET_SPEED = 3

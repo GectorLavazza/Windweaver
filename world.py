@@ -5,7 +5,7 @@ import pygame.surface
 from pygame import Vector2, mouse, Surface, Rect
 
 from load_image import load_image
-from settings import screen_width, screen_height, TILE_SIZE, screen_size, SCALE, MAP_WIDTH, MAP_HEIGHT
+from settings import screen_width, screen_height, TILE_SIZE, screen_size, SCALE, MAP_WIDTH, MAP_HEIGHT, WHITE
 
 
 class World:
@@ -60,7 +60,8 @@ class World:
             'windmill': load_image('windmill_1'),
             'pathway': load_image('pathway'),
             'barn': load_image('barn'),
-            'storage': load_image('storage')
+            'storage': load_image('storage'),
+            'lumberjack': load_image('lumberjack')
         }
 
         images = [load_image(s.replace('.png', '')) for s in listdir('assets/sprites')]
@@ -82,6 +83,7 @@ class World:
         self.barns = 0
         self.pathways = 0
         self.storages = 0
+        self.lumberjacks = 0
 
         self.zone_surface = pygame.surface.Surface(screen_size, pygame.SRCALPHA)
         self.zone_pos = Vector2(0, 0)
@@ -101,7 +103,10 @@ class World:
         self.windmills_left = max(0, self.houses // 2 - self.windmills)
         self.barns_left = 'inf'
         self.storages_left = 'inf'
-        self.left = [self.houses_left, self.pathways_left, self.windmills_left, self.barns_left, self.mines_left, self.storages_left]
+        self.lumberjacks_left = max(0, self.houses // 1 - self.lumberjacks)
+        self.left = [self.houses_left, self.pathways_left,
+                     self.windmills_left, self.barns_left,
+                     self.mines_left, self.storages_left, self.lumberjacks_left]
 
         self.score = 0
         self.buildings_score = 0
@@ -132,7 +137,9 @@ class World:
         self.windmills_left = max(0, self.houses // 2 - self.windmills)
         self.barns_left = max(0, self.houses // 3 - self.barns) + (1 if self.barns == 0 else 0)
         self.storages_left = max(0, self.houses // 5 - self.storages) + (1 if self.houses // 2 > 0 and self.storages == 0 else 0)
-        self.left = [self.houses_left, self.pathways_left, self.windmills_left, self.barns_left, self.mines_left, self.storages_left]
+        self.lumberjacks_left = max(0, self.houses // 1 - self.lumberjacks)
+        self.left = [self.houses_left, self.pathways_left, self.windmills_left, self.barns_left,
+                     self.mines_left, self.storages_left, self.lumberjacks_left]
 
         self.buildings_score = self.houses * 5 + self.windmills * 10 + self.mines * 10 + self.barns * 15 + self.storages * 20
         self.overall_score = self.score + self.buildings_score
@@ -153,7 +160,7 @@ class World:
         self.zone_outline_surface.fill((0, 0, 0, 0))
         for p in outline:
             pos = p[0] - 1 * SCALE / 2, p[1] - 1 * SCALE / 2
-            pygame.draw.rect(self.zone_outline_surface, (0, 255, 0), pygame.Rect(*pos, SCALE, SCALE))
+            pygame.draw.rect(self.zone_outline_surface, WHITE, pygame.Rect(*pos, SCALE, SCALE))
         self.zone_outline_surface.set_colorkey((0, 0, 0, 0))
         self.zone_pos = self.zone_outline_surface.get_rect().topleft
         self.zone_offset = Vector2(self.rect.topleft)
@@ -205,6 +212,7 @@ class World:
         self.barns = len(list(filter(lambda b: 'barn' in b.name, self.buildings_g.sprites())))
         self.storages = len(list(filter(lambda b: 'storage' in b.name, self.buildings_g.sprites())))
         self.pathways = len(self.pathways_g.sprites())
+        self.lumberjacks = len(list(filter(lambda b: 'lumberjack' in b.name, self.buildings_g.sprites())))
 
         self.food = sum([p.food for p in self.buildings_g.sprites() if p.name == 'barn' and p.food > 0])
         self.max_food = 50 + sum([p.capacity for p in self.buildings_g.sprites() if p.name == 'barn'])

@@ -141,6 +141,8 @@ async def main():
                     mode = 4
                 if event.key == pygame.K_6:
                     mode = 5
+                if event.key == pygame.K_7:
+                    mode = 6
 
                 if event.key == pygame.K_e:
                     world.removing = not world.removing

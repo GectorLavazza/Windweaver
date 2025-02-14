@@ -239,6 +239,15 @@ class Tile(Sprite):
                     (self.world.houses // 5 > self.world.storages or self.world.storages == 0 and self.world.houses // 2 > self.world.storages):
                 self.available = True
 
+        # elif build == 'lumberjack':
+        #     check_1 = [self.rect.colliderect(p.collision_rect) and
+        #                (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+        #                for p in self.world.pathways_g.sprites()]
+        #     check_2 = [self.rect.colliderect(p.collision_rect) and (p.name == 'mine' or 'windmill' in p.name) for p in self.world.buildings_g.sprites()]
+        #
+        #     if any(check_1) and not any(check_2) and self.world.houses // 1 > self.world.lumberjacks:
+        #         self.available = True
+
     def buy(self):
         build = self.world.current_build
         stone = STONE_COST[build]
@@ -912,3 +921,82 @@ class Storage(Tile):
         s.set_alpha(self.usage_zone_alpha)
         draw.rect(s, (0, 0, 255), (0, 0, *self.usage_zone.size), 1 * SCALE)
         self.world.screen.blit(s, self.usage_zone.topleft)
+
+
+class Lumberjack(Tile):
+    def __init__(self, pos, world, *group):
+        super().__init__('lumberjack', pos, world, *group)
+
+        self.max_tick = 1200
+        self.tick = self.max_tick
+
+        self.zone = Rect(*self.rect.topleft,
+                         self.rect.width * 5,
+                         self.rect.height * 5)
+        self.zone.center = self.rect.center
+
+        self.food = 10
+        self.capacity = 10
+
+        self.world.update_zone()
+        self.food_w = (self.rect.w * 2) / self.capacity * self.food
+
+    def on_update(self, dt):
+        self.tick -= dt
+        if self.tick <= 0:
+            self.tick = self.max_tick
+
+            self.food -= randint(0, 2)
+            d = self.capacity - self.food
+            v = [p for p in self.world.buildings_g.sprites() if
+                         self.rect.colliderect(p.usage_zone) and p.name == 'barn' and p.food - d >= 0]
+            if v:
+                barn = choice(v)
+                barn.food -= d
+                self.food += d
+
+        if self.food < 1:
+            self.world.score -= 10
+            self.world.health -= 1
+            self.kill()
+            Grass('grass', self.pos, self.world, self.world.grass_g)
+            create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
+            self.world.update_zone()
+
+    def draw_stats(self, dt):
+        b = Rect(self.rect.x - self.rect.w / 2 - SCALE / 2, self.rect.y - 4 * SCALE + SCALE - self.stats_offset, self.rect.w * 2,
+                       2 * SCALE)
+        sb = Surface(b.size, pygame.SRCALPHA)
+        sb.fill((70, 71, 76, self.stats_alpha))
+        self.world.screen.blit(sb, b.topleft)
+
+        self.food_w = max(self.food_w - dt * STATS_BAR_SPEED,
+                          min(self.food_w + dt * STATS_BAR_SPEED, (self.rect.w * 2) / self.capacity * self.food))
+        f = Rect(self.rect.x - self.rect.w / 2 + SCALE / 2, self.rect.y - 4 * SCALE - self.stats_offset,
+                       self.food_w, 2 * SCALE)
+        sf = Surface(f.size, pygame.SRCALPHA)
+        sf.fill((224, 220, 164, self.stats_alpha))
+        self.world.screen.blit(sf, f.topleft)
+
+    def on_kill(self):
+        check = [self.rect.colliderect(p.collision_rect) and
+         (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+         for p in self.world.pathways_g.sprites()]
+
+        if check.count(True) < 2:
+            Grass('grass', self.pos, self.world, self.world.grass_g)
+
+            w, s = randint(1, WOOD_COST['lumberjack'] // 2), randint(1, STONE_COST['lumberjack'] // 2)
+
+            wd = self.world.max_wood - self.world.wood
+            if wd > w:
+                wd = w
+            self.world.wood += wd
+
+            sd = self.world.max_stone - self.world.stone
+            if sd > s:
+                sd = s
+            self.world.stone += sd
+            create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
+            self.kill()
+            self.world.update_zone()
