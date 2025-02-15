@@ -1,8 +1,0 @@
-PLACEMENT RULES
-
-All buildings must be connected to a road.
-All buildings can not be placed directly by mines and windmills
-
-House - costs 5 wood and 5 stone. Consumes food, "dies" if has no food left.
-Pathway - costs 1 wood and 1 stone. Connects everything up.
-Windmill - costs 10 wood and 5 stone. Creates farmland that grows crops.
