@@ -579,7 +579,7 @@ class Windmill(Tile):
         self.tick = self.max_tick
 
         self.frame = 1
-        self.max_animation_tick = 30
+        self.max_animation_tick = 60
         self.animation_tick = self.max_animation_tick
 
         self.frames = {
@@ -610,6 +610,13 @@ class Windmill(Tile):
         if self.tick <= 0:
             self.tick = self.max_tick
             self.spread()
+
+        if self.collected > 150:
+            self.max_animation_tick = 30
+        elif self.collected > 100:
+            self.max_animation_tick = 40
+        elif self.collected > 50:
+            self.max_animation_tick = 50
 
         if self.collected > 50:
             self.gather_tick -= dt
