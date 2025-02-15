@@ -621,6 +621,9 @@ class Windmill(Tile):
                     if self.food == self.capacity:
                         self.on_click()
 
+                if self.collected > 150:
+                    self.on_click()
+
         self.draw_stats(dt)
 
         self.animation_tick -= dt
