@@ -394,7 +394,7 @@ class House(Tile):
         if not self.world.house_placed:
             self.world.house_placed = True
 
-        self.max_tick = 1200
+        self.max_tick = randint(900, 1500)
         self.tick = self.max_tick
 
         self.zone = Rect(*self.rect.topleft,
@@ -498,14 +498,17 @@ class Mine(Tile):
             if self.collision_rect.colliderect(p.rect):
                 self.around.add(p)
 
+        self.start_around = len(self.around.sprites())
+
     def on_update(self, dt):
         self.draw_stats(dt)
-        self.capacity = self.max_capacity - self.collected // 10
+        self.capacity = self.max_capacity - self.collected // (8 + self.start_around)
         self.capacity = max(1, self.capacity)
 
         self.tick -= dt
         if self.tick <= 0:
-            self.max_tick = (60 + 30 * self.collected // 10) * max(0.5, (10 - len(self.around)) / 10)
+            self.max_tick = (60 + 30 * self.collected // (8 + self.start_around)) * \
+                            max(0.5, ((8 + self.start_around) - len(self.around)) / 10)
             self.tick = self.max_tick
 
             amount = randint(0, 2)
