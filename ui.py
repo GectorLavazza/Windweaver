@@ -17,7 +17,7 @@ class Text(Ui):
                  pos=(0, 0), center_align=False, right_align=False, bottom_align=False, vertical_center_align=False, shade=False):
 
         super().__init__(screen)
-        self.font = font.Font('assets/fonts/PixelOperator8-Bold.ttf',
+        self.font = font.Font(PATH + 'assets/fonts/PixelOperator8-Bold.ttf',
                                      font_size * SCALE)
         self.pos = pos
         self.color = color
@@ -74,7 +74,7 @@ class Text(Ui):
 class Clock:
     def __init__(self, screen, font_size, sky, world):
 
-        self.font = font.Font('assets/fonts/PixelOperator8-Bold.ttf',
+        self.font = font.Font(PATH + 'assets/fonts/PixelOperator8-Bold.ttf',
                                      font_size * SCALE)
         self.screen = screen
         self.sky = sky

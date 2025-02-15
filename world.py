@@ -5,7 +5,7 @@ import pygame.surface
 from pygame import Vector2, mouse, Surface, Rect
 
 from load_image import load_image
-from settings import screen_width, screen_height, TILE_SIZE, screen_size, SCALE, MAP_WIDTH, MAP_HEIGHT, WHITE
+from settings import *
 
 
 class World:
@@ -64,8 +64,8 @@ class World:
             'lumberjack': load_image('lumberjack')
         }
 
-        images = [load_image(s.replace('.png', '')) for s in listdir('assets/sprites')]
-        keys = [s.replace('.png', '') for s in listdir('assets/sprites')]
+        images = [load_image(s.replace('.png', '')) for s in listdir(PATH + 'assets/sprites')]
+        keys = [s.replace('.png', '') for s in listdir(PATH + 'assets/sprites')]
 
         self.images = dict(zip(keys, images))
 

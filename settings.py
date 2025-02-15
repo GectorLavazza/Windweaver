@@ -59,3 +59,4 @@ VIGNETTE_WIDTH = 20
 
 from os import path
 PATH = path.dirname(__file__) + '/'
+print(PATH)
