@@ -22,14 +22,14 @@ WOOD_COST = {'house': 5,
              'pathway': 1,
              'barn': 10,
              'storage': 15,
-             'lumberjack': 1}
+             'lumberjack': 15}
 STONE_COST = {'house': 5,
              'mine': 10,
              'windmill': 5,
               'pathway': 1,
               'barn': 10,
               'storage': 15,
-              'lumberjack': 1}
+              'lumberjack': 10}
 
 DAY_TIME = 4500
 HOUR = DAY_TIME * 4 / 24

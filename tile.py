@@ -101,13 +101,13 @@ class Tile(Sprite):
 
     def handle_mouse(self, dt):
         mouse_pos = mouse.get_pos()
-        if self.stats_alpha > 0 or self.name == 'house' and self.food < 3:
+        if self.stats_alpha > 0 or self.name in ('house', 'lumberjack') and self.food < 3:
             self.draw_stats(dt)
 
         if self.usage_zone_alpha > 0:
             self.draw_usage_zone()
 
-        if self.name == 'house' and self.food < 3:
+        if self.name in ('house', 'lumberjack') and self.food < 3:
             self.stats_alpha = min(int(self.stats_alpha + dt * STATS_ALPHA_SPEED), 255) \
                 if self.name not in ('barn', 'mine') and 'windmill' not in self.name else 255
 
@@ -151,7 +151,7 @@ class Tile(Sprite):
         else:
             self.clicked = False
             self.stats_offset = max(0, self.stats_offset - dt * STATS_OFFSET_SPEED)
-            if not (self.name == 'house' and self.food < 3):
+            if not (self.name in ('house', 'lumberjack') and self.food < 3):
                 self.stats_alpha = max(int(self.stats_alpha - dt * STATS_ALPHA_SPEED), 0) \
                     if self.name not in ('barn', 'mine') and 'windmill' not in self.name else 255
             self.usage_zone_alpha = max(int(self.usage_zone_alpha - dt * STATS_ALPHA_SPEED), 0)
@@ -239,14 +239,14 @@ class Tile(Sprite):
                     (self.world.houses // 5 > self.world.storages or self.world.storages == 0 and self.world.houses // 2 > self.world.storages):
                 self.available = True
 
-        # elif build == 'lumberjack':
-        #     check_1 = [self.rect.colliderect(p.collision_rect) and
-        #                (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
-        #                for p in self.world.pathways_g.sprites()]
-        #     check_2 = [self.rect.colliderect(p.collision_rect) and (p.name == 'mine' or 'windmill' in p.name) for p in self.world.buildings_g.sprites()]
-        #
-        #     if any(check_1) and not any(check_2) and self.world.houses // 1 > self.world.lumberjacks:
-        #         self.available = True
+        elif build == 'lumberjack':
+            check_1 = [self.rect.colliderect(p.collision_rect) and
+                       (p.rect.centerx == self.rect.centerx or p.rect.centery == self.rect.centery)
+                       for p in self.world.pathways_g.sprites()]
+            check_2 = [self.rect.colliderect(p.collision_rect) and (p.name == 'mine' or 'windmill' in p.name) for p in self.world.buildings_g.sprites()]
+
+            if any(check_1) and not any(check_2) and self.world.houses // 20 > self.world.lumberjacks:
+                self.available = True
 
     def buy(self):
         build = self.world.current_build
@@ -272,6 +272,8 @@ class Tile(Sprite):
                         Barn(self.pos, self.world, self.world.buildings_g)
                     elif build == 'storage':
                         Storage(self.pos, self.world, self.world.buildings_g)
+                    elif build == 'lumberjack':
+                        Lumberjack(self.pos, self.world, self.world.buildings_g)
                     self.kill()
 
                 else:
@@ -341,13 +343,14 @@ class Tree(Tile):
         self.kill()
 
     def grow(self):
-        self.age += 1
-        self.durability = self.age + 2
-        self.max_durability = self.durability
+        if self.age < 2:
+            self.age += 1
+            self.durability = self.age + 2
+            self.max_durability = self.durability
 
-        self.name = f'tree_{self.age}'
+            self.name = f'tree_{self.age}'
 
-        self.image = self.world.images[self.name]
+            self.image = self.world.images[self.name]
 
     def on_update(self, dt):
         if self.age < 2:
@@ -490,6 +493,11 @@ class Mine(Tile):
         self.max_gather_tick = 60
         self.gather_tick = self.max_gather_tick
 
+        self.around = pygame.sprite.Group()
+        for p in self.world.stones_g.sprites():
+            if self.collision_rect.colliderect(p.rect):
+                self.around.add(p)
+
     def on_update(self, dt):
         self.draw_stats(dt)
         self.capacity = self.max_capacity - self.collected // 10
@@ -497,7 +505,7 @@ class Mine(Tile):
 
         self.tick -= dt
         if self.tick <= 0:
-            self.max_tick = 60 + 30 * self.collected // 10
+            self.max_tick = (60 + 30 * self.collected // 10) * max(0.5, (10 - len(self.around)) / 10)
             self.tick = self.max_tick
 
             amount = randint(0, 2)
@@ -631,7 +639,7 @@ class Windmill(Tile):
 
     def spread(self):
         if randint(1, 2) == 1:
-            tiles = [p for p in self.world.grass_g.sprites() + self.world.pathways_g.sprites() if
+            tiles = [p for p in self.world.grass_g.sprites() if
                      self.rect.colliderect(p.collision_rect) and p.name in 'grass' and p.in_zone()]
             if tiles:
                 tile = choice(tiles)
@@ -931,8 +939,8 @@ class Lumberjack(Tile):
         self.tick = self.max_tick
 
         self.zone = Rect(*self.rect.topleft,
-                         self.rect.width * 5,
-                         self.rect.height * 5)
+                         self.rect.width * 7,
+                         self.rect.height * 7)
         self.zone.center = self.rect.center
 
         self.food = 10
@@ -940,6 +948,24 @@ class Lumberjack(Tile):
 
         self.world.update_zone()
         self.food_w = (self.rect.w * 2) / self.capacity * self.food
+
+        self.usage_zone = Rect(*self.rect.topleft,
+                               self.rect.width * 7,
+                               self.rect.height * 7)
+        self.usage_zone.center = self.rect.center
+
+        self.max_grow_tick = randint(60, 300)
+        self.grow_tick = self.max_grow_tick
+
+        self.max_age_tick = randint(60, 300)
+        self.age_tick = self.max_age_tick
+
+        self.trees = pygame.sprite.Group()
+
+        self.around = pygame.sprite.Group()
+        for p in self.world.trees_g.sprites():
+            if self.collision_rect.colliderect(p.rect):
+                self.around.add(p)
 
     def on_update(self, dt):
         self.tick -= dt
@@ -955,8 +981,20 @@ class Lumberjack(Tile):
                 barn.food -= d
                 self.food += d
 
+        self.grow_tick -= dt
+        if self.grow_tick <= 0:
+            self.max_grow_tick = randint(60, 300)
+            self.grow_tick = self.max_grow_tick
+            self.grow()
+
+        self.age_tick -= dt
+        if self.age_tick <= 0:
+            self.max_age_tick = randint(60, 300)
+            self.age_tick = self.max_age_tick
+            self.age()
+
         if self.food < 1:
-            self.world.score -= 10
+            self.world.score -= 20
             self.world.health -= 1
             self.kill()
             Grass('grass', self.pos, self.world, self.world.grass_g)
@@ -1000,3 +1038,28 @@ class Lumberjack(Tile):
             create_particles(BLACK, self.rect.center, 10, 15, self.world.particles_g)
             self.kill()
             self.world.update_zone()
+
+    def grow(self):
+        if len(self.trees.sprites()) < 20:
+            chance = len(self.around.sprites()) // 2
+            if randint(1, max(2, 5 - chance)) == 1:
+                tiles = [p for p in self.world.grass_g.sprites() if
+                         self.usage_zone.colliderect(p.rect) and p.name in 'grass' and p.in_zone()]
+                if tiles:
+                    tile = choice(tiles)
+                    t = Tree(tile.pos, tile.world, 0, self.world.trees_g)
+                    self.trees.add(t)
+                    tile.kill()
+
+    def age(self):
+        if len(self.trees.sprites()) > 2:
+            chance = len(self.around.sprites()) // 2
+            if randint(1, max(5, 10 - chance)) == 1:
+                t = choice(self.trees.sprites())
+                t.grow()
+
+    def draw_usage_zone(self):
+        s = Surface(self.usage_zone.size, pygame.SRCALPHA)
+        s.set_alpha(self.usage_zone_alpha)
+        draw.rect(s, (0, 255, 0), (0, 0, *self.usage_zone.size), 1 * SCALE)
+        self.world.screen.blit(s, self.usage_zone.topleft)

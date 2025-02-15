@@ -103,7 +103,7 @@ class World:
         self.windmills_left = max(0, self.houses // 2 - self.windmills)
         self.barns_left = 'inf'
         self.storages_left = 'inf'
-        self.lumberjacks_left = max(0, self.houses // 1 - self.lumberjacks)
+        self.lumberjacks_left = max(0, self.houses // 20 - self.lumberjacks)
         self.left = [self.houses_left, self.pathways_left,
                      self.windmills_left, self.barns_left,
                      self.mines_left, self.storages_left, self.lumberjacks_left]
@@ -137,11 +137,11 @@ class World:
         self.windmills_left = max(0, self.houses // 2 - self.windmills)
         self.barns_left = max(0, self.houses // 3 - self.barns) + (1 if self.barns == 0 else 0)
         self.storages_left = max(0, self.houses // 5 - self.storages) + (1 if self.houses // 2 > 0 and self.storages == 0 else 0)
-        self.lumberjacks_left = max(0, self.houses // 1 - self.lumberjacks)
+        self.lumberjacks_left = max(0, self.houses // 20 - self.lumberjacks)
         self.left = [self.houses_left, self.pathways_left, self.windmills_left, self.barns_left,
                      self.mines_left, self.storages_left, self.lumberjacks_left]
 
-        self.buildings_score = self.houses * 5 + self.windmills * 10 + self.mines * 10 + self.barns * 15 + self.storages * 20
+        self.buildings_score = self.houses * 5 + self.windmills * 10 + self.mines * 10 + self.barns * 15 + self.storages * 20 + self.lumberjacks * 30
         self.overall_score = self.score + self.buildings_score
 
     def update_zone(self):
