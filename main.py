@@ -119,7 +119,7 @@ async def main():
     health = Health(screen, world)
     # mode = 'start'
 
-    new_world = 1
+    new_world = 0
     if new_world:
         Map(world, grass_g, trees_g, stones_g)
     else:
@@ -143,8 +143,7 @@ async def main():
 
             for s in data['farmland_g']:
                 pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
-                f = Farmland(pos, world, world.farmland_g)
-                f.name = s['name']
+                Farmland(pos, world, world.farmland_g)
 
             for s in data['buildings_g']:
                 pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
@@ -161,6 +160,20 @@ async def main():
                     Storage(pos, world, buildings_g)
                 elif s['name'] == 'lumberjack':
                     Lumberjack(pos, world, buildings_g)
+
+            world.score = data['world']['score']
+            world.wood = data['world']['wood']
+            world.max_wood = data['world']['max_wood']
+            world.stone = data['world']['stone']
+            world.max_stone = data['world']['max_stone']
+            world.house_placed = data['world']['house_placed']
+            world.current_build = data['world']['current_build']
+
+            sky.tick = data['sky']['tick']
+            sky.current_phase = data['sky']['current_phase']
+            sky.day = data['sky']['day']
+
+            mode = MODES.index(world.current_build)
 
     while running:
         dt = time() - last_time
@@ -300,34 +313,48 @@ async def main():
 
         await asyncio.sleep(0)
 
-    data = {'grass_g': [],
-            'trees_g': [],
-            'stones_g': [],
-            'pathways_g': [],
-            'farmland_g': [],
-            'buildings_g': []}
-
-    for s in grass_g.sprites():
-        data['grass_g'].append(s.save())
-
-    for s in trees_g.sprites():
-        data['trees_g'].append(s.save())
-
-    for s in stones_g.sprites():
-        data['stones_g'].append(s.save())
-
-    for s in pathways_g.sprites():
-        data['pathways_g'].append(s.save())
-
-    for s in farmland_g.sprites():
-        data['farmland_g'].append(s.save())
-
-    for s in buildings_g.sprites():
-        data['buildings_g'].append(s.save())
-
     with open('world.json', mode='w') as f:
+
+        data = {'grass_g': [],
+                'trees_g': [],
+                'stones_g': [],
+                'pathways_g': [],
+                'farmland_g': [],
+                'buildings_g': []}
+
+        for s in grass_g.sprites():
+            data['grass_g'].append(s.save())
+
+        for s in trees_g.sprites():
+            data['trees_g'].append(s.save())
+
+        for s in stones_g.sprites():
+            data['stones_g'].append(s.save())
+
+        for s in pathways_g.sprites():
+            data['pathways_g'].append(s.save())
+
+        for s in farmland_g.sprites():
+            data['farmland_g'].append(s.save())
+
+        for s in buildings_g.sprites():
+            data['buildings_g'].append(s.save())
+
+        data['world'] = {'wood': world.wood,
+                         'max_wood': world.max_wood,
+                         'stone': world.stone,
+                         'max_stone': world.max_stone,
+                         'score': world.score,
+                         'current_build': world.current_build,
+                         'house_placed': world.house_placed,
+                         }
+
+        data['sky'] = {'tick': sky.tick,
+                       'current_phase': sky.current_phase,
+                       'day': sky.day}
+
         json.dump(data, f)
-        print('World saved')
+        print('World successfully saved')
 
     pygame.quit()
     exit()
