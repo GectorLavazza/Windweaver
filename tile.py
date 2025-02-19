@@ -285,6 +285,10 @@ class Tile(Sprite):
     def draw_usage_zone(self):
         pass
 
+    def save(self):
+        data = {'name': self.name, 'pos': (self.pos[0] // TILE_SIZE, self.pos[1] // TILE_SIZE)}
+        return data
+
 
 class Grass(Tile):
     def __init__(self, name, pos, world, *group):

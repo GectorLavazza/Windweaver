@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os.path
 from sys import exit
 from time import time
@@ -13,6 +14,8 @@ from settings import *
 from sky import Sky
 from ui import Text, Clock, Resources, Hotbar, Health
 from world import World
+
+from tile import *
 
 
 async def main():
@@ -48,26 +51,31 @@ async def main():
 
     pygame.display.set_icon(pygame.transform.scale_by(world.images['house'], 8))
 
-    map = Map(world, grass_g, trees_g, stones_g)
-
     cursor = Cursor(cursor_g)
     sky_clock = Clock(screen, 20, sky, world)
 
     top_bg = pygame.Surface((WIDTH, VIGNETTE_WIDTH * SCALE), pygame.SRCALPHA)
     for i in range(top_bg.height, -1, -1):
-        pygame.draw.line(top_bg, (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))), (0, top_bg.height - i), (WIDTH, top_bg.height - i))
+        pygame.draw.line(top_bg, (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))),
+                         (0, top_bg.height - i), (WIDTH, top_bg.height - i))
 
     bottom_bg = pygame.Surface((WIDTH, VIGNETTE_WIDTH * SCALE), pygame.SRCALPHA)
     for i in range(bottom_bg.height, -1, -1):
-        pygame.draw.line(bottom_bg, (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))), (0, i), (WIDTH, i))
+        pygame.draw.line(bottom_bg,
+                         (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))), (0, i),
+                         (WIDTH, i))
 
     right_bg = pygame.Surface((VIGNETTE_WIDTH * SCALE, HEIGHT), pygame.SRCALPHA)
     for i in range(right_bg.width, -1, -1):
-        pygame.draw.line(right_bg, (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))), (i, 0), (i, HEIGHT))
+        pygame.draw.line(right_bg,
+                         (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))), (i, 0),
+                         (i, HEIGHT))
 
     left_bg = pygame.Surface((VIGNETTE_WIDTH * SCALE, HEIGHT), pygame.SRCALPHA)
     for i in range(left_bg.width, -1, -1):
-        pygame.draw.line(left_bg, (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))), (left_bg.width - i, 0), (left_bg.width - i, HEIGHT))
+        pygame.draw.line(left_bg,
+                         (0, 0, 0, max(0, min(i * (VIGNETTE_WIDTH * SCALE / (VIGNETTE_WIDTH * 4)) ** -1, 255))),
+                         (left_bg.width - i, 0), (left_bg.width - i, HEIGHT))
 
     running = 1
     clock = pygame.time.Clock()
@@ -110,6 +118,49 @@ async def main():
 
     health = Health(screen, world)
     # mode = 'start'
+
+    new_world = 1
+    if new_world:
+        Map(world, grass_g, trees_g, stones_g)
+    else:
+        with open('world.json', mode='r') as f:
+            data = json.load(f)
+            for s in data['grass_g']:
+                pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
+                Grass(s['name'], pos, world, grass_g)
+
+            for s in data['trees_g']:
+                pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
+                Tree(pos, world, 1, trees_g)
+
+            for s in data['stones_g']:
+                pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
+                Stone(pos, world, 1, stones_g)
+
+            for s in data['pathways_g']:
+                pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
+                Pathway(pos, world, world.pathways_g)
+
+            for s in data['farmland_g']:
+                pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
+                f = Farmland(pos, world, world.farmland_g)
+                f.name = s['name']
+
+            for s in data['buildings_g']:
+                pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
+                if s['name'] == 'house':
+                    House(pos, world, buildings_g)
+                elif s['name'] == 'mine':
+                    Mine(pos, world, buildings_g)
+                elif 'windmill' in s['name']:
+                    w = Windmill(pos, world, buildings_g)
+                    w.name = s['name']
+                elif s['name'] == 'barn':
+                    Barn(pos, world, buildings_g)
+                elif s['name'] == 'storage':
+                    Storage(pos, world, buildings_g)
+                elif s['name'] == 'lumberjack':
+                    Lumberjack(pos, world, buildings_g)
 
     while running:
         dt = time() - last_time
@@ -160,25 +211,6 @@ async def main():
                     vignette_on = not vignette_on
                 if event.key == pygame.K_F5:
                     debug_on = not debug_on
-
-            #     if event.key == pygame.K_w:
-            #         world.dy = -1
-            #     if event.key == pygame.K_s:
-            #         world.dy = 1
-            #     if event.key == pygame.K_a:
-            #         world.dx = -1
-            #     if event.key == pygame.K_d:
-            #         world.dx = 1
-            #
-            # if event.type == pygame.KEYUP:
-            #     if event.key == pygame.K_w:
-            #         world.dy = 0
-            #     if event.key == pygame.K_s:
-            #         world.dy = 0
-            #     if event.key == pygame.K_a:
-            #         world.dx = 0
-            #     if event.key == pygame.K_d:
-            #         world.dx = 0
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
@@ -267,6 +299,35 @@ async def main():
         clock.tick()
 
         await asyncio.sleep(0)
+
+    data = {'grass_g': [],
+            'trees_g': [],
+            'stones_g': [],
+            'pathways_g': [],
+            'farmland_g': [],
+            'buildings_g': []}
+
+    for s in grass_g.sprites():
+        data['grass_g'].append(s.save())
+
+    for s in trees_g.sprites():
+        data['trees_g'].append(s.save())
+
+    for s in stones_g.sprites():
+        data['stones_g'].append(s.save())
+
+    for s in pathways_g.sprites():
+        data['pathways_g'].append(s.save())
+
+    for s in farmland_g.sprites():
+        data['farmland_g'].append(s.save())
+
+    for s in buildings_g.sprites():
+        data['buildings_g'].append(s.save())
+
+    with open('world.json', mode='w') as f:
+        json.dump(data, f)
+        print('World saved')
 
     pygame.quit()
     exit()
