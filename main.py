@@ -119,7 +119,7 @@ async def main():
     health = Health(screen, world)
     # mode = 'start'
 
-    new_world = 0
+    new_world = 1
     if new_world:
         Map(world, grass_g, trees_g, stones_g)
     else:
@@ -127,39 +127,87 @@ async def main():
             data = json.load(f)
             for s in data['grass_g']:
                 pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
-                Grass(s['name'], pos, world, grass_g)
+                t = Grass(s['name'], pos, world, grass_g)
+                t.tick = s['tick']
+                t.max_tick = s['max_tick']
 
             for s in data['trees_g']:
                 pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
-                Tree(pos, world, 1, trees_g)
+                t = Tree(pos, world, s['age'], trees_g)
+                t.durability = s['durability']
+                t.max_durability = s['max_durability']
+                t.tick = s['tick']
+                t.max_tick = s['max_tick']
 
             for s in data['stones_g']:
                 pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
-                Stone(pos, world, 1, stones_g)
+                t = Stone(pos, world, int(s['name'].split('_')[-1]), stones_g)
+                t.amount = s['amount']
+                t.durability = s['durability']
+                t.max_durability = s['max_durability']
 
             for s in data['pathways_g']:
                 pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
-                Pathway(pos, world, world.pathways_g)
+                t = Pathway(pos, world, world.pathways_g)
 
             for s in data['farmland_g']:
                 pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
-                Farmland(pos, world, world.farmland_g)
+                t = Farmland(pos, world, world.farmland_g)
+                t.name = s['name']
+                t.image = world.images[s['name']]
+                t.age = s['age']
+                t.tick = s['tick']
+                t.max_tick = s['max_tick']
 
             for s in data['buildings_g']:
                 pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
                 if s['name'] == 'house':
-                    House(pos, world, buildings_g)
+                    t = House(pos, world, buildings_g)
+                    t.food = s['food']
+                    t.tick = s['tick']
+                    t.max_tick = s['max_tick']
+
                 elif s['name'] == 'mine':
-                    Mine(pos, world, buildings_g)
+                    t = Mine(pos, world, buildings_g)
+                    t.start_around = s['start_around']
+                    t.collected = s['collected']
+                    t.tick = s['tick']
+                    t.max_tick = s['max_tick']
+                    t.gather_tick = s['gather_tick']
+                    t.max_gather_tick = s['max_gather_tick']
+                    t.capacity = s['capacity']
+                    t.stone = s['stone']
+
                 elif 'windmill' in s['name']:
-                    w = Windmill(pos, world, buildings_g)
-                    w.name = s['name']
+                    t = Windmill(pos, world, buildings_g)
+                    t.name = s['name']
+                    t.frame = s['frame']
+                    t.collected = s['collected']
+                    t.tick = s['tick']
+                    t.max_tick = s['max_tick']
+                    t.gather_tick = s['gather_tick']
+                    t.max_gather_tick = s['max_gather_tick']
+                    t.food = s['food']
+                    t.animation_tick = s['animation_tick']
+                    t.max_animation_tick = s['max_animation_tick']
+
                 elif s['name'] == 'barn':
-                    Barn(pos, world, buildings_g)
+                    t = Barn(pos, world, buildings_g)
+                    t.food = s['food']
+                    t.capacity = s['capacity']
+
                 elif s['name'] == 'storage':
-                    Storage(pos, world, buildings_g)
+                    t = Storage(pos, world, buildings_g)
+
                 elif s['name'] == 'lumberjack':
-                    Lumberjack(pos, world, buildings_g)
+                    t = Lumberjack(pos, world, buildings_g)
+                    t.tick = s['tick']
+                    t.max_tick = s['max_tick']
+                    t.age_tick = s['age_tick']
+                    t.max_age_tick = s['max_age_tick']
+                    t.food = s['food']
+                    t.grow_tick = s['grow_tick']
+                    t.max_grow_tick = s['max_grow_tick']
 
             world.score = data['world']['score']
             world.wood = data['world']['wood']

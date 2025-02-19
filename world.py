@@ -144,6 +144,9 @@ class World:
         self.buildings_score = self.houses * 5 + self.windmills * 10 + self.mines * 10 + self.barns * 15 + self.storages * 20 + self.lumberjacks * 30
         self.overall_score = self.score + self.buildings_score
 
+        self.wood = min(self.wood, self.max_wood)
+        self.stone = min(self.stone, self.max_stone)
+
     def update_zone(self):
         self.zone = [s.zone for s in self.pathways_g.sprites() + self.buildings_g.sprites()]
 

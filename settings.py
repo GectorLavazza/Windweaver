@@ -31,7 +31,7 @@ STONE_COST = {'house': 5,
               'storage': 15,
               'lumberjack': 10}
 
-DAY_TIME = 600
+DAY_TIME = 18000
 HOUR = DAY_TIME / 24
 MINUTE = HOUR / 60
 

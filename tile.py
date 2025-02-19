@@ -314,6 +314,11 @@ class Grass(Tile):
                 self.max_tick = randint(GROWTH_MIN, GROWTH_MAX)
                 self.tick = self.max_tick
 
+    def save(self):
+        data = {'name': self.name, 'pos': (self.pos[0] // TILE_SIZE, self.pos[1] // TILE_SIZE),
+                'tick': self.tick, 'max_tick': self.max_tick}
+        return data
+
 
 class Tree(Tile):
     def __init__(self, pos, world, age, *group):
@@ -365,6 +370,12 @@ class Tree(Tile):
                 if randint(1, 10 * (self.age + 1)) == 1:
                     self.grow()
 
+    def save(self):
+        data = {'name': self.name, 'pos': (self.pos[0] // TILE_SIZE, self.pos[1] // TILE_SIZE),
+                'age': self.age, 'durability': self.durability, 'max_durability': self.max_durability,
+                'tick': self.tick, 'max_tick': self.max_tick}
+        return data
+
 
 class Stone(Tile):
     def __init__(self, pos, world, amount, *group):
@@ -390,6 +401,11 @@ class Stone(Tile):
             self.world.score += d
         Grass('grass', self.pos, self.world, self.world.grass_g)
         self.kill()
+
+    def save(self):
+        data = {'name': self.name, 'pos': (self.pos[0] // TILE_SIZE, self.pos[1] // TILE_SIZE),
+                'amount': self.amount, 'durability': self.durability, 'max_durability': self.max_durability}
+        return data
 
 
 class House(Tile):
@@ -472,6 +488,11 @@ class House(Tile):
             self.kill()
             self.world.update_zone()
 
+    def save(self):
+        data = {'name': self.name, 'pos': (self.pos[0] // TILE_SIZE, self.pos[1] // TILE_SIZE),
+                'food': self.food, 'tick': self.tick, 'max_tick': self.max_tick}
+        return data
+
 
 class Mine(Tile):
     def __init__(self, pos, world, *group):
@@ -497,12 +518,11 @@ class Mine(Tile):
         self.max_gather_tick = 60
         self.gather_tick = self.max_gather_tick
 
-        self.around = pygame.sprite.Group()
+        self.start_around = 0
+
         for p in self.world.stones_g.sprites():
             if self.collision_rect.colliderect(p.rect):
-                self.around.add(p)
-
-        self.start_around = len(self.around.sprites())
+                self.start_around += 1
 
     def on_update(self, dt):
         self.draw_stats(dt)
@@ -511,8 +531,7 @@ class Mine(Tile):
 
         self.tick -= dt
         if self.tick <= 0:
-            self.max_tick = (60 + 30 * self.collected // (8 + self.start_around)) * \
-                            max(0.5, ((8 + self.start_around) - len(self.around)) / 10)
+            self.max_tick = 60 + 15 * self.collected
             self.tick = self.max_tick
 
             amount = randint(0, 2)
@@ -577,6 +596,13 @@ class Mine(Tile):
             self.kill()
             self.world.update_zone()
 
+    def save(self):
+        data = {'name': self.name, 'pos': (self.pos[0] // TILE_SIZE, self.pos[1] // TILE_SIZE),
+                'stone': self.stone, 'tick': self.tick, 'max_tick': self.max_tick, 'capacity': self.capacity,
+                'gather_tick': self.gather_tick, 'max_gather_tick': self.max_gather_tick,
+                'start_around': self.start_around, 'collected': self.collected}
+        return data
+
 
 class Windmill(Tile):
     def __init__(self, pos, world, *group):
@@ -612,7 +638,14 @@ class Windmill(Tile):
         self.max_gather_tick = 60
         self.gather_tick = self.max_gather_tick
 
+        self.farmland_check = False
+
     def on_update(self, dt):
+        if not self.farmland_check:
+            self.farmland = [p for p in self.world.farmland_g.sprites()
+                             if self.collision_rect.colliderect(p.rect)]
+            self.farmland_check = True
+
         self.tick -= dt
         if self.tick <= 0:
             self.tick = self.max_tick
@@ -716,6 +749,14 @@ class Windmill(Tile):
             self.kill()
             self.world.update_zone()
 
+    def save(self):
+        data = {'name': self.name, 'pos': (self.pos[0] // TILE_SIZE, self.pos[1] // TILE_SIZE),
+                'food': self.food, 'tick': self.tick, 'max_tick': self.max_tick, 'frame': self.frame,
+                'animation_tick': self.animation_tick, 'max_animation_tick': self.max_animation_tick,
+                'gather_tick': self.gather_tick, 'max_gather_tick': self.max_gather_tick,
+                'collected': self.collected}
+        return data
+
 
 class Farmland(Tile):
     def __init__(self, pos, world, *group):
@@ -725,8 +766,6 @@ class Farmland(Tile):
 
         self.max_tick = randint(120, 300)  # 120 300
         self.tick = self.max_tick
-
-        self.collected = 0
 
     def grow(self):
         if randint(1, 2) == 1:
@@ -775,6 +814,11 @@ class Farmland(Tile):
         Grass('grass', self.pos, self.world, self.world.grass_g)
 
         self.kill()
+
+    def save(self):
+        data = {'name': self.name, 'pos': (self.pos[0] // TILE_SIZE, self.pos[1] // TILE_SIZE),
+                'age': self.age, 'tick': self.tick, 'max_tick': self.max_tick}
+        return data
 
 
 class Pathway(Tile):
@@ -860,6 +904,11 @@ class Barn(Tile):
 
     def on_update(self, dt):
         self.draw_stats(dt)
+
+    def save(self):
+        data = {'name': self.name, 'pos': (self.pos[0] // TILE_SIZE, self.pos[1] // TILE_SIZE),
+                'food': self.food, 'capacity': self.capacity}
+        return data
 
 
 class Storage(Tile):
@@ -979,11 +1028,6 @@ class Lumberjack(Tile):
 
         self.trees = pygame.sprite.Group()
 
-        self.around = pygame.sprite.Group()
-        for p in self.world.trees_g.sprites():
-            if self.collision_rect.colliderect(p.rect):
-                self.around.add(p)
-
     def on_update(self, dt):
         self.tick -= dt
         if self.tick <= 0:
@@ -1057,9 +1101,13 @@ class Lumberjack(Tile):
             self.world.update_zone()
 
     def grow(self):
+        self.trees = pygame.sprite.Group()
+        for p in self.world.trees_g.sprites():
+            if self.usage_zone.colliderect(p.rect):
+                self.trees.add(p)
+
         if len(self.trees.sprites()) < 20:
-            chance = len(self.around.sprites()) // 2
-            if randint(1, max(2, 5 - chance)) == 1:
+            if randint(1, 3) == 1:
                 tiles = [p for p in self.world.grass_g.sprites() if
                          self.usage_zone.colliderect(p.rect) and p.name in 'grass' and p.in_zone()]
                 if tiles:
@@ -1069,9 +1117,13 @@ class Lumberjack(Tile):
                     tile.kill()
 
     def age(self):
+        self.trees = pygame.sprite.Group()
+        for p in self.world.trees_g.sprites():
+            if self.usage_zone.colliderect(p.rect):
+                self.trees.add(p)
+
         if len(self.trees.sprites()) > 2:
-            chance = len(self.around.sprites()) // 2
-            if randint(1, max(5, 10 - chance)) == 1:
+            if randint(1, 5) == 1:
                 t = choice(self.trees.sprites())
                 t.grow()
 
@@ -1080,3 +1132,10 @@ class Lumberjack(Tile):
         s.set_alpha(self.usage_zone_alpha)
         draw.rect(s, (0, 255, 0), (0, 0, *self.usage_zone.size), 1 * SCALE)
         self.world.screen.blit(s, self.usage_zone.topleft)
+
+    def save(self):
+        data = {'name': self.name, 'pos': (self.pos[0] // TILE_SIZE, self.pos[1] // TILE_SIZE),
+                'food': self.food, 'tick': self.tick, 'max_tick': self.max_tick,
+                'grow_tick': self.grow_tick, 'max_grow_tick': self.max_grow_tick,
+                'age_tick': self.age_tick, 'max_age_tick': self.max_age_tick}
+        return data
