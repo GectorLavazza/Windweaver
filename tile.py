@@ -531,7 +531,7 @@ class Mine(Tile):
 
         self.tick -= dt
         if self.tick <= 0:
-            self.max_tick = 60 + 15 * self.collected
+            self.max_tick = 60 + 6 * self.collected
             self.tick = self.max_tick
 
             amount = randint(0, 2)

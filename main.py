@@ -119,7 +119,7 @@ async def main():
     health = Health(screen, world)
     # mode = 'start'
 
-    new_world = 1
+    new_world = 0
     if new_world:
         Map(world, grass_g, trees_g, stones_g)
     else:
@@ -394,7 +394,7 @@ async def main():
                          'max_stone': world.max_stone,
                          'score': world.score,
                          'current_build': world.current_build,
-                         'house_placed': world.house_placed,
+                         'house_placed': world.house_placed
                          }
 
         data['sky'] = {'tick': sky.tick,
