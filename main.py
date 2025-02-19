@@ -119,11 +119,13 @@ async def main():
     health = Health(screen, world)
     # mode = 'start'
 
-    new_world = 0
+    world_name = 'world'
+    new_world = 0  # 1 to create new world, 0 to open world
+
     if new_world:
         Map(world, grass_g, trees_g, stones_g)
     else:
-        with open('world.json', mode='r') as f:
+        with open(os.path.join(PATH, f'worlds/{world_name}.json'), mode='r') as f:
             data = json.load(f)
             for s in data['grass_g']:
                 pos = s['pos'][0] * TILE_SIZE, s['pos'][1] * TILE_SIZE
@@ -361,7 +363,7 @@ async def main():
 
         await asyncio.sleep(0)
 
-    with open('world.json', mode='w') as f:
+    with open(os.path.join(PATH, f'worlds/{world_name}.json'), mode='w') as f:
 
         data = {'grass_g': [],
                 'trees_g': [],
