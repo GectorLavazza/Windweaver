@@ -274,6 +274,8 @@ async def main():
                     vignette_on = not vignette_on
                 if event.key == pygame.K_F5:
                     debug_on = not debug_on
+                if event.key == pygame.K_F6:
+                    world.update_zone()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button in (1, 3):
